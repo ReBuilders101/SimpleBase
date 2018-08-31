@@ -1,5 +1,6 @@
 package lb.simplebase.core;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 
@@ -21,6 +22,7 @@ public class DrawPanel extends JPanel{
 	 */
 	public DrawPanel(){
 		super(true);
+		setBackground(Color.BLACK);
 	}
 	
 	/**
@@ -33,11 +35,17 @@ public class DrawPanel extends JPanel{
 	
 	/**
 	 * Implementation that calls the {@link Framework#paintCallback(Graphics)} method for drawing a scene to this panel.
+	 * It also makes sure the component is opaque by filling it with the background color, so that it can be used as a content pane.
 	 */
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		g.clearRect(0, 0, getWidth(), getHeight());
 		Framework.getFramework().paintCallback(g);
 	}
 	
+	@Override
+	public boolean isOpaque() {
+		return true;
+	}
 }
