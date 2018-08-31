@@ -17,8 +17,9 @@ import lb.simplebase.scene.Scene;
  * through the static method {@link #getFramework()}. If other instances are created through reflection, the program may break.
  * The framework has a basic lifecycle:
  * <br>1. {@link #init()}: used for setting window size, tickrate and other properties that can not be altered after starting the framework
- * <br>2. {@link #start()}: starts the timers and displays the application window(s) if desired. This should be the last call in the main method.
- * <br>3. {@link #stop()}: stops the timers and exits the application. This method never returns.
+ * <br>2. {@link #registerScene(Scene)}: register scenes for the appilcation
+ * <br>3. {@link #start()}: starts the timers and displays the application window(s) if desired. This should be the last call in the main method.
+ * <br>4. {@link #stop()}: stops the timers and exits the application. This method never returns.
  */
 public final class Framework {
 
@@ -84,14 +85,15 @@ public final class Framework {
 	}
 	
 	/**
-	 * Registers a new scene by its name. Scenes can only be registered before calling {@link #start(boolean, String)}, but they
-	 * can be before and after calling {@link #init(int, int, String, Dimension, boolean, boolean)}.
+	 * Registers a new scene by its name. Scenes can only be registered before calling {@link #start(boolean, String)}
+	 *  and after calling {@link #init(int, int, String, Dimension, boolean, boolean)}.
 	 * @param scene The scene to register
 	 * @throws InvalidSceneException When a scene with this name is already registered
 	 * @throws FrameworkStateException When the framework is already running
 	 */
 	public void registerScene(Scene scene) throws InvalidSceneException, FrameworkStateException{
 		if(running) throw new FrameworkStateException("Cannot register new scenes while the framework is already running.", true);
+		if(!setup) throw new FrameworkStateException("Cannot register new scenes when the framework not yet initialized.", false);
 		String name = scene.getName();
 		if(scenes.containsKey(name)){
 			throw new InvalidSceneException("A scene with the name '" + name + "' is already registered");
