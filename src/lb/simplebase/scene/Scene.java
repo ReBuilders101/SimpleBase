@@ -25,9 +25,12 @@ public abstract class Scene {
 	/**
 	 * This method is called by the {@link Framework} instance at a constant rate (the FPS). All graphics
 	 * and rendering, should happen here. The code should be as fast as possible.
-	 * This method should not be called manually. 
+	 * This method should not be called manually.
+	 * @param g The graphics object to draw into 
+	 * @param width The width of the area to draw into
+	 * @param height The height of the area to draw into
 	 */
-	public abstract void draw(Graphics2D g);
+	public abstract void draw(Graphics2D g, int width, int height);
 	/**
 	 * A unique name for every instance. This name is used to refer to it when changing the active scene
 	 * @return The scene name.

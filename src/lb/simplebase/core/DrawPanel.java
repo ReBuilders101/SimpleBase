@@ -41,7 +41,7 @@ public class DrawPanel extends JPanel{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.clearRect(0, 0, getWidth(), getHeight());
-		Framework.getFramework().paintCallback(g);
+		Framework.getFramework().paintCallback(g, getWidth(), getHeight());
 	}
 	
 	@Override

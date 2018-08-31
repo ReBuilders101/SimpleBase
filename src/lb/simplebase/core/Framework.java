@@ -1,7 +1,9 @@
 package lb.simplebase.core;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
@@ -163,9 +165,19 @@ public final class Framework {
 	/**
 	 * Callback for {@link DrawPanel} instances. This method is called everytime a DrawPanel is repainted.
 	 * @param g The graphics object belonging to the DrawPanel that called this method.
+	 * @param width The width of the area to draw into
+	 * @param height The height of the area to draw into
 	 */
-	void paintCallback(Graphics g){
+	void paintCallback(Graphics g, int width, int height){
 		//ALL THE GRAPHICS
+		if(g instanceof Graphics2D){
+			activeScene.draw((Graphics2D) g, width, height);
+		}else{
+			g.setColor(new Color(255, 0, 255));
+			g.fillRect(0, 0, width, height);
+			g.setColor(Color.BLACK);
+			g.drawString("Error", 10, 10);
+		}
 	}
 	
 	/**
