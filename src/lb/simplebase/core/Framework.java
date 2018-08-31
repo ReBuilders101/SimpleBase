@@ -2,12 +2,14 @@ package lb.simplebase.core;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import lb.simplebase.scene.Scene;
@@ -36,6 +38,7 @@ public final class Framework {
 	private JFrame mainFrame;
 	private JFrame optionFrame;
 	private DrawPanel panel;
+	private JPanel optionsPanel;
 	//Scenes
 	private HashMap<String, Scene> scenes;
 	private Scene activeScene;
@@ -80,9 +83,12 @@ public final class Framework {
 		if(centerFrame){
 			mainFrame.setLocationRelativeTo(null);
 		}
+		optionsPanel = new JPanel(new FlowLayout());
 		if(optionFrame){
 			this.optionFrame = new JFrame(title + " - Options");
+			this.optionFrame.setContentPane(optionsPanel);
 		}
+		scenes = new HashMap<>();
 		setup = true;
 	}
 	
@@ -99,6 +105,9 @@ public final class Framework {
 		String name = scene.getName();
 		if(scenes.containsKey(name)){
 			throw new InvalidSceneException("A scene with the name '" + name + "' is already registered");
+		}
+		if(scene.getOptions() != null){
+			optionsPanel.add(scene.getOptions());
 		}
 		scenes.put(name, scene);
 	}
