@@ -78,6 +78,7 @@ public final class Framework {
 		frameTick = new Timer(1000 / fps, Framework.getFramework()::frameTickHandler);
 		mainFrame = new JFrame(title);
 		mainFrame.setSize(initialFrameSize);
+		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new DrawPanel();
 		mainFrame.setContentPane(panel);
 		if(centerFrame){
