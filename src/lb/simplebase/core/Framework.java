@@ -131,7 +131,10 @@ public final class Framework {
 		}
 		if(showFrames){
 			mainFrame.setVisible(true);
-			if(optionFrame != null) optionFrame.setVisible(true);
+			if(optionFrame != null) {
+				optionFrame.pack();
+				optionFrame.setVisible(true);
+			}
 		}
 		logicTick.start();
 		frameTick.start();
