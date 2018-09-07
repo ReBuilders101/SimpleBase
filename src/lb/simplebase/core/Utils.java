@@ -3,6 +3,8 @@ package lb.simplebase.core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -56,5 +58,11 @@ public final class Utils {
 			return false;
 		}
 		return true;
+	}
+	
+	public static JPanel getGroupBox(String title) {
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder(title));
+		return panel;
 	}
 }
