@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -57,6 +58,77 @@ public final class Framework {
 	 */
 	public static Framework getFramework(){
 		return INSTANCE;
+	}
+	
+	/**
+	 * Exits the application and displays an error message. An exit code of 1 will be used. This method never returns.
+	 * @param message The error message to be displayed
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message 
+	 */
+	public void exitFatal(String message, boolean frame) {
+		exitFatal(message, frame, 1, null);
+	}
+	
+	/**
+	 * Exits the application and displays an error message. This method never returns.
+	 * @param message The error message to be displayed
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message
+	 * @param exitCode The exit code to be used
+	 */
+	public void exitFatal(String message, boolean frame, int exitCode) {
+		exitFatal(message, frame, exitCode, null);
+	}
+	
+	/**
+	 * Exits the application and displays an error message. An exit code of 1 will be used. This method never returns.
+	 * @param message The error message to be displayed
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message
+	 * @param error The {@link Throwable} that caused the error. The Stacktrace will be displayed
+	 */
+	public void exitFatal(String message, boolean frame, Throwable error) {
+		exitFatal(message, frame, 1, error);
+	}
+	
+	/**
+	 * Exits the application and displays an error message. An exit code of 1 will be used. This method never returns.
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message
+	 * @param error The {@link Throwable} that caused the error. The Stacktrace will be displayed. It's message will be the main error message.
+	 */
+	public void exitFatal(boolean frame, Throwable error) {
+		exitFatal(error.getMessage(), frame, 1, error);
+	}
+	
+	/**
+	 * Exits the application and displays an error message. This method never returns.
+	 * @param exitCode The exit code to be used
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message
+	 * @param error The {@link Throwable} that caused the error. The Stacktrace will be displayed. It's message will be the main error message.
+	 */
+	public void exitFatal(int exitCode, boolean frame, Throwable error) {
+		exitFatal(error.getMessage(), frame, exitCode, error);
+	}
+	
+	/**
+	 * Exits the application and displays an error message. This method never returns.
+	 * @param message The error message to be displayed
+	 * @param exitCode The exit code to be used
+	 * @param frame If true, additionally to a console output a {@link JOptionPane} will be shown with the same message
+	 * @param error The {@link Throwable} that caused the error. The Stacktrace will be displayed.
+	 */
+	public void exitFatal(String message, boolean frame, int exitCode, Throwable error) {
+		boolean hasMessage = message != null && !message.isEmpty();
+		System.err.println("The Framework encountered a fatal error" + (hasMessage ? "." : ":"));
+		if(hasMessage) System.err.println(message);
+		if(error != null) {
+			System.err.println("Error detail:");
+			error.printStackTrace(System.err);
+		} else {
+			System.err.println("No error detail.");
+		}
+		if(frame) JOptionPane.showMessageDialog(mainFrame, "<html>The Framework encountered a fatal error" +
+				(hasMessage ? ".<br>" + message : ":<br>" + message) + "<br>" + (error != null ? "Error detail:<br>" +
+						Utils.getStackTrace(error) : "No error detail."), "Fatal Framework Error", JOptionPane.ERROR_MESSAGE);
+		System.exit(exitCode);
 	}
 	
 	/**
