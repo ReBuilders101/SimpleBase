@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import lb.simplebase.math.expression.IntegerElement;
 
+@Deprecated
 public class RenderInteger extends RenderSymbol<IntegerElement> {
 	
 	private RenderInteger() {
