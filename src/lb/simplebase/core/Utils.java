@@ -1,5 +1,7 @@
 package lb.simplebase.core;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -7,6 +9,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import sun.awt.image.ToolkitImage;
 
 /**
  * @version 1.2
@@ -64,5 +68,21 @@ public final class Utils {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(title));
 		return panel;
+	}
+	
+	/**
+	 * Scales a {@link BufferedImage} to a certain size. This method uses the {@link BufferedImage#getScaledInstance(int, int, int)}-Method, 
+	 * but returns a BufferedImage instead of a {@link ToolkitImage}
+	 * @param image The image to be scaled or resized
+	 * @param newWidth The width of the new image
+	 * @param newHeight The height of the new image
+	 * @param hints Hint flags form the {@link Image} class used for scaling
+	 * @return The scaled image
+	 */
+	public static BufferedImage scaleImage(Image image, int newWidth, int newHeight, int hints) {
+		Image scaledImage = image.getScaledInstance(newWidth, newHeight, hints);
+		BufferedImage newImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+		newImage.createGraphics().drawImage(scaledImage, 0, 0, newWidth, newHeight, null);
+		return newImage;
 	}
 }

@@ -6,12 +6,20 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.event.MouseInputListener;
 
 import lb.simplebase.scene.Scene;
 
@@ -26,7 +34,7 @@ import lb.simplebase.scene.Scene;
  * <br>3. {@link #start()}: starts the timers and displays the application window(s) if desired. This should be the last call in the main method.
  * <br>4. {@link #stop()}: stops the timers and exits the application. This method never returns.
  */
-public final class Framework {
+public final class Framework implements MouseInputListener, KeyListener, MouseWheelListener{
 
 	private static final Framework INSTANCE = new Framework();
 
@@ -305,5 +313,60 @@ public final class Framework {
 			activeScene = startScene;
 			activeScene.enable();
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		if(activeScene instanceof MouseListener) ((MouseListener) activeScene).mouseClicked(arg0);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		if(activeScene instanceof MouseListener) ((MouseListener) activeScene).mouseEntered(arg0);
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		if(activeScene instanceof MouseListener) ((MouseListener) activeScene).mouseExited(arg0);
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		if(activeScene instanceof MouseListener) ((MouseListener) activeScene).mousePressed(arg0);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		if(activeScene instanceof MouseListener) ((MouseListener) activeScene).mouseReleased(arg0);
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent arg0) {
+		if(activeScene instanceof MouseMotionListener) ((MouseMotionListener) activeScene).mouseDragged(arg0);
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent arg0) {
+		if(activeScene instanceof MouseMotionListener) ((MouseMotionListener) activeScene).mouseMoved(arg0);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(activeScene instanceof KeyListener) ((KeyListener) activeScene).keyPressed(e);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		if(activeScene instanceof KeyListener) ((KeyListener) activeScene).keyReleased(e);
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		if(activeScene instanceof KeyListener) ((KeyListener) activeScene).keyTyped(e);
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		if(activeScene instanceof MouseWheelListener) ((MouseWheelListener) activeScene).mouseWheelMoved(e);
 	}
 }
