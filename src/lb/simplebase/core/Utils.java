@@ -89,10 +89,20 @@ public final class Utils {
 	
 	/**
 	 * Calculates the font size (in pt) for a text to be x pixels high
-	 * @param pixelSize The height of the Text in pixels
+	 * @param pixelSize The height of the text in pixels
 	 * @return The correct font size
 	 */
 	public static float getFontSize(float pixelSize){
 		return (float) (pixelSize * Toolkit.getDefaultToolkit().getScreenResolution() / 72.0);
 	}
+	
+	/**
+	 * Calculates the pixel size for a text that has the font size x
+	 * @param pixelSize The height of the text as a font size
+	 * @return The correct pixel size
+	 */
+	public static float getPixelSize(float fontSize){
+		return (float) (fontSize * 72.0 / Toolkit.getDefaultToolkit().getScreenResolution());
+	}
+	
 }
