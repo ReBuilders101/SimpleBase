@@ -1,6 +1,7 @@
 package lb.simplebase.core;
 
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -84,5 +85,14 @@ public final class Utils {
 		BufferedImage newImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
 		newImage.createGraphics().drawImage(scaledImage, 0, 0, newWidth, newHeight, null);
 		return newImage;
+	}
+	
+	/**
+	 * Calculates the font size (in pt) for a text to be x pixels high
+	 * @param pixelSize The height of the Text in pixels
+	 * @return The correct font size
+	 */
+	public static float getFontSize(float pixelSize){
+		return (float) (pixelSize * Toolkit.getDefaultToolkit().getScreenResolution() / 72.0);
 	}
 }
