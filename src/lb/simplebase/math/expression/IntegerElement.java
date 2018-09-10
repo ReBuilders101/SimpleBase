@@ -11,6 +11,7 @@ import lb.simplebase.math.expression.render.SymbolRegistry;
  * @author LB
  * This class represents a integer number in a mathematical expression. 
  */
+@Deprecated
 public class IntegerElement implements CalculatableElement {
 
 	private static final long serialVersionUID = -999541132842381945L;
