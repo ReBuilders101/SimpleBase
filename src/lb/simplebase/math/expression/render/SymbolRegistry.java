@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import lb.simplebase.math.expression.ExpressionElement;
 import lb.simplebase.math.expression.IntegerElement;
+import lb.simplebase.math.expression.NumberElement;
 
 public final class SymbolRegistry {
 	
@@ -13,8 +14,8 @@ public final class SymbolRegistry {
 	private SymbolRegistry() {
 		mappings = new HashMap<>();
 		//Add default mappings
-		addMapping(IntegerElement.class, RenderNumber.INT_RENDER_NORMAL);
-//		addMapping(NumberElement.class, RenderNumber.INT_RENDER_NORMAL);
+		addMapping(IntegerElement.class, RenderInteger.INTEGER_RENDER);
+		addMapping(NumberElement.class, RenderNumber.NUMBER_RENDER);
 	}
 	
 	public static SymbolRegistry getRegistry() {

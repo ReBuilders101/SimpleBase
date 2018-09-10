@@ -11,24 +11,26 @@ import lb.simplebase.math.expression.render.SymbolRegistry;
  * @author LB
  * This class represents a integer number in a mathematical expression. 
  */
-public class IntegerElement extends BigInteger implements CalculatableElement{
+public class IntegerElement implements CalculatableElement {
 
 	private static final long serialVersionUID = -999541132842381945L;
 	
+	private BigInteger bigInt;
+	
 	public IntegerElement(long number) {
-		super(BigInteger.valueOf(number).toByteArray());
+		bigInt = BigInteger.valueOf(number);
 	}
 	
 	public IntegerElement(String number) {
-		super(number);
+		bigInt = new BigInteger(number);
 	}
 	
-	public IntegerElement(BigInteger bigInt) {
-		super(bigInt.toByteArray());
+	public IntegerElement(BigInteger big) {
+		bigInt = big; //This is ok because BigInteger is immutable
 	}
 	
 	protected IntegerElement(byte[] bytes) {
-		super(bytes);
+		bigInt = new BigInteger(bytes);
 	}
 
 	public static IntegerElement valueOf(long number) {
@@ -36,7 +38,7 @@ public class IntegerElement extends BigInteger implements CalculatableElement{
 	}
 	
 	public static IntegerElement valueOf(BigInteger bigInt) {
-		return new IntegerElement(bigInt.toByteArray());
+		return new IntegerElement(bigInt);
 	}
 
 	//Implemented Methods
@@ -48,7 +50,7 @@ public class IntegerElement extends BigInteger implements CalculatableElement{
 
 	@Override
 	public BigDecimal getValue() {
-		return new BigDecimal(this);
+		return new BigDecimal(bigInt);
 	}
 
 	

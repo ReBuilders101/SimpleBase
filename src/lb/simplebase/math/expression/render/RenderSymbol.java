@@ -23,7 +23,7 @@ public abstract class RenderSymbol<E extends ExpressionElement> {
 		return name;
 	}
 	
-	public abstract Dimension getSize();
+	public abstract Dimension getSize(Graphics2D g, E element);
 	
 	public abstract void draw(Graphics2D g, E element);
 }
