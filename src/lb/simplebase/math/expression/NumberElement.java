@@ -3,10 +3,12 @@ package lb.simplebase.math.expression;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import lb.simplebase.math.expression.complex.ComplexNumberElement;
+import lb.simplebase.math.expression.complex.ComplexVariant;
 import lb.simplebase.math.expression.render.RenderSymbol;
 import lb.simplebase.math.expression.render.SymbolRegistry;
 
-public class NumberElement implements CalculatableElement{
+public class NumberElement implements CalculatableElement, ComplexVariant<ComplexNumberElement>{
 
 	private static final long serialVersionUID = -1909384316766936204L;
 
@@ -49,6 +51,11 @@ public class NumberElement implements CalculatableElement{
 	@Override
 	public BigDecimal getValue() {
 		return bigDec;
+	}
+
+	@Override
+	public ComplexNumberElement getComplexVariant() {
+		return new ComplexNumberElement(bigDec);
 	}
 	
 }
