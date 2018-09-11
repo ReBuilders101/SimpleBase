@@ -10,6 +10,12 @@ public class BigComplexNumber implements Serializable{
 	
 	private static final long serialVersionUID = 6152524676870394933L;
 
+	public static final BigComplexNumber ZERO = new BigComplexNumber(0);
+	public static final BigComplexNumber ONE = new BigComplexNumber(1);
+	public static final BigComplexNumber NEGATIVE_ONE = new BigComplexNumber(-1);
+	public static final BigComplexNumber POSITIVE_I = new BigComplexNumber(0, 1);
+	public static final BigComplexNumber NEGATIVE_I = new BigComplexNumber(0, -1);
+	
 	private BigDecimal real, imag;
 	
 	//For Serialization
