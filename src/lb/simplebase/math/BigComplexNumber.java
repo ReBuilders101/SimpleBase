@@ -146,13 +146,13 @@ public class BigComplexNumber implements Serializable{
 	}
 	
 	@LimitedPrecision(Precision.DOUBLE)
-	public double getPolarAngle() {
-		return Math.atan2(imag.doubleValue(), real.doubleValue());
+	public BigDecimal getPolarAngle() {
+		return BigDecimal.valueOf(Math.atan2(imag.doubleValue(), real.doubleValue()));
 	}
 	
 	@LimitedPrecision(Precision.DOUBLE)
-	public double getPolarAngleDegrees() {
-		return Math.toDegrees(getPolarAngle());
+	public BigDecimal getPolarAngleDegrees() {
+		return BigDecimal.valueOf(Math.toDegrees(getPolarAngle().doubleValue()));
 	}
 	
 	@LimitedPrecision(Precision.DOUBLE)
