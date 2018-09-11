@@ -10,4 +10,9 @@ public interface ComplexCalculatableElement extends ExpressionElement{
 	public default boolean hasValue() {
 		return true;
 	}
+
+	@Override
+	public default BigComplexNumber getValue(Object... variables) {
+		return getValue();
+	}
 }
