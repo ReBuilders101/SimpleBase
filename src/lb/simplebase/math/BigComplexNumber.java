@@ -91,6 +91,42 @@ public class BigComplexNumber implements Serializable{
 		return new BigComplexNumber(real, imag.negate());
 	}
 	
+	public BigComplexNumber negate() {
+		return new BigComplexNumber(real.negate(), imag.negate());
+	}
+	
+	public BigComplexNumber getReciprocal() {
+		BigDecimal newReal = real.divide(real.pow(2).add(imag.pow(2)));
+		BigDecimal newImag = imag.divide(real.pow(2).add(imag.pow(2)));
+		return new BigComplexNumber(newReal, newImag.negate());
+	}
+	
+	//TODO
+	public BigComplexNumber sqrt() {
+//		BigDecimal gamma = real.add( real.pow(2).add(imag.pow(2)).sqrt() ).divide(BigDecimal.valueOf(2)).sqrt(); //Java 9 adds sqrt
+//		BigDecimal delta0 = real.negate().add( real.pow(2).add(imag.pow(2)).sqrt() ).divide(BigDecimal.valueOf(2)).sqrt(); //Java 9 adds sqrt;
+//		BigDecimal delta = delat0.multiply(BigDecimal.valueOf(imag.signum()));
+//		return new BigComplexNumber(gamma, delta);
+		return null;
+	}
+	
+	public BigComplexNumber getNegated() {
+		return negate();
+	}
+	
+	public BigComplexNumber getSquareRoot() {
+		return sqrt();
+	}
+	
+	public BigComplexNumber getSecondSqareRoot() {
+		return getSquareRoot().negate();
+	}
+	
+	@ArraySize(2)
+	public BigComplexNumber[] getSquareRoots() {
+		return new BigComplexNumber[] { getSquareRoot(), getSecondSqareRoot() };
+	}
+	
 	public boolean hasRealPart() {
 		return !real.equals(BigDecimal.ZERO);
 	}
@@ -99,6 +135,10 @@ public class BigComplexNumber implements Serializable{
 		return !imag.equals(BigDecimal.ZERO);
 	}
 
+	public boolean isZero() {
+		return real.equals(BigDecimal.ZERO) && imag.equals(BigDecimal.ZERO);
+	}
+	
 	@LimitedPrecision(Precision.DOUBLE)
 	public double getPolarAngle() {
 		return Math.atan2(imag.doubleValue(), real.doubleValue());
