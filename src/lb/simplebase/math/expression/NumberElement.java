@@ -12,6 +12,9 @@ public class NumberElement implements CalculatableElement{
 
 	private BigDecimal bigDec;
 	
+	//For serialization
+	protected NumberElement() {}
+	
 	public NumberElement(double number) {
 		bigDec = BigDecimal.valueOf(number);
 	}
