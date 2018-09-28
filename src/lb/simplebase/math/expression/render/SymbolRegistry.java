@@ -3,7 +3,6 @@ package lb.simplebase.math.expression.render;
 import java.util.HashMap;
 
 import lb.simplebase.math.expression.ExpressionElement;
-import lb.simplebase.math.expression.NumberElement;
 
 public final class SymbolRegistry {
 	
@@ -12,9 +11,7 @@ public final class SymbolRegistry {
 	
 	private SymbolRegistry() {
 		mappings = new HashMap<>();
-		//Add default mappings
-//		addMapping(IntegerElement.class, RenderInteger.INTEGER_RENDER);
-		addMapping(NumberElement.class, RenderNumber.NUMBER_RENDER);
+		applyPatch(new DefaultPatch());
 	}
 	
 	public static SymbolRegistry getRegistry() {
@@ -33,10 +30,23 @@ public final class SymbolRegistry {
 	public <T extends ExpressionElement> void overrrideMapping(Class<T> type, RenderSymbol<T> mapping) {
 		mappings.put(type, mapping);
 	}
+	
+	public static void applyPatch(SymbolRegistryPatch patch) {
+		patch.applyPatch(INSTANCE);
+	}
 
 	@SuppressWarnings("unchecked")
 	public <T extends ExpressionElement> RenderSymbol<T> getMapping(Class<T> type){
 		return (RenderSymbol<T>) mappings.get(type);
+	}
+	
+	private static class DefaultPatch implements SymbolRegistryPatch {
+
+		@Override
+		public void applyPatch(SymbolRegistry instance) {
+			
+		}
+		
 	}
 	
 }
