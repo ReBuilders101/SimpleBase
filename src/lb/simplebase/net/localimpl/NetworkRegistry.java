@@ -1,10 +1,6 @@
 package lb.simplebase.net.localimpl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import lb.simplebase.function.EventHandlerMap;
 import lb.simplebase.net.IPacket;
 import lb.simplebase.net.IPacketReceiver;
 import lb.simplebase.net.IPacketSender;
@@ -12,25 +8,16 @@ import lb.simplebase.net.ITargetIdentifier;
 
 public final class NetworkRegistry {
 
-	private static Map<ITargetIdentifier, Set<IPacketReceiver>> receivers = new HashMap<>();
+	private static EventHandlerMap<ITargetIdentifier, IPacketReceiver> receivers = new EventHandlerMap<>();
 	
 	private NetworkRegistry() {}
 	
 	public static void registerReceiver(ITargetIdentifier id, IPacketReceiver receiver) {
-		if(id == null || receiver == null) return;
-		Set<IPacketReceiver> recs = receivers.get(id);
-		if(recs == null) {
-			recs = new HashSet<>();
-			receivers.put(id, recs);
-		}
-		recs.add(receiver);
+		receivers.addHandler(id, receiver);
 	}
 	
 	public static void unregisterReceiver(ITargetIdentifier id, IPacketReceiver receiver) {
-		if(id == null || receiver == null) return;
-		Set<IPacketReceiver> recs = receivers.get(id);
-		if(recs == null) return;
-		recs.remove(receiver);
+		receivers.removeHandler(id, receiver);
 	}
 	
 	public static void unregisterReceiver(IPacketReceiver receiver) {
@@ -38,7 +25,7 @@ public final class NetworkRegistry {
 	}
 	
 	public static void unregisterReceivers(ITargetIdentifier id) {
-		receivers.remove(id);
+		receivers.removeAllHandlers(id);
 	}
 	
 	public static IPacketSender createPacketSender(ITargetIdentifier id) {
@@ -46,8 +33,6 @@ public final class NetworkRegistry {
 	}
 
 	protected static void sendPacketTo(IPacket packet, ITargetIdentifier id) {
-		Set<IPacketReceiver> recs = receivers.get(id);
-		if(recs == null) return;
-		recs.forEach((r) -> r.processPacket(packet, id));
+		receivers.forEachHandler(id, (h) -> h.processPacket(packet, id));
 	}
 }
