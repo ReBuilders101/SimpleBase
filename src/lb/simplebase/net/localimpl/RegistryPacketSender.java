@@ -7,9 +7,15 @@ import lb.simplebase.net.ITargetIdentifier;
 //Not public
 class RegistryPacketSender implements IPacketSender{
 
+	private ITargetIdentifier id;
+	
+	protected RegistryPacketSender(ITargetIdentifier id) {
+		this.id = id;
+	}
+	
 	@Override
-	public void sendPacketTo(IPacket packet, ITargetIdentifier id) {
-		NetworkRegistry.sendPacketTo(packet, id);
+	public void sendPacketTo(IPacket packet, ITargetIdentifier target) {
+		NetworkRegistry.sendPacketTo(packet, target, id);
 	}
 	
 }

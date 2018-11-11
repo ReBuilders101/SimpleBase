@@ -29,10 +29,10 @@ public final class NetworkRegistry {
 	}
 	
 	public static IPacketSender createPacketSender(ITargetIdentifier id) {
-		return new RegistryPacketSender();
+		return new RegistryPacketSender(id);
 	}
 
-	protected static void sendPacketTo(IPacket packet, ITargetIdentifier id) {
-		receivers.forEachHandler(id, (h) -> h.processPacket(packet, id));
+	public static void sendPacketTo(IPacket packet, ITargetIdentifier target, ITargetIdentifier source) {
+		receivers.forEachHandler(target, (h) -> h.processPacket(packet, source));
 	}
 }
