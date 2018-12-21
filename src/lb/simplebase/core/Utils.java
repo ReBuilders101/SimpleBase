@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.stream.Collector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -103,6 +104,13 @@ public final class Utils {
 	 */
 	public static float getPixelSize(float fontSize){
 		return (float) (fontSize * 72.0 / Toolkit.getDefaultToolkit().getScreenResolution());
+	}
+	
+	/**
+	 * @return A collector that converts all stream elements to Strings by their toString() method, and then appends the strings 
+	 */
+	public static <T> Collector<T, ?, String> collectString() {
+		return Collector.of(StringBuilder::new, StringBuilder::append, StringBuilder::append, StringBuilder::toString);
 	}
 	
 }
