@@ -1,0 +1,113 @@
+package lb.simplebase.net;
+
+/**
+ * As stated in {@link ByteData}, this object can be represented as a sequence of bytes. This
+ * interface provides additional methods for writing primitives and strings directly. All methods
+ * depend on the {@link #writeByte(byte)} method, which is defined by the implementation. by default,
+ * data is encoded as Little Endian. Methods may be overridden by implementing classes, as long as compatibility is not broken.
+ * <br>This interface is fully compatible to the data that should be read by the {@link ReadableByteData} interface and all valid implementations.
+ */
+public interface WriteableByteData extends ByteData{
+
+	/**
+	 * Writes a single <code>byte</code> value at the end of the current byte sequence. 
+	 * @param b The <code>byte</code> that should be written
+	 */
+	public void writeByte(byte b);
+	
+	/**
+	 * Writes a <code>char</code> value at the end of the current byte sequence, using two <code>byte</code> values. 
+	 * @param c The <code>char</code> that should be written
+	 */
+	public default void writeChar(char c) {
+		writeByte((byte) (c & 0xFF));
+		writeByte((byte) ((c >>> 8) & 0xFF));
+	}
+	
+	/**
+	 * Writes a <code>short</code> value at the end of the current byte sequence, using two <code>byte</code> values. 
+	 * @param s The <code>short</code> that should be written
+	 */
+	public default void writeShort(short s) {
+		writeByte((byte) (s & 0xFF));
+		writeByte((byte) ((s >>> 8) & 0xFF));
+	}	
+	
+	/**
+	 * Writes a <code>int</code> value at the end of the current byte sequence, using four <code>byte</code> values. 
+	 * @param i The <code>int</code> that should be written
+	 */
+	public default void writeInt(int i) {
+		writeByte((byte) (i & 0xFF));
+		writeByte((byte) ((i >>> 8 ) & 0xFF));
+		writeByte((byte) ((i >>> 16) & 0xFF));
+		writeByte((byte) ((i >>> 24) & 0xFF));
+	}	
+	
+	/**
+	 * Writes a <code>long</code> value at the end of the current byte sequence, using eight <code>byte</code> values. 
+	 * @param l The <code>long</code> that should be written
+	 */
+	public default void writeLong(long l) {
+		writeByte((byte) (l & 0xFF));
+		writeByte((byte) ((l >>> 8 ) & 0xFF));
+		writeByte((byte) ((l >>> 16) & 0xFF));
+		writeByte((byte) ((l >>> 24) & 0xFF));
+		writeByte((byte) ((l >>> 32) & 0xFF));
+		writeByte((byte) ((l >>> 40) & 0xFF));
+		writeByte((byte) ((l >>> 48) & 0xFF));
+		writeByte((byte) ((l >>> 56) & 0xFF));
+	}
+	
+	/**
+	 * Writes a <code>float</code> value at the end of the current byte sequence by encoding it as an <code>int</code>
+	 * with the {@link Float#floatToRawIntBits(float)} method. 
+	 * @param f The <code>float</code> that should be written
+	 */
+	public default void writeFloat(float f) {
+		writeInt(Float.floatToRawIntBits(f));
+	}
+	
+	/**
+	 * Writes a <code>double</code> value at the end of the current byte sequence by encoding it as a <code>long</code>
+	 * with the {@link Double#doubleToRawLongBits(double)} method. 
+	 * @param d The <code>double</code> that should be written
+	 */
+	public default void writeDouble(double d) {
+		writeLong(Double.doubleToRawLongBits(d));
+	}
+	
+	/**
+	 * Writes all bytes in the byte array at the end of the current byte sequence
+	 * @param data The byte data that should be written
+	 */
+	public default void write(byte[] data) {
+		for(byte b : data) {
+			writeByte(b);
+		}
+	}
+	
+	/**
+	 * Writes a {@link CharSequence} to the end of the current byte sequence, by converting it to a {@link String} using 
+	 * {@link CharSequence#toString()} and the to a byte array using {@link String#getBytes()}.
+	 * @param cs The {@link CharSequence} that should be written
+	 * @see #writeStringWithLength(CharSequence)
+	 */
+	public default void writeString(CharSequence cs) {
+		write(cs.toString().getBytes());
+	}
+	
+	/**
+	 * Writes a {@link CharSequence} to the end of the current byte sequence, by converting it to a {@link String} using 
+	 * {@link CharSequence#toString()} and the to a byte array using {@link String#getBytes()}.<br>
+	 * Additionally, the length of the {@link CharSequence} is written as an <code>int</code> in front of the {@link CharSequence}'s
+	 * byte data.
+	 * @param cs The {@link CharSequence} that should be written
+	 * @see #writeString(CharSequence)
+	 */
+	public default void writeStringWithLength(CharSequence cs) {
+		writeInt(cs.length());
+		writeString(cs);
+	}
+	
+}
