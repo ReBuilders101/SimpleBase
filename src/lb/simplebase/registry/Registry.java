@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class Registry<T extends IRegistryEntry> {
+public abstract class Registry<T extends IRegistryEntry> {
 	
 	private Map<IResourceLocation, T> entries;
 	private Registry<T>.Access defaultAccess;
@@ -58,10 +58,10 @@ public class Registry<T extends IRegistryEntry> {
 		return defaultAccess;
 	}
 	
-	public static <T extends IRegistryEntry> Registry<T> createRegistry(T defaultValue) {
-		if(defaultValue.hasRegistryName()) return null;
-		return new Registry<T>(defaultValue);
-	}
+//	public static <T extends IRegistryEntry> Registry<T> createRegistry(T defaultValue) {
+//		if(defaultValue.hasRegistryName()) return null;
+//		return new Registry<T>(defaultValue);
+//	}
 	
 	public class Access {
 		
