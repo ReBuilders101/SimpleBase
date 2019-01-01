@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+
 public class EventHandlerMap<I,H> extends HashMap<I,Set<H>>{
 	private static final long serialVersionUID = -46577653235910497L;
 
