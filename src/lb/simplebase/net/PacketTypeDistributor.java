@@ -29,7 +29,8 @@ public class PacketTypeDistributor implements PacketReceiver{
 	/**
 	 * Registers a new {@link PacketReceiver} as a handler for a certain type of packet.
 	 * Previously created entries for a type can not be changed. Trying to override an existing entry
-	 * with this method will fail.
+	 * with this method will fail.<br>
+	 * Note: {@link PacketReceiver} can be used as a <i>functional interface</i>.
 	 * @param packetClass The class of the {@link Packet} implementation for which the handler should be registered
 	 * @param handler The {@link PacketReceiver} that handles this type of packet
 	 * @return Whether the registration was successful or not
@@ -68,18 +69,4 @@ public class PacketTypeDistributor implements PacketReceiver{
 			receiver.processPacket(received, source);
 		}
 	}
-	
-	/**
-	 * <b>This method should not be used.</b><br>
-	 * All packets will immediately be handed to the default {@link PacketReceiver}.<br>
-	 * This method only exists for compatibility with the {@link PacketReceiver} interface. 
-	 * @param received The packet that was received and should be handled.
-	 * @param source The source of the packet
-	 * @see #getDefaultReceiver()
-	 */
-	@Override
-	public void processUnhandledPacket(Packet received, TargetIdentifier source) {
-		getDefaultReceiver().processPacket(received, source); //Just in case that someone decides to directly call this method, the packet should not be discarded
-	}
-
 }
