@@ -36,6 +36,14 @@ public class EventHandlerMap<I,H> extends HashMap<I,Set<H>>{
 		}
 	}
 	
+	public void forEachHandler(I id, Consumer<? super H> action, H defaultHandler) {
+		if(hasHandlers(id)) {
+			get(id).forEach(action);
+		} else {
+			action.accept(defaultHandler);
+		}
+	}
+	
 	public boolean hasHandlers(I id) {
 		return get(id) != null && !get(id).isEmpty();
 	}
