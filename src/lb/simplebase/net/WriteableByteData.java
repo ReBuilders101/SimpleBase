@@ -10,6 +10,22 @@ package lb.simplebase.net;
 public interface WriteableByteData extends ByteData{
 
 	/**
+	 * Writes a maximum of 8 boolean values, encoded as a byte, to the end of the byte sequence.
+	 * If the array has more than 8 elements, the additional elements are ignored, and <code>false</code> is returned. 
+	 * @param flags The boolean values that should be written
+	 * @return True if all values could be written
+	 */
+	public default boolean writeFlags(boolean...flags) {
+		byte b = 0;
+		int max = flags.length > 8 ? 8 : flags.length; //sent amount of flags, length of array, but max 8
+		for(int i = 0; i < max; i++) { //iterate over array
+			if(flags[i]) b |= (1 << i); //if flag is set, |= with the current power of 2
+		}
+		writeByte(b); //Write the byte
+		return flags.length <= 8; //if <= 8 -> all fit -> ok -> true 
+	}
+	
+	/**
 	 * Writes a single <code>byte</code> value at the end of the current byte sequence. 
 	 * @param b The <code>byte</code> that should be written
 	 */
