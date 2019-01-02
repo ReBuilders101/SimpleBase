@@ -1,21 +1,31 @@
 package lb.simplebase.net.localimpl;
 
-import lb.simplebase.net.IPacket;
-import lb.simplebase.net.IPacketSender;
-import lb.simplebase.net.ITargetIdentifier;
+import lb.simplebase.net.Packet;
+import lb.simplebase.net.PacketSender;
+import lb.simplebase.net.TargetIdentifier;
 
-//Not public
-class RegistryPacketSender implements IPacketSender{
+/**
+ * Invisible to you.
+ * Implementation of {@link PacketSender} that uses a {@link LocalNetworkRegistry} to send packets
+ */
+class RegistryPacketSender implements PacketSender{
 
-	private ITargetIdentifier id;
+	private TargetIdentifier id;
+	private LocalNetworkRegistry registry;
 	
-	protected RegistryPacketSender(ITargetIdentifier id) {
+	protected RegistryPacketSender(TargetIdentifier id, LocalNetworkRegistry registry) {
 		this.id = id;
+		this.registry = registry;
 	}
 	
 	@Override
-	public void sendPacketTo(IPacket packet, ITargetIdentifier target) {
-		NetworkRegistry.sendPacketTo(packet, target, id);
+	public void sendPacketTo(Packet packet, TargetIdentifier target) {
+		registry.sendPacketTo(packet, target, this);
+	}
+
+	@Override
+	public TargetIdentifier getSenderID() {
+		return id;
 	}
 	
 }

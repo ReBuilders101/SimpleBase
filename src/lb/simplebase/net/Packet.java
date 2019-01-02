@@ -20,4 +20,9 @@ public interface Packet {
 	 */
 	public void readData(ReadableByteData data);
 	
+	/**
+	 * Creates a new Instance of this packet type without any content.
+	 * @return A new Packet instance
+	 */
+	public Packet createEmptyInstance();
 }
