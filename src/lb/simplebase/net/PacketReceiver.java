@@ -31,6 +31,7 @@ public interface PacketReceiver extends BiConsumer<Packet, TargetIdentifier>{
 	 * @return The empty packet receiver
 	 */
 	public static PacketReceiver createEmptyReceiver() {
-		return new PacketReceiverEmptyImpl();
+		return (r, s) -> {};
+		//return new PacketReceiverEmptyImpl();
 	}
 }
