@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * All objects implementing this interface can be used to identify a network target.
  * Because {@link TargetIdentifier} is used as a key in {@link HashMap}s, all implementatioons should
- * implement the {@link #hashCode()} method.
+ * implement the {@link Object#hashCode()} method.
  * @see NetworkTargetIdentifier
  * @see LocalTargetIdentifier
  *  */
