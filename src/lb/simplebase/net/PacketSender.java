@@ -2,7 +2,7 @@ package lb.simplebase.net;
 
 /**
  * This interface represents an object that can send packets to other network targets (mostly {@link PacketReceiver}s)
- * and has its ow {@link TargetIdentifier}.
+ * and has its own {@link TargetIdentifier}.
  */
 public interface PacketSender {
 	
