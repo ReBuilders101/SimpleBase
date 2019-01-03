@@ -10,11 +10,14 @@ import java.util.concurrent.BlockingQueue;
  */
 public class PacketThreadReceiver implements PacketReceiver{
 
+	private static volatile int ID = 0;
+	
 	private final Thread processingThread;
 	private final BlockingQueue<PacketInformation> packetsToProcess;
 	private final PacketReceiver receiver;
 	private final PacketReceiver overflowHandler;
 	
+	private final int id;
 	private volatile boolean stopFlag;
 	
 	/**
@@ -61,7 +64,9 @@ public class PacketThreadReceiver implements PacketReceiver{
 		receiver = threadReceiver;
 		stopFlag = false;
 		overflowHandler = overflowReceiver;
+		id = ID++; //Set Id and increment
 		//setup thread
+		processingThread.setName("PacketThreadReceiver-" + id + "-Processing");
 		processingThread.setDaemon(true);
 		processingThread.start();
 	}
@@ -156,6 +161,14 @@ public class PacketThreadReceiver implements PacketReceiver{
 	 */
 	public int getWaitingPacketsCount() {
 		return packetsToProcess.size();
+	}
+	
+	/**
+	 * The id is unique to this instance and is used in the name of the processing thread.
+	 * @return The id of this {@link PacketThreadReceiver} instance
+	 */
+	public int getId() {
+		return id;
 	}
 	
 	/**
