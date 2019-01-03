@@ -19,7 +19,7 @@ import lb.simplebase.core.Utils;
  * @version 1.1
  * @author LB
  * This scene acts as as a container for other scenes. The subscenes can be resized and positioned in the frame.
- * All subscenes will receive calls to their {@link #tick()} and {@link #draw(Graphics2D)} method.
+ * All subscenes will receive calls to their {@link #tick()} and {@link #draw(Graphics2D, int, int)} method.
  * Note that there are special methods for ticking and drawing the container itself.
  */
 public abstract class SceneContainer extends Scene  implements MouseInputListener, KeyListener, MouseWheelListener{

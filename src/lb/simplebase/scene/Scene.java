@@ -10,7 +10,7 @@ import lb.simplebase.core.Framework;
  * @version 1.2
  * @author LB
  * A scene represents a certain state of the application, for example in a game there could be a scene for the menu,
- * for the actual game and for an intro animation. Scenes receive calls to their {@link #tick()} and {@link #draw(Graphics2D)}
+ * for the actual game and for an intro animation. Scenes receive calls to their {@link #tick()} and {@link #draw(Graphics2D, int, int)}
  * methods by the {@link Framework} instance as long as they are active. Scenes may be activated and deactivated at any time,
  *  and can be re-activated
  */
@@ -45,12 +45,12 @@ public abstract class Scene {
 	public abstract JComponent getOptions();
 	/**
 	 * This method is called when the scene is enabled. After this method was called, this scene will start to receive calls to the {@link #tick()}
-	 * and {@link #draw(Graphics2D)} methods. Note that there is no way to prevent the activation.
+	 * and {@link #draw(Graphics2D, int, int)} methods. Note that there is no way to prevent the activation.
 	 */
 	public abstract void enable();
 	/**
 	 * This method is called when the scene is disabled. After this method was called, this scene will no longer receive calls to the {@link #tick()}
-	 * and {@link #draw(Graphics2D)} methods. Note that there is no way to prevent the deactivation. A scene can be activated again by the framework;
+	 * and {@link #draw(Graphics2D, int, int)} methods. Note that there is no way to prevent the deactivation. A scene can be activated again by the framework;
 	 * then the {@link #enable()} method will be called again.
 	 */
 	public abstract void disable();

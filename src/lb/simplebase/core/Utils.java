@@ -99,7 +99,7 @@ public final class Utils {
 	
 	/**
 	 * Calculates the pixel size for a text that has the font size x
-	 * @param pixelSize The height of the text as a font size
+	 * @param fontSize The height of the text as a font size
 	 * @return The correct pixel size
 	 */
 	public static float getPixelSize(float fontSize){
@@ -107,6 +107,8 @@ public final class Utils {
 	}
 	
 	/**
+	 * A collector that converts all stream elements to Strings by their toString() method, and then appends the strings
+	 * @param <T> The type of Stram that this collector will operate on
 	 * @return A collector that converts all stream elements to Strings by their toString() method, and then appends the strings 
 	 */
 	public static <T> Collector<T, ?, String> collectString() {

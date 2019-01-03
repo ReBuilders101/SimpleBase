@@ -4,7 +4,7 @@ package lb.simplebase.core;
  * @version 1.0
  * @author LB
  * This exception is thrown when the {@link Framework} object does not have the correct state
- * This, for example, happens when you try to call the {@link Framework#start()} method while it is already running
+ * This, for example, happens when you try to call the {@link Framework#start(boolean, String)} method while it is already running
  */
 public class FrameworkStateException extends Exception{
 	private static final long serialVersionUID = -2451695892516027701L;

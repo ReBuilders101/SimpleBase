@@ -27,8 +27,8 @@ public class MainTestClass {
 			Framework.getFramework().init(30, 30, "Test", new Dimension(600, 400), true, true);
 			Framework.getFramework().registerScene(new ColorDemoScene("cds", Color.YELLOW));
 			Framework.getFramework().registerScene(new ImageScene("img", ImageIO.read(new File("D:\\jtest5\\img.png")),
-					false, ImageScene.ImageTiling.FILL));
-			Framework.getFramework().start(true, "img");
+					false, ImageScene.ImageTiling.FIT));
+			Framework.getFramework().start(true, "cds");
 		}catch(InvalidSceneException | FrameworkStateException | IOException e){
 			Framework.getFramework().exitFatal(true, e);
 		}

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 /**
  * Saves information about an error or exception that occurred during level creation.
  * Contains a {@link Throwable} that caused this error, as well as information about the cause of
- * the error and how it was handled by the {@link RegionManager}.
+ * the error and how it was handled.
  */
 public class ErrorMessage implements ErrorReportElement{
 	
@@ -54,8 +54,7 @@ public class ErrorMessage implements ErrorReportElement{
 
 	/**
 	 * Error messages can contain any object as payload that may give more information about the cause of the error.
-	 * For example this can contain the {@link Tag}-object in case of a malformed tag. However, the type of this object is
-	 * not saved and cannot be assumed by the {@link #getReason()} or {@link #getStatus()} methods.
+	 * The type of this object is not saved and cannot be assumed by the {@link #getReason()} or {@link #getStatus()} methods.
 	 * @return The custom payload object
 	 */
 	public Object getCustomObject() {
@@ -80,7 +79,7 @@ public class ErrorMessage implements ErrorReportElement{
 
 	/**
 	 * Prints this error message to the {@link PrintStream}.
-	 * @param The {@link PrintStream} that the element should be printed to.
+	 * @param stream The {@link PrintStream} that the element should be printed to.
 	 * @param addDetails If enabled, the output should have more details and more explainations for the errors.
 	 */
 	@Override

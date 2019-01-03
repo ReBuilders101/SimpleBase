@@ -105,7 +105,7 @@ public abstract class LocalNetworkRegistry {
 	 * reciver.
 	 * @param defaultReceiver The {@link PacketReceiver} that should be used when no other {@link PacketReceiver} is found for a {@link TargetIdentifier}
 	 * @param requireCopying If <code>true</code>, the packet data will be copied bytewise
-	 * @return
+	 * @return The created {@link LocalNetworkRegistry} instance
 	 */
 	public static LocalNetworkRegistry createLocalNetworkRegistry(PacketReceiver defaultReceiver, boolean requireCopying) {
 		return requireCopying ? new LocalNetworkRegistryCopying(defaultReceiver) : new LocalNetworkRegistryPassing(defaultReceiver);

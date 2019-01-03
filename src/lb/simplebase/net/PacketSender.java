@@ -16,7 +16,7 @@ public interface PacketSender {
 	/**
 	 * Sends a packet to all specified targets.
 	 * @param packet The packet that should be sent
-	 * @param id The {@link TargetIdentifier}s of all targets
+	 * @param ids The {@link TargetIdentifier}s of all targets
 	 */
 	public default void sendPacketTo(Packet packet, TargetIdentifier...ids) {
 		for(TargetIdentifier id : ids) {

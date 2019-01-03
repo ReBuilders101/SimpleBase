@@ -29,10 +29,10 @@ import lb.simplebase.scene.Scene;
  * The main class of the framework project. Only one instance of this class should exist, and it is obtainable
  * through the static method {@link #getFramework()}. If other instances are created through reflection, the program may break.
  * The framework has a basic lifecycle:
- * <br>1. {@link #init()}: used for setting window size, tickrate and other properties that can not be altered after starting the framework
+ * <br>1. {@link #init(int, int, String, Dimension, boolean, boolean)}: used for setting window size, tickrate and other properties that can not be altered after starting the framework
  * <br>2. {@link #registerScene(Scene)}: register scenes for the appilcation
- * <br>3. {@link #start()}: starts the timers and displays the application window(s) if desired. This should be the last call in the main method.
- * <br>4. {@link #stop()}: stops the timers and exits the application. This method never returns.
+ * <br>3. {@link #start(boolean, String)}: starts the timers and displays the application window(s) if desired. This should be the last call in the main method.
+ * <br>4. {@link #stop(int)}: stops the timers and exits the application. This method never returns.
  */
 public final class Framework implements MouseInputListener, KeyListener, MouseWheelListener{
 
@@ -198,6 +198,7 @@ public final class Framework implements MouseInputListener, KeyListener, MouseWh
 	 * @param showFrames If true, the main and oftion frame (if enabled) will be shown
 	 * @param startScene The registered scene that should be displayed first
 	 * @throws FrameworkStateException When the framework is already running
+	 * @throws InvalidSceneException When the startScene is not one of the registered {@link Scene}s
 	 */
 	public void start(boolean showFrames, String startScene) throws FrameworkStateException, InvalidSceneException{
 		if(running) throw new FrameworkStateException("Cannot (re)start the framework while it is already running.", true);
