@@ -10,6 +10,11 @@ import java.util.concurrent.BlockingQueue;
  */
 public class PacketThreadReceiver implements PacketReceiver{
 
+	/**
+	 * The {@link ThreadGroup} that contains all threads used to process packets with a {@link PacketThreadReceiver}
+	 */
+	public static final ThreadGroup RECEIVER_THREAD_GROUP = new ThreadGroup("Packet-Processing");
+	
 	private static volatile int ID = 0;
 	
 	private final Thread processingThread;
@@ -59,14 +64,19 @@ public class PacketThreadReceiver implements PacketReceiver{
 	 * logging the overflow
 	 */
 	public PacketThreadReceiver(PacketReceiver threadReceiver, int overflowLimit, PacketReceiver overflowReceiver) {
-		processingThread = new Thread(this::threadRunnable);
+		this(threadReceiver, overflowLimit, overflowReceiver, null);
+	}
+	
+	protected PacketThreadReceiver(PacketReceiver threadReceiver, int overflowLimit, PacketReceiver overflowReceiver, String specialThreadName) {
+		processingThread = new Thread(RECEIVER_THREAD_GROUP, this::threadRunnable);
 		packetsToProcess = new ArrayBlockingQueue<>(overflowLimit);
 		receiver = threadReceiver;
 		stopFlag = false;
 		overflowHandler = overflowReceiver;
 		id = ID++; //Set Id and increment
 		//setup thread
-		processingThread.setName("PacketThreadReceiver-" + id + "-Processing");
+		if(specialThreadName == null) specialThreadName = "PacketThreadReceiver";
+		processingThread.setName(specialThreadName + "-" + id + "-Processing");
 		processingThread.setDaemon(true);
 		processingThread.start();
 	}
