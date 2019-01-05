@@ -41,7 +41,7 @@ public class PacketFactory {
 	
 	/**
 	 * Creates a new {@link PacketFactory} for this {@link NetworkConnection}.
-	 * @param mapCon The {@link PacketIdMappingContainer} that contains all packet <-> id mappings
+	 * @param mapCon The {@link PacketIdMappingContainer} that contains all packet &lt;-&gt; id mappings
 	 * @param finishedPacketReceiver The {@link NetworkConnection} that will receive finished {@link Packet}s
 	 */
 	public PacketFactory(PacketIdMappingContainer mapCon, NetworkConnection finishedPacketReceiver) {

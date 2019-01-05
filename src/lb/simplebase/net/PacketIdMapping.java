@@ -11,7 +11,7 @@ public interface PacketIdMapping {
 	
 	/**
 	 * A blank instance of the {@link Packet} sublass available through {@link #getPacketClass()}.<br>
-	 * {@link #getPacketClass()} should be equal to {@link #getNewInstance()}.{@link #getClass()}
+	 * {@link #getPacketClass()} should be equal to {@link #getNewInstance()}<code>.getClass()</code>
 	 * @return A blank instance of the {@link Packet} sublass available through {@link #getPacketClass()}
 	 */
 	public Packet getNewInstance();
@@ -31,6 +31,7 @@ public interface PacketIdMapping {
 	/**
 	 * Creates a new {@link PacketIdMapping} with these values. The id should be unique to this packet implementation.
 	 * The {@link Supplier} <b>must</b> return a new instance for every call.
+	 * @param <T> The type of the {@link Packet} implementation
 	 * @param id The integer id of this {@link Packet} type
 	 * @param clazz The class of this {@link Packet} implementation
 	 * @param newInstance A {@link Supplier} that generates new instances of this packet implementation
