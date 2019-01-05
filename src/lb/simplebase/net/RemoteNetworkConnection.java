@@ -36,7 +36,12 @@ class RemoteNetworkConnection extends NetworkConnection{
 	@Override
 	public void sendPacketToTarget(Packet packet) throws ConnectionStateException {
 		if(getState() == ConnectionState.OPEN) {
-			byte[] data = getPacketFactory().createPacketData(packet);
+			byte[] data;
+			try {
+				data = getPacketFactory().createPacketData(packet); //try to make a packet
+			} catch (PacketMappingNotFoundException e1) {
+				throw new ConnectionStateException("The packet type could not be converted into an id and the packet could not be sent", e1, this, ConnectionState.OPEN);
+			}
 			try {
 				connection.getOutputStream().write(data);
 			} catch (IOException e) {
@@ -65,6 +70,9 @@ class RemoteNetworkConnection extends NetworkConnection{
 				getPacketFactory().feed(b);
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (PacketMappingNotFoundException e) {
+				e.printStackTrace();
+				//probably a different error log
 			}
 		}
 		close(); //close when while exits (this means the remote partner closed the connection 
