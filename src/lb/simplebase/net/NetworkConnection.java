@@ -16,17 +16,19 @@ import java.net.Socket;
  */
 public abstract class NetworkConnection {
 	
-	private TargetIdentifier local; //is this even necessary?
-	private TargetIdentifier remote;
+	private final TargetIdentifier local; //is this even necessary?
+	private final TargetIdentifier remote;
 	//No receiver, because receivers do not depend on specific nonnections (entityupdate from any client etc)
-	private NetworkManager packetHandler; //This is the Networkmanager
-	private volatile boolean open; //Threadsafe for socket listener
+	private final NetworkManager packetHandler; //This is the Networkmanager
+	private volatile ConnectionState state; //Threadsafe for socket listener
+	private final PacketFactory factory;
 	
-	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, boolean open) {
+	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
-		this.open = open; //TODO can it be opened from the beginning
+		this.state = initialState;
+		this.factory = new PacketFactory(packetHandler, this);
 	}
 
 	/**
@@ -51,31 +53,36 @@ public abstract class NetworkConnection {
 	/**
 	 * If the connection is open, {@link Packet}s can be sent through the connection and can be received from the remote partner. A connection can be
 	 * closed from either this side ({@link #close()}) or by the remote partner.<br>
-	 * If the connection is not open, this means that either the connection has been closed or that it has not yet been made.
+	 * If the connection is not open, this means that either the connection has been closed or that it has not yet been made.<br>
+	 * Equal to testing {@link #getState()}<code> == </code>{@link ConnectionState#OPEN}
 	 * @return Whether the connection is open
 	 */
 	public boolean isConnectionOpen() {
-		return open;
+		return state == ConnectionState.OPEN;
 	}
 	
 	/**
 	 * Closes this {@link NetworkConnection}. After closing, no {@link Packet}s can be sent or received.
 	 * The connected {@link NetworkManager} will be notified when a connection is closed, and
-	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.
+	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
+	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
 	public void close() {
-		open = false;
+		state = ConnectionState.CLOSED;
 		packetHandler.notifyConnectionClosed(this);
 	}
 	
 	/**
-	 * Sets the open flag to true
+	 * Set the connection state
 	 */
-	protected final void open() {
-		open = true;
+	protected void setConnectionState(ConnectionState state) {
+		this.state = state;
 	}
 	
-	private void handleReceivedPacket(Packet received) {
+	/**
+	 * packet from the socket listener thread
+	 */
+	protected void handleReceivedPacket(Packet received) {
 		packetHandler.accept(received, local);
 	}
 	
@@ -86,7 +93,7 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionAlreadyConnectedException When the connection is already connected
 	 * @see #connect(int)
 	 */
-	public void connect() throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
+	public void connect() throws ConnectionStateException {
 		connect(30); //Default timeout 30s
 	}
 	
@@ -97,7 +104,7 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionNotConnectedException When the connection could not be made 
 	 * @throws ConnectionAlreadyConnectedException When the connection is already connected
 	 */
-	public abstract void connect(int timeout) throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException;
+	public abstract void connect(int timeout) throws ConnectionStateException;
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
@@ -105,7 +112,7 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionNotOpenException When the connection has not yet been connected or has been closed
 	 * @throws IOException When the {@link Packet} data could not be written to the connection's IO Stream
 	 */
-	public abstract void sendPacketToTarget(Packet packet) throws ConnectionNotOpenException, IOException;
+	public abstract void sendPacketToTarget(Packet packet) throws ConnectionStateException;
 	
 	/**
 	 * A local connection is a connection between two network targets that exist within the same program.
@@ -115,6 +122,25 @@ public abstract class NetworkConnection {
 	 * @return Whether this connection is between two network targets in the same program
 	 */
 	public abstract boolean isLocalConnection();
+	
+	/**
+	 * The current {@link ConnectionState} of this {@link NetworkConnection}.
+	 * Some actions can throw {@link ConnectionStateException}s if the current state does not match the required state.
+	 * @return The current {@link ConnectionState} of this {@link NetworkConnection}
+	 */
+	public ConnectionState getState() {
+		return state;
+	}
+
+	/**
+	 * The {@link PacketFactory} that is used to create Packets from this connection.
+	 * @return The {@link PacketFactory} that is used to create Packets from this connection
+	 */
+	public PacketFactory getPacketFactory() {
+		return factory;
+	}
+	
+	///////////////////////////////////////THE STATIC METHODS BEGIN HERE/////////////////////////////////////////////////////////////////////
 	
 	//Called from the Networkmanager
  	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager) {
@@ -126,7 +152,7 @@ public abstract class NetworkConnection {
  	}
  	
  	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager, boolean connect)
- 			throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
+ 			throws ConnectionStateException {
 		if(remote.isLocalOnly()) {
 			return new LocalNetworkConnection(local, remote, manager, connect);
 		} else {
@@ -135,186 +161,14 @@ public abstract class NetworkConnection {
  	}
  	
  	//Only for testing
- 	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager, boolean connect,
+ 	@Deprecated
+	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager, boolean connect,
  			@Deprecated boolean copyIfLocal)
- 			throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
+ 			throws ConnectionStateException {
 		if(remote.isLocalOnly()) {
 			return new LocalCopyNetworkConnection(local, remote, manager, connect);
 		} else {
 			return new RemoteNetworkConnection(local, remote, manager, connect);
 		}
  	}
-	
- 	
- 	//################################################################################
- 	
- 	
-	protected static class LocalNetworkConnection extends NetworkConnection{
-
-		private NetworkConnection partner = null;
-		
-		protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
-			super(source, target, packetHandler, false);
-		}
-		
-		protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean connect) 
-				throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
-			this(source, target, packetHandler);
-			if(connect) connect();
-		}
-		
-		protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, NetworkConnection setPartner) {
-			this(source, target, packetHandler);
-			partner = setPartner;
-		}
-		
-		@Override
-		public void sendPacketToTarget(Packet packet) throws ConnectionNotOpenException {
-			if(!isConnectionOpen()) {
-				throw new ConnectionNotOpenException("Local connection has already been closed", this);
-			}else if(partner == null || !partner.isConnectionOpen()) {
-				close(); //Close if partner is closed //TODO does this work?
-				throw new ConnectionNotOpenException("Local connection partner closed or not connected", partner);
-			} else {
-				partner.handleReceivedPacket(packet); //Local partner handles packet
-			}
-		}
-
-		@Override
-		public void connect(int timeout) throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
-			if(partner != null)
-				throw new ConnectionAlreadyConnectedException("Local connection already open", this);
-			partner = LocalServerManager.waitForLocalConnectionPartner(this, timeout);
-			open();
-		}
-
-		protected NetworkConnection getPartner() {
-			return partner;
-		}
-
-		@Override
-		public boolean isLocalConnection() {
-			return true;
-		}
-		
-	}
-	
-	//##############################################################################################
-	/**
-	 * @deprecated Only for testing
-	 */
-	@Deprecated
-	protected static class LocalCopyNetworkConnection extends LocalNetworkConnection {
-
-		protected LocalCopyNetworkConnection(TargetIdentifier source, TargetIdentifier target,
-				NetworkManager packetHandler, boolean connect)
-				throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
-			super(source, target, packetHandler, connect);
-		}
-
-		protected LocalCopyNetworkConnection(TargetIdentifier source, TargetIdentifier target,
-				NetworkManager packetHandler) {
-			super(source, target, packetHandler);
-		}
-		
-		@Override
-		public void sendPacketToTarget(Packet packet) throws ConnectionNotOpenException {
-			if(!isConnectionOpen()) {
-				throw new ConnectionNotOpenException("Local connection has already been closed", this);
-			}else if(getPartner() == null || !getPartner().isConnectionOpen()) {
-				close(); //Close if partner is closed //TODO does this work?
-				throw new ConnectionNotOpenException("Local connection partner closed or not connected", getPartner());
-			} else {
-				ByteBuffer data = new ByteBuffer();
-				packet.writeData(data);
-				Packet packet2 = packet.createEmptyInstance();
-				packet2.readData(data);
-				getPartner().handleReceivedPacket(packet2); //Local partner handles copied packet
-			}
-		}
-		
-	}
-	
-	protected static class RemoteNetworkConnection extends NetworkConnection{
-
-		private final Socket connection;
-		private final Thread socketListenerThread;
-		private final PacketFactory factory;
-		private final int id;
-		
-		private static volatile int ID = 0; 
-		
-		protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
-			this(source, target, packetHandler, new Socket());
-		}
-
-		protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean connect) throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
-			this(source, target, packetHandler);
-			if(connect)
-				connect();
-		}
-		
-		protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket) {
-			super(source, target, packetHandler, false);
-			factory = new PacketFactory(packetHandler, this);
-			connection = connectedSocket;
-			if(connection.isConnected() && !connection.isClosed()) open(); //this doesn't connect twice, it just sets the open flag
-			id = ID++; //Assign unique id
-			//setup thread
-			socketListenerThread = new Thread(this::waitForPacket);
-			socketListenerThread.setDaemon(true);
-			socketListenerThread.setName("RemoteNetworkConnection-" + id + "-SocketListener");
-			socketListenerThread.start();
-		}
-		
-		@Override
-		public void sendPacketToTarget(Packet packet) throws IOException, ConnectionNotOpenException {
-			if(connection.isClosed() || !connection.isConnected())
-				throw new ConnectionNotOpenException("Remote connection is closed or not connected", this);
-			ByteBuffer data = new ByteBuffer();
-			packet.writeData(data);
-			connection.getOutputStream().write(data.getAsArray());
-		}
-		
-		@Override
-		public void close() {
-			super.close();
-			try {
-				connection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		private void waitForPacket(){
-			while(!connection.isClosed() && isConnectionOpen()) {
-				try {
-					byte b = (byte) connection.getInputStream().read();
-					//Do something with the bytes
-					factory.feed(b);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			close(); //close when while exits (this means the remote partner closed the connection 
-		}
-
-		@Override
-		public void connect(int timeout) throws ConnectionNotConnectedException, ConnectionAlreadyConnectedException {
-			if(connection.isConnected())
-				throw new ConnectionAlreadyConnectedException("Remote connection is already connected", this);
-			try {
-				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
-				open();
-			} catch (IOException e) {
-				throw new ConnectionNotConnectedException("Could not make remote Connection", this);
-			}
-		}
-
-		@Override
-		public boolean isLocalConnection() {
-			return false;
-		}
-		
-	}
 }

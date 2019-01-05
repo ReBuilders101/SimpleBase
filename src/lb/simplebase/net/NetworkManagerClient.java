@@ -1,7 +1,5 @@
 package lb.simplebase.net;
 
-import java.io.IOException;
-
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
@@ -32,11 +30,7 @@ public class NetworkManagerClient extends NetworkManager{
 	@Override
 	public void sendPacketTo(Packet packet, TargetIdentifier id) {
 		if(id.equals(serverId)) {
-			try {
-				sendPacketToServer(packet);
-			} catch (ConnectionNotOpenException e) {
-				//Method doesn't allow to return anything
-			}
+			sendPacketToServer(packet);
 		}
 	}
 	
@@ -44,13 +38,13 @@ public class NetworkManagerClient extends NetworkManager{
 	 * Sends the {@link Packet} to the connected server, and returns whether the packet was sent successfully.
 	 * @param packet The Packet that should be sent
 	 * @return Whether the {@link Packet} was sent successfully
-	 * @throws ConnectionNotOpenException If the connection to the server is not open
 	 */
-	public boolean sendPacketToServer(Packet packet) throws ConnectionNotOpenException {
+	public boolean sendPacketToServer(Packet packet) {
 		try {
 			serverConnection.sendPacketToTarget(packet);
-		} catch (IOException e) {
-			return false; //False if packet sending failed
+		} catch (ConnectionStateException e) {
+			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}
@@ -63,7 +57,7 @@ public class NetworkManagerClient extends NetworkManager{
 	public boolean openConnectionToServer() {
 		try {
 			serverConnection.connect();
-		} catch (ConnectionNotConnectedException | ConnectionAlreadyConnectedException e) {
+		} catch (ConnectionStateException e) {
 			return false;
 		}
 		return true;
@@ -78,11 +72,19 @@ public class NetworkManagerClient extends NetworkManager{
 	}
 	
 	/**
-	 * The {@link NetworkConnection} to the server that is used to send packets
+	 * The {@link NetworkConnection} to the server that is used to send packets.
 	 * @return The {@link NetworkConnection} to the server
 	 */
 	public NetworkConnection getServerConnection() {
 		return serverConnection;
+	}
+	
+	/**
+	 * The {@link ConnectionState} of the connection to the server.
+	 * @return The {@link ConnectionState} of the connection to the server
+	 */
+	public ConnectionState getServerConnectionState() {
+		return serverConnection.getState();
 	}
 	
 	/**

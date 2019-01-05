@@ -2,7 +2,6 @@ package lb.simplebase.net;
 
 /**
  * A packet represents data that can be sent through a network connection.<br>
- * To allow deserialization to happen, every implementing class <b>must</b> have a constructor with no parameters.
  * @see PacketReceiver
  * @see PacketSender
  */
@@ -24,5 +23,5 @@ public interface Packet {
 	 * Creates a new Instance of this packet type without any content.
 	 * @return A new Packet instance
 	 */
-	public Packet createEmptyInstance();
+//	public Packet createEmptyInstance();
 }

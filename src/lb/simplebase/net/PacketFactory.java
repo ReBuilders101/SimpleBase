@@ -27,6 +27,10 @@ public class PacketFactory {
 		
 	}
 	
+	public Packet createNewInstance(Class<? extends Packet> clazz) {
+		return null;
+	}
+	
 	private static enum Mappings implements PacketIdMapping {
 		;
 

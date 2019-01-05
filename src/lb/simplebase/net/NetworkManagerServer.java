@@ -115,7 +115,7 @@ public class NetworkManagerServer extends NetworkManager{
 		if(connection == null || !connection.isConnectionOpen()) return false;
 		try {
 			connection.sendPacketToTarget(packet);
-		} catch (ConnectionNotOpenException | IOException e) {
+		} catch (ConnectionStateException e) {
 			return false;
 		}
 		return true;
@@ -134,7 +134,7 @@ public class NetworkManagerServer extends NetworkManager{
 				if(connection.isConnectionOpen()) {
 					try {
 						connection.sendPacketToTarget(packet);
-					} catch (ConnectionNotOpenException | IOException e) {
+					} catch (ConnectionStateException e) {
 						allSuccessful = false;
 					}
 				}
@@ -240,8 +240,8 @@ public class NetworkManagerServer extends NetworkManager{
 	/**
 	 * Create partner connection for local connection
 	 */
-	protected NetworkConnection attemptLocalConnection(NetworkConnection connection) {
-		return new NetworkConnection.LocalNetworkConnection(getSenderID(), connection.getLocalTargetId(), this, connection);
+	protected NetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
+		return new LocalNetworkConnection(getSenderID(), connection.getLocalTargetId(), this, connection);
 	}
 	
 	/**
@@ -262,7 +262,7 @@ public class NetworkManagerServer extends NetworkManager{
 					//after accepting, sync on the list
 					synchronized(connections) {
 						TargetIdentifier remoteId = generateNewTargetId(newConnection);
-						NetworkConnection connection = new NetworkConnection.RemoteNetworkConnection(getSenderID(), remoteId,
+						NetworkConnection connection = new RemoteNetworkConnection(getSenderID(), remoteId,
 								this, newConnection);
 						if(canAcceptNewConnection()) {
 							connections.put(remoteId, connection);
