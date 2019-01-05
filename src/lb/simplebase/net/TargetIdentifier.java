@@ -61,6 +61,18 @@ public interface TargetIdentifier {
 		}
 		
 		/**
+		 * Creates a new instance of {@link NetworkTargetIdentifier} that can be used for network
+		 * communication.
+		 * @param id The unique id that is used for this target
+		 * @param address The {@link InetSocketAddress} that can be used to connect a {@link Socket} to this target
+		 * @throws UnknownHostException
+		 */
+		public NetworkTargetIdentifier(String id, InetSocketAddress address) {
+			this.id = id;
+			this.address = address;
+		}
+		
+		/**
 		 * Returns the {@link InetSocketAddress} that can be used to connect a socket to this target.
 		 * @return The {@link InetSocketAddress} for this target
 		 */
