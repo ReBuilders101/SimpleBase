@@ -31,7 +31,7 @@ class LocalNetworkConnection extends NetworkConnection{
 	@Override
 	public void connect(int timeout) throws ConnectionStateException {
 		if(getState() == ConnectionState.UNCONNECTED) {
-			partner = LocalServerManager.waitForLocalConnectionPartner(this, timeout);
+			partner = LocalServerManager.waitForLocalConnectionServer(this, timeout);
 			setConnectionState(ConnectionState.OPEN);
 		} else {
 			throw new ConnectionStateException("The NetworkConnection was already connected", this, ConnectionState.UNCONNECTED);

@@ -4,6 +4,7 @@ package lb.simplebase.net;
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
  */
+@ClientSide
 public class NetworkManagerClient extends NetworkManager{
 
 	NetworkConnection serverConnection;

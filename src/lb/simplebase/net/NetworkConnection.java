@@ -89,28 +89,25 @@ public abstract class NetworkConnection {
 	/**
 	 * Tries to make a network connection to the remote target, using the connection information
 	 * that this instance was created with. This method uses a timeout vaule of 30 seconds.
-	 * @throws ConnectionNotConnectedException When the connection could not be made 
-	 * @throws ConnectionAlreadyConnectedException When the connection is already connected
+	 * @throws ConnectionStateException When the connection could not be made
 	 * @see #connect(int)
 	 */
 	public void connect() throws ConnectionStateException {
-		connect(30); //Default timeout 30s
+		connect(30000); //Default timeout 30s = 30,000 ms
 	}
 	
 	/**
 	 * Tries to make a network connection to the remote target, using the connection information
 	 * that this instance was created with.
-	 * @param timeout The maximal timeout in seconds
-	 * @throws ConnectionNotConnectedException When the connection could not be made 
-	 * @throws ConnectionAlreadyConnectedException When the connection is already connected
+	 * @param timeout The maximal timeout in milliseconds
+	 * @throws ConnectionStateException When the connection could not be made
 	 */
 	public abstract void connect(int timeout) throws ConnectionStateException;
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
 	 * @param packet The {@link Packet} containing the data that should be sent
-	 * @throws ConnectionNotOpenException When the connection has not yet been connected or has been closed
-	 * @throws IOException When the {@link Packet} data could not be written to the connection's IO Stream
+	 * @throws ConnectionStateException When the {@link Packet} could not be sent
 	 */
 	public abstract void sendPacketToTarget(Packet packet) throws ConnectionStateException;
 	

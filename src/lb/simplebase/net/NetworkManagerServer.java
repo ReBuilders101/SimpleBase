@@ -14,6 +14,7 @@ import java.util.function.Consumer;
  * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link NetworkConnection}s to clients.
  * All {@link Packet}s that are received are processed on one thread, which is available through {@link #getProcessingThread()}.
  */
+@ServerSide
 public class NetworkManagerServer extends NetworkManager{
 	
 	private static volatile int ID = 0;
@@ -51,6 +52,9 @@ public class NetworkManagerServer extends NetworkManager{
 		socketConnectionAcceptor.setDaemon(true);
 		socketConnectionAcceptor.setName("NetworkManagerServer-" + id + "-SocketAcceptor");
 		socketConnectionAcceptor.start();
+		
+		//Register for local connections
+		LocalServerManager.addServer(this);
 	}
 	
 	/**
@@ -107,7 +111,7 @@ public class NetworkManagerServer extends NetworkManager{
 	 * clients, or if the {@link NetworkConnection} to that client is closed, or if an exception occurred while sending the {@link Packet}'s
 	 * data, this method returns <code>false</code>. Otherwise, if the {@link Packet} was sent successfully, <code>true</code> is returned.
 	 * @param packet The packet that should be sent
-	 * @param id The {@link TargetIdentifier} of the target, which should be one of the clients connected to this {@link NetworkManagerServer}
+	 * @param clientId The {@link TargetIdentifier} of the target, which should be one of the clients connected to this {@link NetworkManagerServer}
 	 * @return Whether the packet was sent successfully
 	 */
 	public boolean sendPacketToClient(Packet packet, TargetIdentifier clientId) {
@@ -238,10 +242,19 @@ public class NetworkManagerServer extends NetworkManager{
 	}
 	
 	/**
-	 * Create partner connection for local connection
+	 * Create partner connection for local connection,
+	 * and adds it to the own connection list
 	 */
-	protected NetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
-		return new LocalNetworkConnection(getSenderID(), connection.getLocalTargetId(), this, connection);
+	protected LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) throws ConnectionStateException{
+		synchronized (connections) {
+			if(canAcceptNewConnection()) {
+				LocalNetworkConnection connection2 = new LocalNetworkConnection(getSenderID(), connection.getLocalTargetId(), this, connection);
+				connections.put(connection2.getRemoteTargetId(), connection2); //The connection on this side will be added
+				return connection2;
+			} else {
+				throw new ConnectionStateException("Attempted new local connection to server, but server could not accept connection", connection, ConnectionState.UNCONNECTED);
+			}
+		}
 	}
 	
 	/**

@@ -65,7 +65,6 @@ public interface TargetIdentifier {
 		 * communication.
 		 * @param id The unique id that is used for this target
 		 * @param address The {@link InetSocketAddress} that can be used to connect a {@link Socket} to this target
-		 * @throws UnknownHostException
 		 */
 		public NetworkTargetIdentifier(String id, InetSocketAddress address) {
 			this.id = id;
