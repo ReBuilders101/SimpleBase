@@ -1,5 +1,10 @@
 package lb.simplebase.net;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * The {@link NetworkManager} handles all {@link NetworkConnection}s in a network for one target.
  * In case if clients, this is only the connection to the server, but in case of a server, there
@@ -7,11 +12,14 @@ package lb.simplebase.net;
  * Because the implementation depends heavily on whether the {@link NetworkManager} represents a server or client,
  * the subclasses {@link NetworkManagerServer} and {@link NetworkManagerClient} should be used.
  */
-public abstract class NetworkManager extends PacketThreadReceiver implements PacketSender{
+public abstract class NetworkManager extends PacketThreadReceiver implements PacketSender, PacketIdMappingContainer {
+	
+	private Set<PacketIdMapping> mappings;
 	
 	protected NetworkManager(PacketReceiver threadReceiver, TargetIdentifier localId) {
 		super(threadReceiver, 500, (r, s) -> System.out.println("Overflow!"), "NetworkManager"); //TODO change sysout to other log //Increase overflow, because multiple packet sources
 		local = localId;
+		mappings = new HashSet<>();
 	}
 
 	private TargetIdentifier local; //every manager represents one party
@@ -39,4 +47,27 @@ public abstract class NetworkManager extends PacketThreadReceiver implements Pac
 	public abstract void close();
 	
 	protected abstract void notifyConnectionClosed(NetworkConnection connection);
+
+	@Override
+	public Set<PacketIdMapping> getAllMappings() {
+		return Collections.unmodifiableSet(mappings);
+	}
+
+	/**
+	 * Adds a new {@link PacketIdMapping} to the list of mappings
+	 * @param mapping The {@link PacketIdMapping} to add
+	 */
+	public void addMapping(PacketIdMapping mapping) {
+		mappings.add(mapping);
+	}
+	
+	/**
+	 * Adds all {@link PacketIdMapping}s that are contained in an <code>enum</code>-Structure (which also extends {@link PacketIdMapping}). 
+	 * @param <T> The type of the <code>enum</code>-implementation
+	 * @param e The {@link Enum} containing all mappings
+	 */
+	public <T extends Enum<T> & PacketIdMapping> void addMappings(Class<T> e) {
+		EnumSet<T> es = EnumSet.allOf(e);
+		mappings.addAll(es);
+	}
 }

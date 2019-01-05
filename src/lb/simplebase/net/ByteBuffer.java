@@ -129,4 +129,13 @@ public class ByteBuffer implements WriteableByteData, ReadableByteData{
 		readInvalid = false;
 	}
 	
+	/**
+	 * Writes all byte data from another {@link ByteBuffer} into this {@link ByteBuffer}.
+	 * @param buf The {@link ByteBuffer} containing the data
+	 */
+	public void write(ByteBuffer buf) {
+		final byte[] data = buf.getAsArray();
+		write(data);
+	}
+	
 }

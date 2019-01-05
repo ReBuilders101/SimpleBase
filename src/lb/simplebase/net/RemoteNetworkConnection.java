@@ -36,11 +36,9 @@ class RemoteNetworkConnection extends NetworkConnection{
 	@Override
 	public void sendPacketToTarget(Packet packet) throws ConnectionStateException {
 		if(getState() == ConnectionState.OPEN) {
-			ByteBuffer data = new ByteBuffer();
-			packet.writeData(data);
-			//Try to send the data
+			byte[] data = getPacketFactory().createPacketData(packet);
 			try {
-				connection.getOutputStream().write(data.getAsArray());
+				connection.getOutputStream().write(data);
 			} catch (IOException e) {
 				throw new ConnectionStateException("An IOException occurred while trying to send a packet", e, this, ConnectionState.OPEN); //Maybe another exception type?
 			}
