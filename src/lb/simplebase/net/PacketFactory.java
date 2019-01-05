@@ -115,6 +115,14 @@ public class PacketFactory {
 	}
 	
 	/**
+	 * The {@link PacketIdMappingContainer} used by this {@link PacketFactory}.
+	 * @return The {@link PacketIdMappingContainer} used by this {@link PacketFactory}
+	 */
+	public PacketIdMappingContainer getMappingContainer() {
+		return mapCon;
+	}
+	
+	/**
 	 * Converts a {@link Packet} into bytes, including header and metadata
 	 * @param packet The {@link Packet} to convert
 	 * @return The bytes repesenting the packet
