@@ -59,7 +59,7 @@ class NetworkTest {
 	@Test
 	void sendTest() throws InterruptedException, BrokenBarrierException {
 		serverManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
-		clientManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
+		clientManager.addAllMappings(serverManager); //ensure the mappings are always the same
 		
 		assertTrue(clientManager.openConnectionToServer(), "Could not open connection");
 		assertTrue(clientManager.isServerConnectionOpen(), "Connection not open");
@@ -89,7 +89,6 @@ class NetworkTest {
 	void getPacket(Packet packet, TargetIdentifier source) {
 //		assertEquals(assertionPacket, packet);
 		assertionPacket = packet;
-		System.out.println(source + " | " + packet);
 		try {
 			barrier.await();
 		} catch (InterruptedException | BrokenBarrierException e) {

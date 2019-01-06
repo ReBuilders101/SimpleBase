@@ -70,4 +70,12 @@ public abstract class NetworkManager extends PacketThreadReceiver implements Pac
 		EnumSet<T> es = EnumSet.allOf(e);
 		mappings.addAll(es);
 	}
+	
+	/**
+	 * Adds all {@link PacketIdMapping}s from another container
+	 * @param con The {@link PacketIdMappingContainer} containing all Mappings
+	 */
+	public void addAllMappings(PacketIdMappingContainer con) {
+		mappings.addAll(con.getAllMappings());
+	}
 }

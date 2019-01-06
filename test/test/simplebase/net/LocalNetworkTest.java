@@ -63,7 +63,7 @@ class LocalNetworkTest {
 	@Test
 	void sendTest() throws InterruptedException, BrokenBarrierException {
 		serverManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
-		clientManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
+		clientManager.addAllMappings(serverManager);
 		
 		clientManager.openConnectionToServer();
 		
