@@ -180,6 +180,18 @@ public class NetworkManagerServer extends NetworkManager{
 	}
 	
 	/**
+	 * Closes the connection to this network target.
+	 * @param target The {@link TargetIdentifier} of the target to which the connection should be closed
+	 * @return Whether the connection was closed successfully
+	 */
+	public boolean closeConnectionTo(TargetIdentifier target) {
+		NetworkConnection con = connections.get(target);
+		if(con == null) return false;
+		con.close();
+		return true;
+	}
+	
+	/**
 	 * Whether this {@link NetworkManagerServer} generally accepts new connections, without calculating whether a
 	 * new connection would exceed the connection limit. To test for this as well, see {@link #canAcceptNewConnection()}.
 	 * @return Whether this {@link NetworkConnection} accepts new connections at all
