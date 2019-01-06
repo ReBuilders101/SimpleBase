@@ -53,12 +53,13 @@ public class NetworkManagerClient extends NetworkManager{
 	/**
 	 * Tries to open the connection to the server.
 	 * If the connection is already open, or could not be made, <code>false</code> is returned.
-	 * @return Whether the connection was sent successfully
+	 * @return Whether the connection was opened successfully
 	 */
 	public boolean openConnectionToServer() {
 		try {
 			serverConnection.connect();
 		} catch (ConnectionStateException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;

@@ -1,19 +1,15 @@
 package lb.simplebase.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
 
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
@@ -21,11 +17,11 @@ import lb.simplebase.net.Packet;
 import lb.simplebase.net.PacketIdMapping;
 import lb.simplebase.net.TargetIdentifier;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LocalNetworkTest {
+class NetworkTest {
 
 	static TargetIdentifier server;
-	static TargetIdentifier client;
+	static TargetIdentifier clientFromClient;
+	static TargetIdentifier clientFromServer;
 	
 	NetworkManagerServer serverManager;
 	NetworkManagerClient clientManager;
@@ -36,28 +32,28 @@ class LocalNetworkTest {
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		server = new TargetIdentifier.LocalTargetIdentifier("server");
-		client = new TargetIdentifier.LocalTargetIdentifier("client");
+		server = new TargetIdentifier.NetworkTargetIdentifier("server", "localhost", 1234);
+		clientFromClient = new TargetIdentifier.NetworkTargetIdentifier("client", "localhost", 1234);
 	}
 
 	@BeforeEach
 	void setUp() throws Exception {
 		serverManager = new NetworkManagerServer(this::getPacket, server, System.out::println);
-		clientManager = new NetworkManagerClient(this::getPacket, client, server);
+		clientManager = new NetworkManagerClient(this::getPacket, clientFromClient, server);
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
 		clientManager.close();
 		serverManager.shutdown();
-		serverManager = null;
 		clientManager = null;
+		serverManager = null;
 	}
 
 	@Test
 	void connectTest() {
-		clientManager.openConnectionToServer();
-		Assertions.assertTrue(clientManager.isServerConnectionOpen());
+		assertTrue(clientManager.openConnectionToServer(), "Could not open connection");
+		assertTrue(clientManager.isServerConnectionOpen(), "Connection not open");
 	}
 	
 	@Test
@@ -65,26 +61,29 @@ class LocalNetworkTest {
 		serverManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
 		clientManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
 		
-		clientManager.openConnectionToServer();
+		assertTrue(clientManager.openConnectionToServer(), "Could not open connection");
+		assertTrue(clientManager.isServerConnectionOpen(), "Connection not open");
 		
-		byte[] data = new byte[50];
-		new Random().nextBytes(data);
-		Packet test = new TestPacket(data);
-		assertTrue(clientManager.sendPacketToServer(test), "Cannot send packet");
+		byte[] dataArray = new byte[50];
+		new Random().nextBytes(dataArray);
+		Packet data = new TestPacket(dataArray);
+		clientManager.sendPacketToServer(data);
 		
-		//Wait with assertion until packet has been processed 
-		barrier.await();
-		assertEquals(test, assertionPacket);
+		barrier.await(); //Wait for packet to be received
+		assertEquals(data, assertionPacket, "Packets are not equal");
 		
-		new Random().nextBytes(data);
-		Packet test2 = new TestPacket(data);
-		assertTrue(serverManager.hasConnectionTo(client), "No client connection");
-		assertTrue(serverManager.hasOpenConnectionTo(client), "No open client connection");
-		assertTrue(serverManager.sendPacketToClient(test2, client), "Cannot send packet");
+		//Now try the other dircetion
+		assertEquals(serverManager.getClients().size(), 1, "More or less than one client");
+		clientFromServer = serverManager.getClients().iterator().next(); //Get the only connection
+		assertNotNull(clientFromServer, "Client connection from server side not found");
 		
-		//Wait with assertion until packet has been processed 
-		barrier.await();
-		assertEquals(test2, assertionPacket);
+		new Random().nextBytes(dataArray);
+		data = new TestPacket(dataArray);
+		
+		assertTrue(serverManager.sendPacketToClient(data, clientFromServer), "Could not send Packet");
+		
+		barrier.await(); //wait for received packet
+		assertEquals(data, assertionPacket, "Packets are not equal (2)");
 	}
 
 	void getPacket(Packet packet, TargetIdentifier source) {

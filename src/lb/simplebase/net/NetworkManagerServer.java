@@ -339,4 +339,22 @@ public class NetworkManagerServer extends NetworkManager{
 		LocalServerManager.removeServer(this);
 	}
 	
+	/**
+	 * Closes all client connections, removes this server from the local
+	 * connection list and closes the {@link ServerSocket}. No more connections are possible to this server from this point.
+	 * @return Whether the {@link ServerSocket} could be closed successfully
+	 */
+	public boolean shutdown() {
+		close();
+		removeLocalServer();
+		if(server != null) {
+			try {
+				server.close();
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 }

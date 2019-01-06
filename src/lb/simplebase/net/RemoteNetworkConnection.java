@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 class RemoteNetworkConnection extends NetworkConnection{
 
@@ -63,11 +64,15 @@ class RemoteNetworkConnection extends NetworkConnection{
 	}
 
 	private void waitForPacket(){
-		while(!connection.isClosed() && isConnectionOpen()) {
+		while(!connection.isClosed()) {
 			try {
-				byte b = (byte) connection.getInputStream().read();
+				if(isConnectionOpen()) {
+					byte b = (byte) connection.getInputStream().read();
+					getPacketFactory().feed(b);
+				}
 				//Do something with the bytes
-				getPacketFactory().feed(b);
+			}catch (SocketException e) {
+				//Do nothing, socket is closed and loop will exit next iteration 
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (PacketMappingNotFoundException e) {
@@ -89,8 +94,10 @@ class RemoteNetworkConnection extends NetworkConnection{
 			setConnectionState(ConnectionState.OPEN);
 		} else if(getState() == ConnectionState.OPEN){
 			throw new ConnectionStateException("The connection was already open", this, ConnectionState.UNCONNECTED);
-		} else {
+		} else if (getState() == ConnectionState.CLOSED){
 			throw new ConnectionStateException("The connection had already been closed", this, ConnectionState.UNCONNECTED);
+		} else {
+			throw new RuntimeException("I have no idea what is going on");
 		}
 	}
 

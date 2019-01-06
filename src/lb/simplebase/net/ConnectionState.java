@@ -42,8 +42,15 @@ public enum ConnectionState {
 	 * @return The state of the connection
 	 */
 	public static ConnectionState fromSocket(Socket socket) {
-		if(socket.isClosed()) return CLOSED;
-		if(socket.isConnected()) return OPEN;
-		return UNCONNECTED;
+		if(!socket.isConnected()) {
+			return ConnectionState.UNCONNECTED; //If never connected, then still unconnected
+		} else if(!socket.isClosed()) {
+			return ConnectionState.OPEN; //If never closed, open
+		} else {
+			return ConnectionState.CLOSED; //Else it is already closed
+		}
+//		if(socket.isClosed()) return CLOSED;
+//		if(socket.isConnected()) return OPEN;
+//		return UNCONNECTED;
 	}
 }
