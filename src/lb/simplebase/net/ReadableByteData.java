@@ -83,7 +83,7 @@ public interface ReadableByteData extends ByteData{
 		long result = 0;
 		for(int i = 0; i < 8; i++) {
 			//Offset starts with 0 and array starts with LSB -> LSB is not shifted -> ok
-			result |= ( ((long)bytes[i]) << (i * 8)); //you can use &= , |= or += because numbers don't 'overlap'
+			result |= ( ( ((long)bytes[i]) & 0xFF ) << (i * 8)); //you can use &= , |= or += because numbers don't 'overlap'
 		}
 		return result;
 	}
