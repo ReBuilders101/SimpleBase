@@ -16,6 +16,10 @@ final class LocalServerManager {
 		servers.put(server.getSenderID(), server);
 	}
 	
+	protected static void removeServer(NetworkManagerServer server) {
+		servers.remove(server.getSenderID());
+	}
+	
 	/**
 	 * 
 	 * @param connection A {@link NetworkConnection} to the server that should be connected to

@@ -29,6 +29,18 @@ public class MainTestClass {
 			Framework.getFramework().registerScene(new ImageScene("img", ImageIO.read(new File("D:\\jtest5\\img.png")),
 					false, ImageScene.ImageTiling.FIT));
 			Framework.getFramework().start(true, "cds");
+			
+			int test = 2147483647;
+			test++;
+			System.out.println(test);
+			
+			int data1 = 23;
+			int data2 = 178;
+			System.out.println((byte) data1);
+			System.out.println((byte) data2);
+			System.out.println(Integer.toBinaryString(data2));
+			System.out.println(Integer.toBinaryString((byte) data2));
+			
 		}catch(InvalidSceneException | FrameworkStateException | IOException e){
 			Framework.getFramework().exitFatal(true, e);
 		}

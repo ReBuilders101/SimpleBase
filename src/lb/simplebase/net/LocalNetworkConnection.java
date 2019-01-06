@@ -50,7 +50,8 @@ class LocalNetworkConnection extends NetworkConnection{
 	@Override
 	public void close() {
 		super.close();
-		partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
+		if(partner != null) //If it was even connected
+			partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
 	}
 	
 	/**

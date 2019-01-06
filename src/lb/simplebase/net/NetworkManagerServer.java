@@ -20,6 +20,7 @@ public class NetworkManagerServer extends NetworkManager{
 	private static volatile int ID = 0;
 	private static final long CAN_ACCEPT_TEST_DELAY = 1L;
 	
+	private final boolean isLocalOnly;
 	private final int id;
 	private boolean closed;
 	
@@ -42,16 +43,24 @@ public class NetworkManagerServer extends NetworkManager{
 	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit, Consumer<NetworkConnection> newConnectionHandler) throws IOException {
 		super(threadReceiver, localId);
 		this.connectionLimit = connectionLimit;
-		this.connections = Collections.synchronizedMap(new HashMap<>()); //Sync map, because it is accessed from 
-		this.server = new ServerSocket(localId.getConnectionAddress().getPort()); //Bind to port
+		this.connections = Collections.synchronizedMap(new HashMap<>()); //Sync map, because it is accessed from two threads 
+		
+		this.isLocalOnly = localId.isLocalOnly();
+		
 		this.id = ID++;
 		this.closed = false;
 		this.conHand = newConnectionHandler;
 		
-		socketConnectionAcceptor = new Thread(this::acceptServerConnections);
-		socketConnectionAcceptor.setDaemon(true);
-		socketConnectionAcceptor.setName("NetworkManagerServer-" + id + "-SocketAcceptor");
-		socketConnectionAcceptor.start();
+		if(!localId.isLocalOnly()) { //Open server if not local
+			this.server = new ServerSocket(localId.getConnectionAddress().getPort()); //Bind to port
+			socketConnectionAcceptor = new Thread(this::acceptServerConnections);
+			socketConnectionAcceptor.setDaemon(true);
+			socketConnectionAcceptor.setName("NetworkManagerServer-" + id + "-SocketAcceptor");
+			socketConnectionAcceptor.start();
+		} else {
+			this.server = null;
+			this.socketConnectionAcceptor = null;
+		}
 		
 		//Register for local connections
 		LocalServerManager.addServer(this);
@@ -301,6 +310,7 @@ public class NetworkManagerServer extends NetworkManager{
 
 	/**
 	 * Sets {@link #isAcceptingConnections()} to <code>false</code> and closes all existing connections.
+	 * However, new connections can still be made if {@link #setAcceptsConnections(boolean)} is called with <code>true</code> again. 
 	 */
 	@Override
 	public void close() {
@@ -312,5 +322,20 @@ public class NetworkManagerServer extends NetworkManager{
 		setAcceptsConnections(false);
 	}
 	
+	/**
+	 * Whether this server is local-only, so no {@link ServerSocket} is running and only local connnections are possible
+	 * @return Whether this server is local-only
+	 */
+	public boolean isLocalOnly() {
+		return isLocalOnly;
+	}
+	
+	/**
+	 * Removes the {@link NetworkManagerServer} from the list of local servers.
+	 * After this server was removed, no more local connections can be made.
+	 */
+	public void removeLocalServer() {
+		LocalServerManager.removeServer(this);
+	}
 	
 }
