@@ -40,8 +40,8 @@ public interface ReadableByteData extends ByteData{
 		byte b0 = readByte(); //least significant
 		byte b1 = readByte(); //most significant
 		return (char) ( //Convert result to char
-				(( (char) b1) << 8) | //MSB shifted left
-				( (char) b0) //LSB stays right
+				((( (char) b1) & 0xFF ) << 8) | //MSB shifted left
+				((  (char) b0) & 0xFF ) //LSB stays right
 				);
 	}
 	
@@ -53,8 +53,8 @@ public interface ReadableByteData extends ByteData{
 		byte b0 = readByte(); //least significant
 		byte b1 = readByte(); //most significant
 		return (short) ( //Convert result to short
-				(( (short) b1) << 8) | //MSB shifted left
-				( (short) b0)); //LSB stays rigth
+				((( (short) b1) & 0xFF ) << 8) | //MSB shifted left
+				((  (short) b0) & 0xFF )); //LSB stays rigth
 	}
 	
 	/**
@@ -67,10 +67,10 @@ public interface ReadableByteData extends ByteData{
 		byte b2 = readByte();
 		byte b3 = readByte(); //MSB
 		//No enclosing typecast needed, result is already int
-		return 	(( (int) b3) << 24) | //MSB has most left shift
-				(( (int) b2) << 16) |
-				(( (int) b1) << 8 ) |
-				(  (int) b0);		  //LSB not shifted
+		return 	((( (int) b3 ) & 0xFF) << 24) | //MSB has most left shift
+				((( (int) b2 ) & 0xFF) << 16) |
+				((( (int) b1 ) & 0xFF) << 8 ) |
+				( ( (int) b0 ) & 0xFF);		  //LSB not shifted
 	}
 	
 	/**
