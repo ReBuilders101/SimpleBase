@@ -259,6 +259,7 @@ public class NetworkManagerServer extends NetworkManager{
 			if(canAcceptNewConnection()) {
 				LocalNetworkConnection connection2 = new LocalNetworkConnection(getSenderID(), connection.getLocalTargetId(), this, connection);
 				connections.put(connection2.getRemoteTargetId(), connection2); //The connection on this side will be added
+				conHand.accept(connection2); //Send the new local connection to the handler
 				return connection2;
 			} else {
 				throw new ConnectionStateException("Attempted new local connection to server, but server could not accept connection", connection, ConnectionState.UNCONNECTED);

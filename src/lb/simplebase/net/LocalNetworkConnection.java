@@ -17,6 +17,7 @@ class LocalNetworkConnection extends NetworkConnection{
 	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, LocalNetworkConnection setPartner) {
 		this(source, target, packetHandler);
 		partner = setPartner;
+		setConnectionState(ConnectionState.OPEN); //The connection is open when the partner exists
 	}
 	
 	@Override
