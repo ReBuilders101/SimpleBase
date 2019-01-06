@@ -1,4 +1,4 @@
-package lb.simplebase.test;
+package test.simplebase.net;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package lb.simplebase.test;
+package test.simplebase.net;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
