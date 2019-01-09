@@ -53,6 +53,16 @@ public class Signature<T> {
 		return new Signature<?>[] {new Signature<>(value1, type1), new Signature<>(value2, type2)};
 	}
 	
+	@SafeVarargs
+	public static <T, U> Signature<?>[] allOf(Class<? super T> type, T...values) {
+		final int length = values.length;
+		Signature<?>[] ret = new Signature<?>[length];
+		for(int i = 0; i < length; i++) {
+			ret[i] = new Signature<T>(values[i], type);
+		}
+		return ret;
+	}
+	
 	public static <T, U> Signature<?>[] of(Class<? super T> type1, T value1) {
 		return new Signature<?>[] {new Signature<>(value1, type1)};
 	}
@@ -64,5 +74,9 @@ public class Signature<T> {
 			ret[i] = new Signature<>(values[i]);
 		}
 		return ret;
+	}
+	
+	public static Signature<?>[] empty() {
+		return new Signature<?>[0];
 	}
 }

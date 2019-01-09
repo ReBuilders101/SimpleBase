@@ -105,52 +105,55 @@ public final class ReflectionUtils {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getMethod(methodName, types);
+			Method method = accessMethod(clazz, methodName, types);
 			return method.invoke(instance, values);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			return null;
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T, C> T executeMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature<?>...sig) {
-		return (T) executeMethod(clazz, methodName, instance, returnType, sig);
+		return (T) executeMethod(clazz, methodName, instance, sig);
 	}
 	
 	public static <C> Object executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getDeclaredMethod(methodName, types);
+			Method method = accessDeclaredMethod(clazz, methodName, types);
 			return method.invoke(instance, values);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			return null;
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T, C> T executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature<?>...sig) {
-		return (T) executeDeclaredMethod(clazz, methodName, instance, returnType, sig);
+		return (T) executeDeclaredMethod(clazz, methodName, instance, sig);
 	}	
 	
 	public static Object executeStaticMethod(Class<?> clazz, String methodName, Signature<?>...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getMethod(methodName, types);
+			Method method = accessDeclaredMethod(clazz, methodName, types);
 			return method.invoke(null, values);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			return null;
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> T executeStaticMethod(Class<?> clazz, String methodName, Class<T> returnType, Signature<?>...sig) {
-		return (T) executeStaticMethod(clazz, methodName, returnType, sig);
+		return (T) executeStaticMethod(clazz, methodName, sig);
 	}
 	
 	public static <C> boolean executeVoidMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getMethod(methodName, types);
+			Method method = accessMethod(clazz, methodName, types);
 			method.invoke(instance, values);
 			return true;
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -162,7 +165,7 @@ public final class ReflectionUtils {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getDeclaredMethod(methodName, types);
+			Method method = accessDeclaredMethod(clazz, methodName, types);
 			method.invoke(instance, values);
 			return true;
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -174,7 +177,7 @@ public final class ReflectionUtils {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
-			Method method = clazz.getMethod(methodName, types);
+			Method method = accessDeclaredMethod(clazz, methodName, types);
 			method.invoke(null, values);
 			return true;
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -184,7 +187,16 @@ public final class ReflectionUtils {
 	
 	public static <T> ReflectedMethod getMethodExecutor(Class<T> clazz, String methodName, T instance, Class<?>...sig) {
 		try {
-			final Method method = clazz.getMethod(methodName, sig);
+			final Method method = accessMethod(clazz, methodName, sig);
+			return (o) -> method.invoke(instance, o);
+		} catch (NoSuchMethodException | SecurityException e) {
+			return null;
+		}
+	}
+	
+	public static <T> ReflectedMethod getDeclaredMethodExecutor(Class<T> clazz, String methodName, T instance, Class<?>...sig) {
+		try {
+			final Method method = accessDeclaredMethod(clazz, methodName, sig);
 			return (o) -> method.invoke(instance, o);
 		} catch (NoSuchMethodException | SecurityException e) {
 			return null;
@@ -192,7 +204,7 @@ public final class ReflectionUtils {
 	}
 	
 	public static ReflectedMethod getStaticMethodExecutor(Class<?> clazz, String methodName, Class<?>...sig) {
-		return getMethodExecutor(clazz, methodName, null, sig);
+		return getDeclaredMethodExecutor(clazz, methodName, null, sig);
 	}
 	
 	public static <C> boolean setField(Class<C> clazz, String fieldName, C instance, Object value) {
@@ -215,5 +227,17 @@ public final class ReflectionUtils {
 		Field field = clazz.getDeclaredField(fieldName);
 		field.setAccessible(true);
 		return field;
+	}
+	
+	public static Method accessMethod(Class<?> clazz, String methodName, Class<?>[] sig) throws NoSuchMethodException, SecurityException {
+		Method method = clazz.getMethod(methodName, sig);
+		method.setAccessible(true);
+		return method;
+	}
+	
+	public static Method accessDeclaredMethod(Class<?> clazz, String methodName, Class<?>[] sig) throws NoSuchMethodException, SecurityException {
+		Method method = clazz.getDeclaredMethod(methodName, sig);
+		method.setAccessible(true);
+		return method;
 	}
 }
