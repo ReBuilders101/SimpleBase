@@ -4,19 +4,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 
 import lb.simplebase.core.Framework;
 import lb.simplebase.core.FrameworkStateException;
 import lb.simplebase.core.InvalidSceneException;
 import lb.simplebase.core.Utils;
+import lb.simplebase.reflect.FixedSizeObject;
+import lb.simplebase.reflect.OffHeapArray;
+import lb.simplebase.reflect.UnsafeUtils;
 import lb.simplebase.scene.ColorDemoScene;
 import lb.simplebase.scene.ImageScene;
 
 /**
- * @version 1.0
- * @author LB
  * The main class used to test this program
  */
 public class MainTestClass {
@@ -41,9 +41,18 @@ public class MainTestClass {
 			System.out.println(Integer.toBinaryString(data2));
 			System.out.println(Integer.toBinaryString((byte) data2));
 			
+			OffHeapArray<Integer> intArray = UnsafeUtils.createOffHeapArray(50, FixedSizeObject.INTEGER);
+			intArray.set(30, 26);
+			System.out.println(intArray.get(30));
+			intArray.freeMemory();
+			
 		}catch(InvalidSceneException | FrameworkStateException | IOException e){
 			Framework.getFramework().exitFatal(true, e);
 		}
 	}
 
+	void test() throws CloneNotSupportedException {
+		clone();
+	}
+	
 }

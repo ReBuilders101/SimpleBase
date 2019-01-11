@@ -117,6 +117,7 @@ public final class ReflectionUtils {
 	 * not in a superclass of this class. The Field may have any access modifier.<br>
 	 * If any exception occurs while getting the value of the field, <code>null</code> is returned.<br>
 	 * Use {@link #getDeclaredField(Class, String, Object, Class)} if you want the result to be casted to the field type.
+	 * @param <C> The type of the class and the instance
 	 * @param clazz The class that contains the field
 	 * @param fieldName The name of the field
 	 * @param object The instance of the class for which the value should be read
@@ -341,6 +342,7 @@ public final class ReflectionUtils {
 	 * @param <T> The return type of the executed method, and of this method
 	 * @param clazz The class that contains the static method
 	 * @param methodName The name of the method
+	 * @param returnType The type that is returned by the executed method
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return The return value of the method call
 	 */
