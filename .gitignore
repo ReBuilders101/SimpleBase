@@ -24,3 +24,6 @@ hs_err_pid*
 
 # Javadoc
 /doc/
+
+# The test class
+/src/lb/simplebase/MainTestClass.java
