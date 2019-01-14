@@ -3,6 +3,8 @@ package lb.simplebase.net;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A {@link PacketReceiver} that processes received {@link Packet}s in another thread.<br>
@@ -14,6 +16,8 @@ public class PacketThreadReceiver implements PacketReceiver{
 	 * The {@link ThreadGroup} that contains all threads used to process packets with a {@link PacketThreadReceiver}
 	 */
 	public static final ThreadGroup RECEIVER_THREAD_GROUP = new ThreadGroup("Packet-Processing");
+	
+	private ExecutorService packetHandlerExecutor;
 	
 	private static volatile int ID = 0;
 	
@@ -75,10 +79,11 @@ public class PacketThreadReceiver implements PacketReceiver{
 		overflowHandler = overflowReceiver;
 		id = ID++; //Set Id and increment
 		//setup thread
-		if(specialThreadName == null) specialThreadName = "PacketThreadReceiver";
-		processingThread.setName(specialThreadName + "-" + id + "-Processing");
-		processingThread.setDaemon(true);
-		processingThread.start();
+//		if(specialThreadName == null) specialThreadName = "PacketThreadReceiver";
+//		processingThread.setName(specialThreadName + "-" + id + "-Processing");
+//		processingThread.setDaemon(true);
+//		processingThread.start();
+		packetHandlerExecutor = Executors.newSingleThreadExecutor();
 	}
 	
 	/**
