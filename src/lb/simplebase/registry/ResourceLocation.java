@@ -1,13 +1,13 @@
 package lb.simplebase.registry;
 
-public interface IResourceLocation extends Comparable<IResourceLocation> {
+public interface ResourceLocation extends Comparable<ResourceLocation> {
 	
 	public String asString();
-	public boolean isEqual(IResourceLocation location);
+	public boolean isEqual(ResourceLocation location);
 	
-	public static final IResourceLocation DEFAULT = new StringLocation("DEFAULT"); 
+	public static final ResourceLocation DEFAULT = new StringLocation("DEFAULT"); 
 	
-	public static class StringLocation implements IResourceLocation {
+	public static class StringLocation implements ResourceLocation {
 
 		private String location;
 		
@@ -16,7 +16,7 @@ public interface IResourceLocation extends Comparable<IResourceLocation> {
 		}
 		
 		@Override
-		public int compareTo(IResourceLocation paramT) {
+		public int compareTo(ResourceLocation paramT) {
 			return this.asString().compareTo(paramT.asString());
 		}
 
@@ -26,7 +26,7 @@ public interface IResourceLocation extends Comparable<IResourceLocation> {
 		}
 
 		@Override
-		public boolean isEqual(IResourceLocation location) {
+		public boolean isEqual(ResourceLocation location) {
 			return location.asString().equals(asString());
 		}
 	}

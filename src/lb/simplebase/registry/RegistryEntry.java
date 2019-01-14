@@ -1,28 +1,28 @@
 package lb.simplebase.registry;
 
-public interface IRegistryEntry {
+public interface RegistryEntry {
 
-	public boolean setRegistryName(IResourceLocation location);
-	public IResourceLocation getRegistryName();
+	public boolean setRegistryName(ResourceLocation location);
+	public ResourceLocation getRegistryName();
 	public boolean hasRegistryName();
 	
 	
-	public static abstract class RegistryEntry implements IRegistryEntry{
+	public static abstract class RegistryEntryImpl implements RegistryEntry{
 		
-		private IResourceLocation location;
+		private ResourceLocation location;
 		private boolean hasName;
 		
-		protected RegistryEntry() {
+		protected RegistryEntryImpl() {
 			this.hasName = false;
 		}
 		
-		protected RegistryEntry(IResourceLocation location) {
+		protected RegistryEntryImpl(ResourceLocation location) {
 			this.location = location;
 			this.hasName = true;
 		}
 		
 		@Override
-		public boolean setRegistryName(IResourceLocation location) {
+		public boolean setRegistryName(ResourceLocation location) {
 			if(hasName) {
 				return false;
 			} else {
@@ -33,7 +33,7 @@ public interface IRegistryEntry {
 		}
 
 		@Override
-		public IResourceLocation getRegistryName() {
+		public ResourceLocation getRegistryName() {
 			return location;
 		}
 
