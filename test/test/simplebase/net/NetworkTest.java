@@ -38,7 +38,7 @@ class NetworkTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		serverManager = new NetworkManagerServer(this::getPacket, server, System.out::println);
+		serverManager = new NetworkManagerServer(this::getPacket, server);
 		clientManager = new NetworkManagerClient(this::getPacket, clientFromClient, server);
 	}
 

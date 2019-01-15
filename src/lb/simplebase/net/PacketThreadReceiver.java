@@ -1,8 +1,10 @@
 package lb.simplebase.net;
 
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A {@link PacketReceiver} that processes received {@link Packet}s in another thread.<br>
@@ -14,71 +16,28 @@ public class PacketThreadReceiver implements PacketReceiver{
 	 * The {@link ThreadGroup} that contains all threads used to process packets with a {@link PacketThreadReceiver}
 	 */
 	public static final ThreadGroup RECEIVER_THREAD_GROUP = new ThreadGroup("Packet-Processing");
+	public static final ThreadFactory RECEIVER_THREAD_FACTORY = new GroupThreadFactory(RECEIVER_THREAD_GROUP, "Packet-Processing-Executor-"); 
 	
-	private static volatile int ID = 0;
-	
-	private final Thread processingThread;
-	private final BlockingQueue<PacketInformation> packetsToProcess;
+	private final ExecutorService packetHandlerExecutor;
 	private final PacketReceiver receiver;
-	private final PacketReceiver overflowHandler;
-	
-	private final int id;
-	private volatile boolean stopFlag;
+	private boolean stopFlag;
+	private final boolean singleThread; 
 	
 	/**
 	 * Creates a new {@link PacketThreadReceiver} with an overflow limit of 100 and an empty overflow handler.
 	 * @param threadReceiver The {@link PacketReceiver} that will be called on the processing thread
+	 * @param singleThread Whether the used {@link ExecutorService} should use only one thread or a dynamic amount
 	 */
-	public PacketThreadReceiver(PacketReceiver threadReceiver) {
-		this(threadReceiver, 100, PacketReceiver.createEmptyReceiver());
-	}
-	
-	/**
-	 * Creates a new {@link PacketThreadReceiver} with an empty overflow handler.
-	 * @param threadReceiver The {@link PacketReceiver} that will be called on the processing thread
-	 * @param overflowLimit The capacity of the underlying queue, this means the amount of packets that can be waiting for processing
-	 * before packets are handled by the overflow receiver
-	 */
-	public PacketThreadReceiver(PacketReceiver threadReceiver, int overflowLimit) {
-		this(threadReceiver, overflowLimit, PacketReceiver.createEmptyReceiver());
-	}
-	
-	/**
-	 * Creates a new {@link PacketThreadReceiver} with an overflow limit of 100.
-	 * @param threadReceiver The {@link PacketReceiver} that will be called on the processing thread
-	 * @param overflowReceiver The {@link PacketReceiver} that will receive packets in case of an overflow.
-	 * This receiver <b>not</b> will receive the packets on a separate thread and should mostly used for
-	 * logging the overflow
-	 */
-	public PacketThreadReceiver(PacketReceiver threadReceiver, PacketReceiver overflowReceiver) {
-		this(threadReceiver, 100, overflowReceiver);
-	}
-	
-	/**
-	 * Creates a new {@link PacketThreadReceiver}.
-	 * @param threadReceiver The {@link PacketReceiver} that will be called on the processing thread
-	 * @param overflowLimit The capacity of the underlying queue, this means the amount of packets that can be waiting for processing
-	 * before packets are handled by the overflow receiver
-	 * @param overflowReceiver The {@link PacketReceiver} that will receive packets in case of an overflow.
-	 * This receiver <b>not</b> will receive the packets on a separate thread and should mostly used for
-	 * logging the overflow
-	 */
-	public PacketThreadReceiver(PacketReceiver threadReceiver, int overflowLimit, PacketReceiver overflowReceiver) {
-		this(threadReceiver, overflowLimit, overflowReceiver, null);
-	}
-	
-	protected PacketThreadReceiver(PacketReceiver threadReceiver, int overflowLimit, PacketReceiver overflowReceiver, String specialThreadName) {
-		processingThread = new Thread(RECEIVER_THREAD_GROUP, this::threadRunnable);
-		packetsToProcess = new ArrayBlockingQueue<>(overflowLimit);
-		receiver = threadReceiver;
-		stopFlag = false;
-		overflowHandler = overflowReceiver;
-		id = ID++; //Set Id and increment
-		//setup thread
-		if(specialThreadName == null) specialThreadName = "PacketThreadReceiver";
-		processingThread.setName(specialThreadName + "-" + id + "-Processing");
-		processingThread.setDaemon(true);
-		processingThread.start();
+	public PacketThreadReceiver(PacketReceiver threadReceiver, boolean singleThread) {
+		this.receiver = threadReceiver;
+		this.stopFlag = false;
+		this.singleThread = singleThread;
+		
+		if(singleThread) {
+			this.packetHandlerExecutor = Executors.newSingleThreadExecutor(RECEIVER_THREAD_FACTORY);
+		} else {
+			this.packetHandlerExecutor = Executors.newCachedThreadPool(RECEIVER_THREAD_FACTORY);
+		}
 	}
 	
 	/**
@@ -91,58 +50,37 @@ public class PacketThreadReceiver implements PacketReceiver{
 	@Override
 	public void processPacket(Packet received, TargetIdentifier source) {
 		if(stopFlag) return; //if stopped, don't even add new elements
-		PacketInformation info = new PacketInformation(received, source);
-		if(!packetsToProcess.offer(info)) { //put is blocking, so offer
-			overflowHandler.processPacket(received, source);
-		}
-	}
-
-	/**
-	 * The method that is executed in the processing thread
-	 */
-	private void threadRunnable(){
-		try {
-			while(!stopFlag) { //Just repeat taking packets
-				PacketInformation next = packetsToProcess.take();
-				receiver.accept(next.packet, next.source);
-			}
-		} catch (InterruptedException e) { //Someone wants this thread to terminate, so we will do so
-			Thread.currentThread().interrupt(); //Restore flag
-		} //Method then returns, the thread ends
-		stopFlag = true; //Before terminating, also set the stop flag
+		packetHandlerExecutor.execute(() -> receiver.processPacket(received, source)); //Submit a new task to the executorservice
 	}
 	
 	/**
-	 * The thread in which the {@link Packet}s are processed. Every instance of {@link PacketThreadReceiver} has
-	 * its own processing thread. The processing thread is a daemon {@link Thread}, which means it will not prevent the program
-	 * from exiting even if this thread is still running.<br>
-	 * If the processing thread should be stopped, the method {@link #stopProcessingThread()} should be used instead of using the
-	 * returned {@link Thread} object.
-	 * @return The processing thread
+	 * Stops the processing {@link ExecutorService}. This means that no new packets will be accepted, but the packets that
+	 * were already submitted will still be processed.
+	 * @see ExecutorService#shutdown()
 	 */
-	public Thread getProcessingThread() {
-		return processingThread;
-	}
-	
-	/**
-	 * Stops the processing thread. Packets in the queue will not be processed, and newly received packets will not be
-	 * added to the queue.
-	 * @return The remaining {@link Queue} of packets that could not be processed
-	 * @see #getProcessingThread()
-	 */
-	public Queue<PacketInformation> stopProcessingThread() {
+	public void stopProcessingExecutor() {
 		stopFlag = true;
-		return packetsToProcess;
+		packetHandlerExecutor.shutdown();
 	}
 	
 	/**
-	 * Whether the procesing thread has stopped processing packets from the queue.<br>
+	 * Stops the processing {@link ExecutorService}. Packet processing tasks that have already been submitted to the {@link ExecutorService}#
+	 * will not be processed but returned.
+	 * @return The list of unprocessed packet tasks.
+	 * @see ExecutorService#shutdownNow()
+	 */
+	public List<Runnable> forceStopProcessingExecutor() {
+		stopFlag = true;
+		return packetHandlerExecutor.shutdownNow();
+	}
+	
+	/**
+	 * Whether the procesing {@link ExecutorService} has stopped accepting new processing tasks.<br>
 	 * If <code>true</code>, all packets sent to this {@link PacketThreadReceiver} will not be processed at all.
-	 * @return Whether the processing thread is stopped
-	 * @see #getProcessingThread()
+	 * @return Whether the processing executor is stopped
 	 */
 	public boolean isProcessingThreadStopped() {
-		return stopFlag || !processingThread.isAlive();
+		return stopFlag || packetHandlerExecutor.isShutdown() || packetHandlerExecutor.isTerminated();
 	}
 	
 	/**
@@ -154,61 +92,37 @@ public class PacketThreadReceiver implements PacketReceiver{
 	}
 	
 	/**
-	 * The {@link PacketReceiver} that will receive overflowing packets on the 'normal' thread
-	 * (The same thread that this {@link PacketThreadReceiver} received the packets on).
-	 * @return The packet overflow receiver
+	 * Whether the {@link ExecutorService} uses a single thread or a dynamic amount.
+	 * If only a single thread is used, it is not guaranteed that the receiving thread will be the same thread.
+	 * There will be only one thread at a time that processes {@link Packet}s, but if a thread fails with an uncaught
+	 * exception, a new thread may take its place.
+	 * @return Whether the {@link ExecutorService} uses a single thread or a dynamic amount
 	 */
-	public PacketReceiver getOverflowReceiver() {
-		return overflowHandler;
+	public boolean hasSingleThread() {
+		return singleThread;
 	}
 	
 	/**
-	 * The amount of packets that have been received by this {@link PacketThreadReceiver}, but not yet processed on the processing thread.
-	 * If this number exceeds the overflow limit, the {@link Packet}s are sent to the overflow receiver instead.
-	 * @return The amount of packets waiting to be processed
-	 * @see #getProcessingThreadReceiver()
-	 * @see #getOverflowReceiver()
+	 * The {@link ThreadFactory} that creates new threads for a threadGroup
 	 */
-	public int getWaitingPacketsCount() {
-		return packetsToProcess.size();
-	}
-	
-	/**
-	 * The id is unique to this instance and is used in the name of the processing thread.
-	 * @return The id of this {@link PacketThreadReceiver} instance
-	 */
-	public int getId() {
-		return id;
-	}
-	
-	/**
-	 * Utility class that packs information about a {@link Packet} and its source ({@link TargetIdentifier}) into a single
-	 * object that can be used in collections.
-	 */
-	public static class PacketInformation {
+	private static class GroupThreadFactory implements ThreadFactory {
 		
-		private final Packet packet;
-		private final TargetIdentifier source;
+		private final AtomicInteger ID = new AtomicInteger(0);
 		
-		private PacketInformation(Packet packet, TargetIdentifier source) {
-			this.packet = packet;
-			this.source = source;
+		private final ThreadGroup group;
+		private final String namePrefix;
+		
+		private GroupThreadFactory(ThreadGroup group, String namePrefix) {
+			this.group = group;
+			this.namePrefix = namePrefix;
 		}
 		
-		/**
-		 * The {@link Packet} that was sent form the source ({@link #getSource()}).
-		 * @return The {@link Packet}
-		 */
-		public Packet getPacket() {
-			return packet;
-		}
-		
-		/**
-		 * The {@link TargetIdentifier} of the sorce that the {@link Packet} ({@link #getPacket()}) was sent from.
-		 * @return The {@link TargetIdentifier} of the source
-		 */
-		public TargetIdentifier getSource() {
-			return source;
+		@Override
+		public Thread newThread(Runnable paramRunnable) {
+			int id = ID.getAndIncrement();
+			String name = namePrefix + id;
+			Thread thread = new Thread(group, paramRunnable, name);
+			return thread;
 		}
 	}
 	

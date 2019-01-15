@@ -16,8 +16,8 @@ public abstract class NetworkManager extends PacketThreadReceiver implements Pac
 	
 	private Set<PacketIdMapping> mappings;
 	
-	protected NetworkManager(PacketReceiver threadReceiver, TargetIdentifier localId) {
-		super(threadReceiver, 500, (r, s) -> System.err.println("Overflow!"), "NetworkManager"); //TODO change sysout to other log //Increase overflow, because multiple packet sources
+	protected NetworkManager(PacketReceiver threadReceiver, TargetIdentifier localId, boolean singleThread) {
+		super(threadReceiver, singleThread); //only one thread
 		local = localId;
 		mappings = new HashSet<>();
 	}
