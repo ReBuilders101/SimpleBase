@@ -8,11 +8,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 /**
  * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link NetworkConnection}s to clients.
- * All {@link Packet}s that are received are processed on one thread, which is available through {@link #getProcessingThread()}.
+ * All {@link Packet}s that are received are processed with an {@link ExecutorService}.
  */
 @ServerSide
 public class NetworkManagerServer extends NetworkManager{

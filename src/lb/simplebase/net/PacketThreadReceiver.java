@@ -1,6 +1,6 @@
 package lb.simplebase.net;
 
-import java.util.Queue;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -54,10 +54,9 @@ public class PacketThreadReceiver implements PacketReceiver{
 	}
 	
 	/**
-	 * Stops the processing thread. Packets in the queue will not be processed, and newly received packets will not be
-	 * added to the queue.
-	 * @return The remaining {@link Queue} of packets that could not be processed
-	 * @see #getProcessingThread()
+	 * Stops the processing {@link ExecutorService}. This means that no new packets will be accepted, but the packets that
+	 * were already submitted will still be processed.
+	 * @see ExecutorService#shutdown()
 	 */
 	public void stopProcessingExecutor() {
 		stopFlag = true;
@@ -65,10 +64,20 @@ public class PacketThreadReceiver implements PacketReceiver{
 	}
 	
 	/**
-	 * Whether the procesing thread has stopped processing packets from the queue.<br>
+	 * Stops the processing {@link ExecutorService}. Packet processing tasks that have already been submitted to the {@link ExecutorService}#
+	 * will not be processed but returned.
+	 * @return The list of unprocessed packet tasks.
+	 * @see ExecutorService#shutdownNow()
+	 */
+	public List<Runnable> forceStopProcessingExecutor() {
+		stopFlag = true;
+		return packetHandlerExecutor.shutdownNow();
+	}
+	
+	/**
+	 * Whether the procesing {@link ExecutorService} has stopped accepting new processing tasks.<br>
 	 * If <code>true</code>, all packets sent to this {@link PacketThreadReceiver} will not be processed at all.
-	 * @return Whether the processing thread is stopped
-	 * @see #getProcessingThread()
+	 * @return Whether the processing executor is stopped
 	 */
 	public boolean isProcessingThreadStopped() {
 		return stopFlag || packetHandlerExecutor.isShutdown() || packetHandlerExecutor.isTerminated();
@@ -83,14 +92,6 @@ public class PacketThreadReceiver implements PacketReceiver{
 	}
 	
 	/**
-	 * The {@link ExecutorService} that is used to process incoming packets on a different thread.
-	 * @return The {@link ExecutorService} that handles packets
-	 */
-	public ExecutorService getProcessingExecutor() {
-		return packetHandlerExecutor;
-	}
-	
-	/**
 	 * Whether the {@link ExecutorService} uses a single thread or a dynamic amount.
 	 * If only a single thread is used, it is not guaranteed that the receiving thread will be the same thread.
 	 * There will be only one thread at a time that processes {@link Packet}s, but if a thread fails with an uncaught
@@ -99,38 +100,6 @@ public class PacketThreadReceiver implements PacketReceiver{
 	 */
 	public boolean hasSingleThread() {
 		return singleThread;
-	}
-	
-	/**
-	 * Utility class that packs information about a {@link Packet} and its source ({@link TargetIdentifier}) into a single
-	 * object that can be used in collections.
-	 */
-	@Deprecated
-	public static class PacketInformation {
-		
-		private final Packet packet;
-		private final TargetIdentifier source;
-		
-		private PacketInformation(Packet packet, TargetIdentifier source) {
-			this.packet = packet;
-			this.source = source;
-		}
-		
-		/**
-		 * The {@link Packet} that was sent form the source ({@link #getSource()}).
-		 * @return The {@link Packet}
-		 */
-		public Packet getPacket() {
-			return packet;
-		}
-		
-		/**
-		 * The {@link TargetIdentifier} of the sorce that the {@link Packet} ({@link #getPacket()}) was sent from.
-		 * @return The {@link TargetIdentifier} of the source
-		 */
-		public TargetIdentifier getSource() {
-			return source;
-		}
 	}
 	
 	/**
