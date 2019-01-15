@@ -65,9 +65,7 @@ public class EventManager {
 	public <T> boolean fireEventAsync(Class<T> eventClass, T data) {
 		Event<T> event = (Event<T>) events.get(eventClass); //Safe cast, type parameter of key and value are always the same
 		if(event == null) return false;
-		asyncFire.submit(() -> {
-			event.fire(data);
-		});
+		asyncFire.execute(() -> event.fire(data));
 		return true;
 	}
 	
