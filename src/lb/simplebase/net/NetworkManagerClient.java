@@ -17,7 +17,7 @@ public class NetworkManagerClient extends NetworkManager{
 	 * @param serverId The {@link TargetIdentifier} of the server that the client should connect to
 	 */
 	public NetworkManagerClient(PacketReceiver threadReceiver, TargetIdentifier localId, TargetIdentifier serverId) {
-		super(threadReceiver, localId);
+		super(threadReceiver, localId, true);
 		this.serverId = serverId;
 		serverConnection = NetworkConnection.createConnection(localId, serverId, this);
 	}

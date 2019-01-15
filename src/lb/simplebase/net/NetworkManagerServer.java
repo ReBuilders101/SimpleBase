@@ -34,14 +34,16 @@ public class NetworkManagerServer extends NetworkManager{
 	/**
 	 * Creates a new {@link NetworkManagerServer}. The created instance will not contain any connections, but it will immediately start listening
 	 * for incoming connections (and accept them).
+	 * If the <i>localId</i> is a local-only implementation ({@link TargetIdentifier#isLocalOnly()}), no server socket for network connections will be created.
 	 * @param threadReceiver The {@link PacketReceiver} that will receive incoming {@link Packet}s from all clients on a separate {@link Thread}
 	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link NetworkManagerServer}
 	 * @param connectionLimit The maximum amount of connections that this {@link NetworkManagerServer} can have
 	 * @param newConnectionHandler A callback that is called when a new connection has been created.
+	 * @param singleThread Whether the packets should only be processed on one thread at a time. See {@link PacketThreadReceiver#hasSingleThread()}.
 	 * @throws IOException When the {@link ServerSocket} used to listen for connections could not be created
 	 */
-	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit, Consumer<NetworkConnection> newConnectionHandler) throws IOException {
-		super(threadReceiver, localId);
+	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit, Consumer<NetworkConnection> newConnectionHandler, boolean singleThread) throws IOException {
+		super(threadReceiver, localId, singleThread);
 		this.connectionLimit = connectionLimit;
 		this.connections = Collections.synchronizedMap(new HashMap<>()); //Sync map, because it is accessed from two threads 
 		
@@ -68,41 +70,17 @@ public class NetworkManagerServer extends NetworkManager{
 	
 	/**
 	 * Creates a new {@link NetworkManagerServer}. The created instance will not contain any connections, but it will immediately start listening
-	 * for incoming connections (and accept them). The server will have a connection limit of {@link Integer#MAX_VALUE}, which
-	 * is effecitvely unlimited.
-	 * @param threadReceiver The {@link PacketReceiver} that will receive incoming {@link Packet}s from all clients on a separate {@link Thread}
-	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link NetworkManagerServer}
-	 * @param newConnectionHandler A callback that is called when a new connection has been created.
-	 * @throws IOException When the {@link ServerSocket} used to listen for connections could not be created
-	 */
-	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, Consumer<NetworkConnection> newConnectionHandler) throws IOException {
-		this(threadReceiver, localId, Integer.MAX_VALUE, newConnectionHandler);
-	}
-	
-	/**
-	 * Creates a new {@link NetworkManagerServer}. The created instance will not contain any connections, but it will immediately start listening
-	 * for incoming connections (and accept them). The server will have a connection limit of {@link Integer#MAX_VALUE}, which
-	 * is effecitvely unlimited. No callback for newly created connections will be registered.
+	 * for incoming connections (and accept them).
+	 * If the <i>localId</i> is a local-only implementation ({@link TargetIdentifier#isLocalOnly()}), no server socket for network connections will be created.
+	 * <br>This {@link NetworkManagerServer} will have unlimited connections, no handler for new connections, and will only use a single processing thread.
 	 * @param threadReceiver The {@link PacketReceiver} that will receive incoming {@link Packet}s from all clients on a separate {@link Thread}
 	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link NetworkManagerServer}
 	 * @throws IOException When the {@link ServerSocket} used to listen for connections could not be created
 	 */
 	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId) throws IOException {
-		this(threadReceiver, localId, Integer.MAX_VALUE, (c) -> {});
+		this(threadReceiver, localId, Integer.MAX_VALUE, (c) -> {}, true);
 	}
 	
-	/**
-	 * Creates a new {@link NetworkManagerServer}. The created instance will not contain any connections, but it will immediately start listening
-	 * for incoming connections (and accept them). No callback for newly created connections will be registered.
-	 * @param threadReceiver The {@link PacketReceiver} that will receive incoming {@link Packet}s from all clients on a separate {@link Thread}
-	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link NetworkManagerServer}
-	 * @param connectionLimit The maximum amount of connections that this {@link NetworkManagerServer} can have
-	 * @throws IOException When the {@link ServerSocket} used to listen for connections could not be created
-	 */
-	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit) throws IOException {
-		this(threadReceiver, localId, connectionLimit, (c) -> {});
-	}
-
 	/**
 	 * Sends a packet to the specified target. Acts exactly like {@link #sendPacketToClient(Packet, TargetIdentifier)}, 
 	 * but lacks the return value that indicates success or failure to send the {@link Packet}. Because of this, using 
