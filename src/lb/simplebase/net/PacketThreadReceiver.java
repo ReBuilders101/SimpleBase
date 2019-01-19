@@ -104,6 +104,7 @@ public class PacketThreadReceiver implements PacketReceiver{
 	
 	/**
 	 * The {@link ThreadFactory} that creates new threads for a threadGroup
+	 * The returned threads will be daemon threads
 	 */
 	private static class GroupThreadFactory implements ThreadFactory {
 		
@@ -122,6 +123,7 @@ public class PacketThreadReceiver implements PacketReceiver{
 			int id = ID.getAndIncrement();
 			String name = namePrefix + id;
 			Thread thread = new Thread(group, paramRunnable, name);
+			thread.setDaemon(true);
 			return thread;
 		}
 	}
