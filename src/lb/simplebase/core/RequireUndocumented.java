@@ -1,4 +1,4 @@
-package lb.simplebase.reflect;
+package lb.simplebase.core;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;

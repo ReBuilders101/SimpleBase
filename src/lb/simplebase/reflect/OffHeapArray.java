@@ -1,5 +1,7 @@
 package lb.simplebase.reflect;
 
+import lb.simplebase.core.RequireUndocumented;
+
 /**
  * Represents an array that can contain any primitive type. The array can have a maximum size of {@link Long#MAX_VALUE}.<br>
  * The array exists not on the heap memory, but in a specially allocated memory region. This region will not be checked
