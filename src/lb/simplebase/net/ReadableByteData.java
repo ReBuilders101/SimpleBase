@@ -23,6 +23,16 @@ public interface ReadableByteData extends ByteData{
 	}
 	
 	/**
+	 * Reads a single boolean value from the next byte. The result will be <code>false</code>
+	 * when the byte is <code>0</code>, and <code>true</code> when it is any other number
+	 * (only <code>1</code> should be possible if this method is used correctly).
+	 * @return The next byte as a <code>boolean</code> value
+	 */
+	public default boolean readBoolean() {
+		return readByte() != 0;
+	}
+	
+	/**
 	 * Reads one byte from the byte sequence.
 	 * @return The next <code>byte</code>
 	 */

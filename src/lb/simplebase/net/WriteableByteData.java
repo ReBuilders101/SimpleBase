@@ -25,6 +25,18 @@ public interface WriteableByteData extends ByteData{
 	}
 	
 	/**
+	 * Writes a single boolean value, represented by a <code>0</code> for <code>false</code>
+	 * and a <code>1</code> for <code>true</code>.<br>
+	 * This method uses a whole byte to save the boolean information. If more than one <code>boolean</code>
+	 * value has to be written, consider using {@link #writeFlags(boolean...)} to send up to 8 boolean values
+	 * with a single byte.
+	 * @param b The <code>boolean</code> value that should be written
+	 */
+	public default void writeBoolean(boolean b) {
+		writeByte(b ? (byte) 1 : (byte) 0); 
+	}
+	
+	/**
 	 * Writes a single <code>byte</code> value at the end of the current byte sequence. 
 	 * @param b The <code>byte</code> that should be written
 	 */
