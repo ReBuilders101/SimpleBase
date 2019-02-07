@@ -137,4 +137,22 @@ public interface WriteableByteData extends ByteData{
 		writeString(cs);
 	}
 	
+	/**
+	 * Writes a {@link CharSequence} to the end of the current byte sequence, by converting it to a {@link String} using 
+	 * {@link CharSequence#toString()} and the to a byte array using {@link String#getBytes()}.<br>
+	 * Additionally, the length of the {@link CharSequence} is written as an <code>byte</code> in front of the {@link CharSequence}'s
+	 * byte data.<br>
+	 * <b>If the CharSequence is longer than 255 chars, it will be cut at 255 chars.</b>
+	 * @param cs The {@link CharSequence} that should be written
+	 * @see #writeString(CharSequence)
+	 */
+	public default void writeShortStringWithLength(CharSequence cs) {
+		writeByte((byte) cs.length());
+		if(cs.length() > 255) {
+			writeString(cs.subSequence(0, 255));
+		} else {
+			writeString(cs);
+		}
+	}
+	
 }

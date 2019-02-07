@@ -165,4 +165,14 @@ public interface ReadableByteData extends ByteData{
 		return readString(readInt());
 	}
 	
+	/**
+	 * Reads an <code>byte</code> representing the length of the {@link String}, and then reads
+	 * this amount of bytes as the string data. The new {@link String} is created using {@link String#String(byte[])}
+	 * @return The created {@link String}
+	 * @see #readString(int)
+	 */
+	public default String readShortStringWithLength() {
+		return readString(readByte() & 0xFF);
+	}
+	
 }
