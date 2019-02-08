@@ -18,7 +18,9 @@ import sun.awt.image.ToolkitImage;
  * @version 1.2
  * @author LB
  * A collection of utility methods
+ * @deprecated This is mainly swing/AWT utils, and we use OpenGL
  */
+@Deprecated
 public final class Utils {
 	
 	/**
