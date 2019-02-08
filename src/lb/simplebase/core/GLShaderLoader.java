@@ -20,6 +20,9 @@ import static org.lwjgl.opengl.GL11.GL_FALSE;
  */
 public final class GLShaderLoader {
 	
+	public static final String DEFAULT_VERTEX_SHADER = "lb/simplebase/core/DefaultVertexShader.glsl";
+	public static final String DEFAULT_FRAGMENT_SHADER = "lb/simplebase/core/DefaultFragmentShader.glsl";
+	
 	private GLShaderLoader() {}
 	
 	/**
@@ -52,14 +55,23 @@ public final class GLShaderLoader {
 	}
 	
 	/**
-	 * Loads a shader from a file and attaches it to a program.
+	 * Links a program and adds a task to delete the program when the application is terminated.
+	 * @param program The program to link
+	 */
+	public static void slLinkProgram(int program) {
+		GL20.glLinkProgram(program);
+		GLFramework.gfAddTerminateTask(() -> GL20.glDeleteProgram(program));
+	}
+	
+	/**
+	 * Loads a shader from a file and attaches it to a program. The shaders will be automatically destroyed and detached when the
+	 * program is terminated
 	 * @param name The name of the shader, as a path that can be used in {@link #slReadFromFile(String)}.
 	 * @param programHandle The handle of the program that this shader should be attached to
 	 * @param shaderType The type of shader. This parameter can be one of the possible values for {@link GL20#glCreateShader(int)}
 	 * @throws RuntimeException If the shader could not be compiled
-	 * @return The handle of the created shader object
 	 */
-	public static int slAattachShader(String name, int programHandle, int shaderType) {
+	public static void slAttachShader(String name, int programHandle, int shaderType) {
 		final String shaderSource = slReadFromFile(name); //Read the shader source code
 		final int shaderHandle = glCreateShader(shaderType); //Create the shader of a type
 		glShaderSource(shaderHandle, shaderSource); //Set the source code for this handle
@@ -70,8 +82,23 @@ public final class GLShaderLoader {
 		}
 		//Attach the shader to the program
 		glAttachShader(programHandle, shaderHandle);
-		//return the handle, in case it is needed
-		return shaderHandle;
+		
+		GLFramework.gfAddTerminateTask(() -> GL20.glDetachShader(programHandle, shaderHandle));
+		GLFramework.gfAddTerminateTask(() -> GL20.glDeleteShader(shaderHandle)); 
 	}	
+	
+	/**
+	 * Creates a default shader program that uses {@link #DEFAULT_VERTEX_SHADER} and {@link #DEFAULT_FRAGMENT_SHADER} as shaders.<br>
+	 * Every call generates a new program.<br>
+	 * Program and shaders are automatically cleaned up.
+	 * @return A default shader program
+	 */
+	public static int slDefaultProgram() {
+		final int program = GL20.glCreateProgram();
+		slAttachShader(DEFAULT_VERTEX_SHADER, program, GL20.GL_VERTEX_SHADER);
+		slAttachShader(DEFAULT_FRAGMENT_SHADER, program, GL20.GL_FRAGMENT_SHADER);
+		slLinkProgram(program);
+		return program;
+	}
 	
 }

@@ -1,5 +1,8 @@
 package lb.simplebase.core;
 
+import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11C.glClear;
+
 import java.awt.Dimension;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,9 +41,14 @@ public final class GLFramework {
 	private static int swapInterval = 1;
 	
 	private static GLCapabilities capabilities;
+	private static GLProgram program;
+	
+	private static boolean shouldStop = false;
+	private static boolean useCloseFlag = true;
 	
 	///////////////FLAGS/////////////
-	private static boolean exitOnStop = false;
+	private static boolean exitOnStop = true;
+	private static boolean autoClear = true;
 	
 	/**
 	 * Initializes GLFW.
@@ -87,10 +95,21 @@ public final class GLFramework {
 		GLFW.glfwSwapInterval(swapInterval);
 		
 		state = FrameworkState.STARTED;
+		
+		gfMainLoopImpl(); //Starts the main program loop. Blocking.
 	}
 	
-	@AnyState
-	public static void gfStop() {
+	@RequireState(FrameworkState.INITIALIZED) //Actually also Uninitialized
+	public static void gfSetProgram(GLProgram program) {
+		if(state != FrameworkState.UNINITIALIZED && state != FrameworkState.INITIALIZED) {
+			logger.error("Cannot set program if framework has already been started");
+			return;
+		}
+		GLFramework.program = program;
+	}
+	
+	//Stop after loop has ended
+	private static void gfStopImpl() {
 		switch (state) {
 		case STARTED: 
 			GLFW.glfwDestroyWindow(windowId); //Destroy the window if one had been created
@@ -105,8 +124,56 @@ public final class GLFramework {
 	}
 	
 	@AnyState
+	public static void gfStop() {
+		if(state == FrameworkState.STARTED) {
+			shouldStop = true;
+		} else {
+			gfStopImpl();
+		}
+	}
+	
+	@AnyState
+	public static void gfEnableAutoClear() {
+		autoClear = true;
+	}
+	@AnyState
+	public static void gfDisableAutoClear() {
+		autoClear = false;
+	}
+	
+	private static boolean windowClose() {
+		return useCloseFlag && GLFW.glfwWindowShouldClose(windowId);
+	}
+	
+	private static void gfMainLoopImpl() {
+		if(program == null) {
+			logger.error("No program is set. Exiting.");
+			gfStopImpl();
+			return;
+		}
+		program.init();
+		
+		while(!program.stopProgram() && !shouldStop && !windowClose()) {
+			if(autoClear) glClear(GL_COLOR_BUFFER_BIT);
+			program.render();
+			program.update();
+			//Update window
+			GLFW.glfwPollEvents();
+			GLFW.glfwSwapBuffers(windowId);
+		}
+		
+		program.dispose();
+		gfStopImpl();
+	}
+	
+	@AnyState
 	public static FrameworkState gfGetState() {
 		return state;
+	}
+	
+	@AnyState
+	public static void gfIgnoreWindowCloseFlag() {
+		useCloseFlag = false;
 	}
 	
 	@RequireState(FrameworkState.STARTED)
@@ -125,13 +192,13 @@ public final class GLFramework {
 	}
 	
 	@AnyState
-	public static void gfSetLogOutput(OutputChannel out) {
-		logger = LogHelper.create(GLFramework.class, out);
+	public static void gfAddTerminateTask(Runnable task) {
+		disposeActions.add(task);
 	}
 	
 	@AnyState
-	public static void gfExitOnStop() {
-		exitOnStop = true;
+	public static void gfSetLogOutput(OutputChannel out) {
+		logger = LogHelper.create(GLFramework.class, out);
 	}
 	
 	@AnyState
