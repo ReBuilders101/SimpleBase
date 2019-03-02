@@ -175,4 +175,10 @@ public interface ReadableByteData extends ByteData{
 		return readString(readByte() & 0xFF);
 	}
 	
+	/**
+	 * Returns true only if another byte can be read from the data source.
+	 * @return Whether another byte can be read
+	 */
+	public boolean canRead();
+	
 }

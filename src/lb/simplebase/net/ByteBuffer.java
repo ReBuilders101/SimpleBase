@@ -62,7 +62,7 @@ public class ByteBuffer implements WriteableByteData, ReadableByteData{
 	 */
 	@Override
 	public byte readByte() {
-		if(readPointer >= writeData.size()) { //Test against write size, so in case of error array isn't copied
+		if(!canRead()) { //Test against write size, so in case of error array isn't copied
 			throw new IndexOutOfBoundsException("Read pointer: " + readPointer + ", byte data length: " + writeData.size());
 		} else {
 			updateRead();
@@ -136,6 +136,11 @@ public class ByteBuffer implements WriteableByteData, ReadableByteData{
 	public void write(ByteBuffer buf) {
 		final byte[] data = buf.getAsArray();
 		write(data);
+	}
+
+	@Override
+	public boolean canRead() {
+		return readPointer < writeData.size();
 	}
 	
 }

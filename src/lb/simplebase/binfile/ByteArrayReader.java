@@ -38,4 +38,9 @@ public class ByteArrayReader implements ReadableByteData{
 		this.index = index;
 	}
 
+	@Override
+	public boolean canRead() {
+		return index < data.length;
+	}
+
 }
