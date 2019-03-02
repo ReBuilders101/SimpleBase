@@ -74,7 +74,7 @@ public final class GLFramework {
 		}
 		final long loadTime = System.currentTimeMillis() - startTime;
 		if(loadTime > 15000) {
-			logger.warn("GLFW is taking %dms to initialize. Updating your graphics driver may accelerate initializastion.", loadTime);
+			logger.warn("GLFW is taking %dms to initialize. Updating your graphics driver may accelerate initialization.", loadTime);
 		}
 		state = FrameworkState.INITIALIZED;
 	}
@@ -111,14 +111,21 @@ public final class GLFramework {
 	//Stop after loop has ended
 	private static void gfStopImpl() {
 		switch (state) {
-		case STARTED: 
+		case STARTED:
+			disposeActions.forEach((r) -> r.run()); //Run all actions first
 			GLFW.glfwDestroyWindow(windowId); //Destroy the window if one had been created
-		case INITIALIZED:
 			GLFW.glfwTerminate(); //Teminate, if initialized
+			break;
+		case INITIALIZED:
+			disposeActions.forEach((r) -> r.run()); //Run all actions first
+			GLFW.glfwTerminate(); //Teminate, if initialized
+			break;
 		case UNINITIALIZED:
 			disposeActions.forEach((r) -> r.run()); //Run all actions always, except when state is ENDED, because then they have been run already
+			break;
 		case ENDED:
 			if(exitOnStop) System.exit(0); //If requested, exit the Application
+			break;
 		}
 		state = FrameworkState.ENDED;
 	}
