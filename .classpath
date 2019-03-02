@@ -4,5 +4,23 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/lwjgl/lwjgl.jar" sourcepath="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/lwjgl/lwjgl-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/lwjgl/lwjgl-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/glfw/lwjgl-glfw.jar" sourcepath="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/glfw/lwjgl-glfw-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/glfw/lwjgl-glfw-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/opengl/lwjgl-opengl.jar" sourcepath="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/opengl/lwjgl-opengl-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/opengl/lwjgl-opengl-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/opengl/lwjgl-opengl-natives-windows.jar"/>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/lwjgl/lwjgl-natives-windows.jar"/>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/glfw/lwjgl-glfw-natives-windows.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
