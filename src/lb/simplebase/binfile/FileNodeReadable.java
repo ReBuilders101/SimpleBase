@@ -9,14 +9,14 @@ import java.util.List;
  *
  * @param <T>
  */
-public class FileNode<T> implements Iterable<T>{
+public class FileNodeReadable<T> implements Iterable<T>{
 	
 	private List<T> data;
 	private FileNodeTemplate<T> template;
 	private String name;
 	
 	@SuppressWarnings("unchecked")
-	protected FileNode(List<T> data, FileNodeTemplate<?> template) {
+	protected FileNodeReadable(List<T> data, FileNodeTemplate<?> template) {
 		this.name = template.getName();
 		this.data = data;
 		this.template = (FileNodeTemplate<T>) template;

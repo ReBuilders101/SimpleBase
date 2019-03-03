@@ -6,8 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.binfile.FileData;
-import lb.simplebase.binfile.FileNode;
+import lb.simplebase.binfile.FileReadable;
+import lb.simplebase.binfile.FileNodeReadable;
 import lb.simplebase.binfile.FileNodeTemplate;
 import lb.simplebase.binfile.FileNodeWritable;
 import lb.simplebase.binfile.FileTemplate;
@@ -42,8 +42,8 @@ class FileTest {
 		efn.add(new Entity("abcd", 44));
 		byte[] fileData = fw.writeData();
 		
-		FileData fd = template.parseData(fileData);
-		FileNode<Vertex> node = (FileNode<Vertex>) fd.getFileNode(VertexFileNode.NAME);
+		FileReadable fd = template.parseData(fileData);
+		FileNodeReadable<Vertex> node = (FileNodeReadable<Vertex>) fd.getFileNode(VertexFileNode.NAME);
 		Vertex v1 = node.getElement(0);
 		assertEquals(23  , v1.x);
 		assertEquals(5   , v1.y);

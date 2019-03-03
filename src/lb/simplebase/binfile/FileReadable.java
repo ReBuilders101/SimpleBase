@@ -6,18 +6,18 @@ import java.util.Map;
 /**
  * Contains data read from a file through a template
  */
-public class FileData implements Iterable<FileNode<?>>{
+public class FileReadable implements Iterable<FileNodeReadable<?>>{
 
 	private FileTemplate template;
-	private Map<String, FileNode<?>> nodeElements;
+	private Map<String, FileNodeReadable<?>> nodeElements;
 	
-	protected FileData(byte[] headerData, Map<String, FileNode<?>> nodeElements, FileTemplate template) {
+	protected FileReadable(byte[] headerData, Map<String, FileNodeReadable<?>> nodeElements, FileTemplate template) {
 		this.nodeElements = nodeElements;
 		this.template = template;
 	}
 	
 	@Override
-	public Iterator<FileNode<?>> iterator() {
+	public Iterator<FileNodeReadable<?>> iterator() {
 		return nodeElements.values().iterator();
 	}
 	
@@ -25,14 +25,14 @@ public class FileData implements Iterable<FileNode<?>>{
 		return template;
 	}
 	
-	public FileNode<?> getFileNode(String name) {
+	public FileNodeReadable<?> getFileNode(String name) {
 		if(!containsFileNode(name)) return null;
 		return nodeElements.get(name);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> FileNode<T> getFileNode(String name, Class<T> elementType) {
-		return (FileNode<T>) getFileNode(name);
+	public <T> FileNodeReadable<T> getFileNode(String name, Class<T> elementType) {
+		return (FileNodeReadable<T>) getFileNode(name);
 	}
 	
 	public boolean containsFileNode(String name) {
@@ -42,7 +42,7 @@ public class FileData implements Iterable<FileNode<?>>{
 	
 	public FileWritable getAsWriteable() {
 		FileWritable fw = template.createWritable();
-		for(FileNode<?> node : this) {
+		for(FileNodeReadable<?> node : this) {
 			FileNodeWritable<?> fnw = fw.getFileNode(node.getName());
 			if(fnw != null) {
 				fnw.addAllUnchecked(node);

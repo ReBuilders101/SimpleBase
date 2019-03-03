@@ -37,7 +37,7 @@ public class FileTemplate implements Iterable<FileNodeTemplate<?>>{
 		return true;
 	}
 	
-	public FileData parseData(File dataSource) throws IOException {
+	public FileReadable parseData(File dataSource) throws IOException {
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(dataSource);
@@ -50,13 +50,13 @@ public class FileTemplate implements Iterable<FileNodeTemplate<?>>{
 		}
 	}
 	
-	public FileData parseData(byte[] data) {
+	public FileReadable parseData(byte[] data) {
 		ReadableByteData readable = new ByteArrayReader(data);
 		//Header
 		int headerLen = readable.readInt();
 		byte[] headerData = readable.read(headerLen);
 		//Nodes
-		Map<String, FileNode<?>> nodeDat = new HashMap<>();
+		Map<String, FileNodeReadable<?>> nodeDat = new HashMap<>();
 		int nodeCount = readable.readInt(); //Number of nodes
 		for(int i = 0; i < nodeCount; i++) {
 			String currentNodeName = readable.readShortStringWithLength();
@@ -72,12 +72,12 @@ public class FileTemplate implements Iterable<FileNodeTemplate<?>>{
 					currentNodeData.add(currentTemplate.parseElement(readable));
 				}
 				//After node was fully read
-				FileNode<?> currentNode = new FileNode<>(currentNodeData, currentTemplate);
+				FileNodeReadable<?> currentNode = new FileNodeReadable<>(currentNodeData, currentTemplate);
 				nodeDat.put(currentNodeName, currentNode);
 			}
 		}
 		//After all nodes
-		return new FileData(headerData, nodeDat, this);
+		return new FileReadable(headerData, nodeDat, this);
 	}
 	
 	public FileWritable createWritable() {
