@@ -13,9 +13,15 @@ import lb.simplebase.net.WriteableByteData;
 public abstract class FileNodeTemplate<T> {
 	
 	private Class<T> clazz;
+	private String name;
 	
-	protected FileNodeTemplate(Class<T> clazz) {
+	protected FileNodeTemplate(Class<T> clazz, String name) {
 		this.clazz = clazz;
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public Class<T> getInstanceClass() {
@@ -25,8 +31,13 @@ public abstract class FileNodeTemplate<T> {
 	public abstract T parseElement(ReadableByteData data);
 	public abstract void writeElement(WriteableByteData data, T element);
 
-	public static <T> FileNodeTemplate<T> createFromDelegates(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz) {
-		return new DelegateFileNodeTemplate<>(parser, writer, clazz);
+	@SuppressWarnings("unchecked")
+	public void writeElementUnchecked(ByteArrayWriter data, Object element) {
+		writeElement(data, (T) element);
+	}
+	
+	public static <T> FileNodeTemplate<T> createFromDelegates(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz, String name) {
+		return new DelegateFileNodeTemplate<>(parser, writer, clazz, name);
 	}
 	
 	private static class DelegateFileNodeTemplate<T> extends FileNodeTemplate<T>{
@@ -34,8 +45,8 @@ public abstract class FileNodeTemplate<T> {
 		private Function<ReadableByteData, T> parser;
 		private BiConsumer<WriteableByteData, T> writer;
 		
-		public DelegateFileNodeTemplate(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz) {
-			super(clazz);
+		public DelegateFileNodeTemplate(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz, String name) {
+			super(clazz, name);
 			this.parser = parser;
 			this.writer = writer;
 		}
@@ -51,5 +62,4 @@ public abstract class FileNodeTemplate<T> {
 		}
 		
 	}
-	
 }

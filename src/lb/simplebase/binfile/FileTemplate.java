@@ -1,7 +1,11 @@
 package lb.simplebase.binfile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,21 +14,40 @@ import lb.simplebase.net.ReadableByteData;
 /**
  * A template which contains rules for reading a file
  */
-public class FileTemplate {
+public class FileTemplate implements Iterable<FileNodeTemplate<?>>{
 
 	private Map<String, FileNodeTemplate<?>> nodes;
 	
-	public boolean addNode(String name, FileNodeTemplate<?> node) {
+	public FileTemplate() {
+		nodes = new HashMap<>();
+	}
+	
+	public boolean addNode(FileNodeTemplate<?> node) {
+		String name = node.getName();
 		if(name == null || name.isEmpty()) return false;
 		if(nodes.containsKey(name)) return false;
 		nodes.put(name, node);
 		return true;
 	}
 	
-	public boolean forceAddNode(String name, FileNodeTemplate<?> node) {
+	public boolean forceAddNode(FileNodeTemplate<?> node) {
+		String name = node.getName();
 		if(name == null || name.isEmpty()) return false;
 		nodes.put(name, node);
 		return true;
+	}
+	
+	public FileData parseData(File dataSource) throws IOException {
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(dataSource);
+			int length = (int) dataSource.length();
+			byte[] data = new byte[length];
+			fis.read(data);
+			return parseData(data);
+		}finally {
+			if(fis != null) fis.close();
+		}
 	}
 	
 	public FileData parseData(byte[] data) {
@@ -58,6 +81,11 @@ public class FileTemplate {
 	}
 	
 	public FileWriteable createWritable() {
-		return new FileWriteable(); //TODO
+		return new FileWriteable(this); //TODO
+	}
+
+	@Override
+	public Iterator<FileNodeTemplate<?>> iterator() {
+		return nodes.values().iterator();
 	}
 }
