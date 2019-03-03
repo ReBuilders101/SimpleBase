@@ -8,7 +8,7 @@ import java.util.Arrays;
  * All read methods throw {@link ArrayIndexOutOfBoundsException}s when the read pointer is larger than the size of the array.
  * <br><b>Not Threadsafe.</b>
  */
-public class ByteBuffer implements WriteableByteData, ReadableByteData{
+public class ByteBuffer implements WritableByteData, ReadableByteData{
 
 	private ByteArrayOutputStream writeData;
 	private byte[] readData;

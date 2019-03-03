@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import lb.simplebase.binfile.FileData;
 import lb.simplebase.binfile.FileNode;
 import lb.simplebase.binfile.FileNodeTemplate;
-import lb.simplebase.binfile.FileNodeWriteable;
+import lb.simplebase.binfile.FileNodeWritable;
 import lb.simplebase.binfile.FileTemplate;
-import lb.simplebase.binfile.FileWriteable;
+import lb.simplebase.binfile.FileWritable;
 import lb.simplebase.net.ReadableByteData;
-import lb.simplebase.net.WriteableByteData;
+import lb.simplebase.net.WritableByteData;
 
 class FileTest {
 
@@ -33,11 +33,11 @@ class FileTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void test() {
-		FileWriteable fw = template.createWritable();
-		FileNodeWriteable<Vertex> vfn = (FileNodeWriteable<Vertex>) fw.getFileNode(VertexFileNode.NAME);
+		FileWritable fw = template.createWritable();
+		FileNodeWritable<Vertex> vfn = (FileNodeWritable<Vertex>) fw.getFileNode(VertexFileNode.NAME);
 		vfn.add(new Vertex(23, 5, -678));
 		vfn.add(new Vertex(-3, 785, 12));
-		FileNodeWriteable<Entity> efn = (FileNodeWriteable<Entity>) fw.getFileNode(EntityFileNode.NAME);
+		FileNodeWritable<Entity> efn = (FileNodeWritable<Entity>) fw.getFileNode(EntityFileNode.NAME);
 		efn.add(new Entity("test", 23));
 		efn.add(new Entity("abcd", 44));
 		byte[] fileData = fw.writeData();
@@ -64,7 +64,7 @@ class FileTest {
 			return v;
 		}
 		@Override
-		public void writeElement(WriteableByteData data, Vertex element) {
+		public void writeElement(WritableByteData data, Vertex element) {
 			data.writeInt(element.x);
 			data.writeInt(element.y);
 			data.writeInt(element.z);
@@ -84,7 +84,7 @@ class FileTest {
 			return e;
 		}
 		@Override
-		public void writeElement(WriteableByteData data, Entity element) {
+		public void writeElement(WritableByteData data, Entity element) {
 			data.writeStringWithLength(element.name);
 			data.writeInt(element.health);
 		}

@@ -80,8 +80,8 @@ public class FileTemplate implements Iterable<FileNodeTemplate<?>>{
 		return new FileData(headerData, nodeDat, this);
 	}
 	
-	public FileWriteable createWritable() {
-		return new FileWriteable(this); //TODO
+	public FileWritable createWritable() {
+		return new FileWritable(this); //TODO
 	}
 
 	@Override

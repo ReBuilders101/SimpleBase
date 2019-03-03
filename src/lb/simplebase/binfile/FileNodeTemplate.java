@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import lb.simplebase.net.ReadableByteData;
-import lb.simplebase.net.WriteableByteData;
+import lb.simplebase.net.WritableByteData;
 
 /**
  * The {@link FileNodeTemplate} contains rules for parsing and writing objects from and to a file
@@ -29,23 +29,23 @@ public abstract class FileNodeTemplate<T> {
 	}
 	
 	public abstract T parseElement(ReadableByteData data);
-	public abstract void writeElement(WriteableByteData data, T element);
+	public abstract void writeElement(WritableByteData data, T element);
 
 	@SuppressWarnings("unchecked")
 	public void writeElementUnchecked(ByteArrayWriter data, Object element) {
 		writeElement(data, (T) element);
 	}
 	
-	public static <T> FileNodeTemplate<T> createFromDelegates(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz, String name) {
+	public static <T> FileNodeTemplate<T> createFromDelegates(Function<ReadableByteData, T> parser, BiConsumer<WritableByteData, T> writer, Class<T> clazz, String name) {
 		return new DelegateFileNodeTemplate<>(parser, writer, clazz, name);
 	}
 	
 	private static class DelegateFileNodeTemplate<T> extends FileNodeTemplate<T>{
 
 		private Function<ReadableByteData, T> parser;
-		private BiConsumer<WriteableByteData, T> writer;
+		private BiConsumer<WritableByteData, T> writer;
 		
-		public DelegateFileNodeTemplate(Function<ReadableByteData, T> parser, BiConsumer<WriteableByteData, T> writer, Class<T> clazz, String name) {
+		public DelegateFileNodeTemplate(Function<ReadableByteData, T> parser, BiConsumer<WritableByteData, T> writer, Class<T> clazz, String name) {
 			super(clazz, name);
 			this.parser = parser;
 			this.writer = writer;
@@ -57,7 +57,7 @@ public abstract class FileNodeTemplate<T> {
 		}
 
 		@Override
-		public void writeElement(WriteableByteData data, T element) {
+		public void writeElement(WritableByteData data, T element) {
 			writer.accept(data, element);
 		}
 		

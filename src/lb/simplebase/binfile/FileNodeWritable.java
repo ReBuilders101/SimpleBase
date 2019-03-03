@@ -5,14 +5,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class FileNodeWriteable<T> implements Iterable<T>{
+public class FileNodeWritable<T> implements Iterable<T>{
 	
 	private List<T> elements;
 	private FileNodeTemplate<T> template;
 	private String name;
 	
 	@SuppressWarnings("unchecked")
-	public FileNodeWriteable(FileNodeTemplate<?> template) {
+	public FileNodeWritable(FileNodeTemplate<?> template) {
 		this.name = template.getName();
 		this.elements = new ArrayList<>();
 		this.template = (FileNodeTemplate<T>) template;

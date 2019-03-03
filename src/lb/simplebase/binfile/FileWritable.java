@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class FileWriteable implements  Iterable<FileNodeWriteable<?>>{
+public class FileWritable implements  Iterable<FileNodeWritable<?>>{
 	
-	private Map<String, FileNodeWriteable<?>> nodeElements;
+	private Map<String, FileNodeWritable<?>> nodeElements;
 	private FileTemplate template;
 	private byte[] header;
 	
-	public FileWriteable(FileTemplate template) {
+	public FileWritable(FileTemplate template) {
 		this.template = template;
 		this.header = new byte[0];
 		this.nodeElements = new HashMap<>();
 		//Add empty nodes
 		for(FileNodeTemplate<?> node : template) {
-			FileNodeWriteable<?> newNode = new FileNodeWriteable<>(node);
+			FileNodeWritable<?> newNode = new FileNodeWritable<>(node);
 			this.nodeElements.put(node.getName(), newNode);
 		}
 	}
@@ -27,7 +27,7 @@ public class FileWriteable implements  Iterable<FileNodeWriteable<?>>{
 		return template;
 	}
 	
-	public Map<String, FileNodeWriteable<?>> getNodeMap() {
+	public Map<String, FileNodeWritable<?>> getNodeMap() {
 		return Collections.unmodifiableMap(nodeElements);
 	}
 	
@@ -40,14 +40,14 @@ public class FileWriteable implements  Iterable<FileNodeWriteable<?>>{
 		return nodeElements.containsKey(name);
 	}
 	
-	public FileNodeWriteable<?> getFileNode(String name) {
+	public FileNodeWritable<?> getFileNode(String name) {
 		if(!containsFileNode(name)) return null;
 		return nodeElements.get(name);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> FileNodeWriteable<T> getFileNode(String name, Class<T> elementType) {
-		return (FileNodeWriteable<T>) getFileNode(name);
+	public <T> FileNodeWritable<T> getFileNode(String name, Class<T> elementType) {
+		return (FileNodeWritable<T>) getFileNode(name);
 	}
 	
 	public byte[] writeData() {
@@ -58,7 +58,7 @@ public class FileWriteable implements  Iterable<FileNodeWriteable<?>>{
 		//Node count
 		baw.writeInt(nodeElements.size());
 		//Then nodes
-		for(FileNodeWriteable<?> node : this) {
+		for(FileNodeWritable<?> node : this) {
 			baw.writeShortStringWithLength(node.getName()); //Node name
 			baw.writeInt(node.getElements().size()); //Element count
 			//Need a sub-writer to get the size of the node
@@ -78,7 +78,7 @@ public class FileWriteable implements  Iterable<FileNodeWriteable<?>>{
 	}
 
 	@Override
-	public Iterator<FileNodeWriteable<?>> iterator() {
+	public Iterator<FileNodeWritable<?>> iterator() {
 		return nodeElements.values().iterator();
 	}
 	

@@ -4,7 +4,7 @@ package lb.simplebase.net;
  * This interface provides additional methods for reading primitives and strings directly. All methods
  * depend on the {@link #readByte()} method, which is defined by the implementation. by default,
  * data is encoded as Little Endian. Methods may be overridden by implementing classes, as long as compatibility is not broken.
- * <br>This interface is fully compatible to the data written by the {@link WriteableByteData} interface and all valid implementations.
+ * <br>This interface is fully compatible to the data written by the {@link WritableByteData} interface and all valid implementations.
  */
 public interface ReadableByteData extends ByteData{
 

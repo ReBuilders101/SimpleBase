@@ -6,7 +6,7 @@ package lb.simplebase.net;
  * data is encoded as Little Endian. Methods may be overridden by implementing classes, as long as compatibility is not broken.
  * <br>This interface is fully compatible to the data that should be read by the {@link ReadableByteData} interface and all valid implementations.
  */
-public interface WriteableByteData extends ByteData{
+public interface WritableByteData extends ByteData{
 
 	/**
 	 * Writes a maximum of 8 boolean values, encoded as a byte, to the end of the byte sequence.

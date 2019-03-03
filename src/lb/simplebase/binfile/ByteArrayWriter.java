@@ -2,9 +2,9 @@ package lb.simplebase.binfile;
 
 import java.io.ByteArrayOutputStream;
 
-import lb.simplebase.net.WriteableByteData;
+import lb.simplebase.net.WritableByteData;
 
-public class ByteArrayWriter implements WriteableByteData{
+public class ByteArrayWriter implements WritableByteData{
 
 	private ByteArrayOutputStream baos;
 	

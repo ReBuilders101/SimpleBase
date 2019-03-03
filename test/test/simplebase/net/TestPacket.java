@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import lb.simplebase.net.Packet;
 import lb.simplebase.net.ReadableByteData;
-import lb.simplebase.net.WriteableByteData;
+import lb.simplebase.net.WritableByteData;
 
 public class TestPacket implements Packet{
 
@@ -19,7 +19,7 @@ public class TestPacket implements Packet{
 	public TestPacket() {}
 	
 	@Override
-	public void writeData(WriteableByteData data) {
+	public void writeData(WritableByteData data) {
 		data.writeInt(length);
 		data.write(byteData);
 	}

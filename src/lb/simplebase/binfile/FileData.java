@@ -40,10 +40,10 @@ public class FileData implements Iterable<FileNode<?>>{
 		return nodeElements.containsKey(name);
 	}
 	
-	public FileWriteable getAsWriteable() {
-		FileWriteable fw = template.createWritable();
+	public FileWritable getAsWriteable() {
+		FileWritable fw = template.createWritable();
 		for(FileNode<?> node : this) {
-			FileNodeWriteable<?> fnw = fw.getFileNode(node.getName());
+			FileNodeWritable<?> fnw = fw.getFileNode(node.getName());
 			if(fnw != null) {
 				fnw.addAllUnchecked(node);
 			}
