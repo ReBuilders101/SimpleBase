@@ -1,4 +1,4 @@
-package lb.simplebase.core;
+package lb.simplebase.javacore;
 
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -18,10 +18,7 @@ import sun.awt.image.ToolkitImage;
  * @version 1.2
  * @author LB
  * A collection of utility methods
- * @deprecated This is mainly swing/AWT utils, and we use OpenGL. This is in a separate branch, because it is still useful
- * for other applications
  */
-@Deprecated
 public final class Utils {
 	
 	/**
