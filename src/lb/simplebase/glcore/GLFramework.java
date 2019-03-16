@@ -187,7 +187,7 @@ public final class GLFramework {
 	}
 	
 	@RequireState(FrameworkState.STARTED)
-	public static GLCapabilities getGLCapabilities() {
+	public static GLCapabilities gfGetGLCapabilities() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Capabilities only exist after the window has been created");
 			return null;
@@ -366,7 +366,7 @@ public final class GLFramework {
 	}
 	
 	@RequireState(FrameworkState.STARTED)
-	public static void enableStickyKeys() {
+	public static void gfEnableStickyKeys() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -374,7 +374,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_STICKY_KEYS, GL11.GL_TRUE);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void disableStickyKeys() {
+	public static void gfDisableStickyKeys() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -382,7 +382,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_STICKY_KEYS, GL11.GL_FALSE);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void enableStickyMouse() {
+	public static void gfEnableStickyMouse() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -390,7 +390,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_STICKY_MOUSE_BUTTONS, GL11.GL_TRUE);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void disableStickyMouse() {
+	public static void gfDisableStickyMouse() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -398,7 +398,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_STICKY_MOUSE_BUTTONS, GL11.GL_FALSE);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void showCursor() {
+	public static void gfShowCursor() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -406,7 +406,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void hideCursor() {
+	public static void gfHideCursor() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
@@ -414,7 +414,7 @@ public final class GLFramework {
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
 	}
 	@RequireState(FrameworkState.STARTED)
-	public static void grabCursor() {
+	public static void gfGrabCursor() {
 		if(state != FrameworkState.STARTED) {
 			logger.warn("Input preferences can only be set if the window has been created and not been destroyed");
 			return;
