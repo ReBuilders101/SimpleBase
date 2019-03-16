@@ -1,4 +1,4 @@
-package lb.simplebase.core;
+package lb.simplebase.glcore;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.CLASS;

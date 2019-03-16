@@ -1,4 +1,4 @@
-package lb.simplebase.core;
+package lb.simplebase.glcore;
 
 public interface GLProgram {
 	

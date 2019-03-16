@@ -30,20 +30,19 @@ class FileTest {
 	void tearDown() throws Exception {
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void test() {
 		FileWritable fw = template.createWritable();
-		FileNodeWritable<Vertex> vfn = (FileNodeWritable<Vertex>) fw.getFileNode(VertexFileNode.NAME);
+		FileNodeWritable<Vertex> vfn = fw.getFileNode(VertexFileNode.NAME, Vertex.class);
 		vfn.add(new Vertex(23, 5, -678));
 		vfn.add(new Vertex(-3, 785, 12));
-		FileNodeWritable<Entity> efn = (FileNodeWritable<Entity>) fw.getFileNode(EntityFileNode.NAME);
+		FileNodeWritable<Entity> efn = fw.getFileNode(EntityFileNode.NAME, Entity.class);
 		efn.add(new Entity("test", 23));
 		efn.add(new Entity("abcd", 44));
 		byte[] fileData = fw.writeData();
 		
 		FileReadable fd = template.parseData(fileData);
-		FileNodeReadable<Vertex> node = (FileNodeReadable<Vertex>) fd.getFileNode(VertexFileNode.NAME);
+		FileNodeReadable<Vertex> node = fd.getFileNode(VertexFileNode.NAME, Vertex.class);
 		Vertex v1 = node.getElement(0);
 		assertEquals(23  , v1.x);
 		assertEquals(5   , v1.y);

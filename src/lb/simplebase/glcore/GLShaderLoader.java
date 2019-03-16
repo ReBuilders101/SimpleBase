@@ -1,4 +1,4 @@
-package lb.simplebase.core;
+package lb.simplebase.glcore;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

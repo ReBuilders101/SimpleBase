@@ -1,6 +1,6 @@
 package lb.simplebase.reflect;
 
-import lb.simplebase.core.RequireUndocumented;
+import lb.simplebase.glcore.RequireUndocumented;
 import sun.misc.Unsafe;
 
 /**

@@ -1,4 +1,4 @@
-package lb.simplebase.core;
+package lb.simplebase.glcore;
 
 import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11C.glClear;
