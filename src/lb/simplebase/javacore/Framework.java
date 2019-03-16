@@ -17,10 +17,13 @@ import lb.simplebase.core.RequireState;
 
 public final class Framework {
 
+	public static final String DEFAULT_SCENE_NAME = "default";
+	
 	private Framework() {};
 	
 	private static FrameworkState state = FrameworkState.UNINITIALIZED;
 	private static boolean exitOnStop = true;
+	private static Scene currentScene;
 	
 	private static Map<String, Scene> scenes;
 	private static JFrame mainFrame;
@@ -32,6 +35,8 @@ public final class Framework {
 	
 	private static int fps;
 	private static int tps;
+	
+	private static long tick;
 	
 	private static Timer tickTimer;
 	private static Timer frameTimer;
@@ -64,7 +69,11 @@ public final class Framework {
 		//Set variables
 		fps = 60;
 		tps = 30;
+		tick = 0;
 		scenes = new HashMap<>();
+		//Add default states
+		Scene defaultScene = Scene.createEmpty(DEFAULT_SCENE_NAME);
+		scenes.put(DEFAULT_SCENE_NAME, defaultScene);
 		//Update state
 		state = FrameworkState.INITIALIZED;
 	}
@@ -95,6 +104,7 @@ public final class Framework {
 		mainFrame.setVisible(true);
 		smallFrame.pack();
 		smallFrame.setVisible(true);
+		tick = 0;
 		//Start timers
 		tickTimer.scheduleAtFixedRate(new TimerTask() {
 			
@@ -112,6 +122,8 @@ public final class Framework {
 				smallDcp.repaint();
 			}
 		}, 0, 1000 / fps);
+		//Set current scene
+		currentScene = scenes.get(DEFAULT_SCENE_NAME);
 		
 		state = FrameworkState.STARTED;
 	}
@@ -148,6 +160,33 @@ public final class Framework {
 		Framework.tps = tps;
 	}
 	
+	@RequireState(FrameworkState.INITIALIZED)
+	public static boolean addScene(Scene scene) {
+		if(getState() != FrameworkState.INITIALIZED) return false;
+		if(scene == null) return false;
+		String name = scene.getName();
+		if(name == null || name.isEmpty()) return false;
+		if(scenes.containsKey(name)) return false;
+		scenes.put(name, scene);
+		return true;
+	}
+	
+	@RequireState(FrameworkState.STARTED)
+	public static boolean setActiveScene(String name) {
+		if(getState() != FrameworkState.STARTED) return false;
+		if(name == null || name.isEmpty()) return false;
+		if(!scenes.containsKey(name)) return false;
+		Scene requested = scenes.get(name);
+		if(requested == null) return false;
+		currentScene = requested;
+		return true;
+	}
+	
+	@AnyState
+	public static long getCurrentTick() {
+		return tick;
+	}
+	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
 		
 	}
@@ -157,7 +196,8 @@ public final class Framework {
 	}
 	
 	private static void onUpdateTask() {
-		
+		currentScene.update(tick);
+		tick++; //Increment for every update
 	}
 	
 }
