@@ -45,11 +45,11 @@ public abstract class Scene {
 		return getPreviousScene() != null;
 	}
 	
+	public static Scene createEmpty(String title) {
+		return new EmptyScene(title);
+	}
+	
 	private static class EmptyScene extends Scene {
-
-		public static EmptyScene create(String title) {
-			return new EmptyScene(title);
-		}
 		
 		private EmptyScene(String uniqueName) {
 			super(uniqueName);
