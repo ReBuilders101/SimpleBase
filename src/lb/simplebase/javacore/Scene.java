@@ -1,6 +1,6 @@
 package lb.simplebase.javacore;
 
-import java.awt.Dimension;
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 public abstract class Scene {
@@ -15,7 +15,7 @@ public abstract class Scene {
 	
 	public abstract void update(long tick);
 	
-	public abstract void draw(Graphics2D g2d, Dimension drawSize);
+	public abstract void draw(Graphics2D g2d, int width, int height);
 	
 	public String getName() {
 		return name;
@@ -43,6 +43,27 @@ public abstract class Scene {
 	
 	public final boolean hasPreviousScene() {
 		return getPreviousScene() != null;
+	}
+	
+	private static class EmptyScene extends Scene {
+
+		public static EmptyScene create(String title) {
+			return new EmptyScene(title);
+		}
+		
+		private EmptyScene(String uniqueName) {
+			super(uniqueName);
+		}
+
+		@Override
+		public void update(long tick) {}
+
+		@Override
+		public void draw(Graphics2D g2d, int width, int height) {
+			g2d.setColor(Color.WHITE);
+			g2d.fillRect(0, 0, width, height);
+		}
+		
 	}
 	
 }

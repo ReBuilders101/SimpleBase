@@ -28,7 +28,7 @@ public class DrawCallbackPanel extends JPanel{
 		super.paintComponent(g);
 		g.clearRect(0, 0, getWidth(), getHeight());
 		if(g instanceof Graphics2D) {
-			callback.draw((Graphics2D) g, getSize());
+			callback.draw((Graphics2D) g, getWidth(), getHeight());
 		} else {
 			System.err.println("Panel Graphics object is not an instance of Graphics2D");
 		}

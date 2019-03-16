@@ -148,11 +148,11 @@ public final class Framework {
 		Framework.tps = tps;
 	}
 	
-	private static void onMainPanelDraw(Graphics2D g, Dimension size) {
+	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
 		
 	}
 	
-	private static void onSmallPanelDraw(Graphics2D g, Dimension size) {
+	private static void onSmallPanelDraw(Graphics2D g, int width, int height) {
 		
 	}
 	
