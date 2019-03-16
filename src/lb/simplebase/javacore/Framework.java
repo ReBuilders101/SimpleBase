@@ -1,8 +1,11 @@
 package lb.simplebase.javacore;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -48,14 +51,19 @@ public final class Framework {
 		//Create the Frames
 		//Main Frame first
 		mainFrame = new JFrame();
+		mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		mainDcp = new DrawCallbackPanel(Framework::onMainPanelDraw);
 		mainFrame.add(mainDcp);
 		//Then small frame
 		smallFrame = new JFrame();
+		smallFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		smallFrame.addWindowListener(new WindowListenerStopOnClose());
 		smallDcp = new DrawCallbackPanel(Framework::onSmallPanelDraw);
 		smallFrame.setLayout(new GridLayout(1, 2));
 		JPanel leftSide = new JPanel(new GridLayout(2, 1));
-		leftSide.add(smallDcp); //Add at top left
+		JPanel preview = new JGroupBox("Live Preview", new BorderLayout());
+		preview.add(smallDcp); //Add at top left
+		leftSide.add(preview);
 		JPanel generalOptions = new JGroupBox("General Options");
 		leftSide.add(generalOptions);
 		smallFrame.add(leftSide);
@@ -140,6 +148,7 @@ public final class Framework {
 		if(getState() != FrameworkState.INITIALIZED) return;
 		mainFrame.setUndecorated(active);
 		if(active) mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		if(active) smallFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 	
 	@AnyState
@@ -188,16 +197,35 @@ public final class Framework {
 	}
 	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
-		
+		if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onSmallPanelDraw(Graphics2D g, int width, int height) {
-		
+		if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onUpdateTask() {
-		currentScene.update(tick);
+		if(currentScene != null) currentScene.update(tick);
 		tick++; //Increment for every update
+	}
+	
+	private static class WindowListenerStopOnClose implements WindowListener {
+		@Override
+		public void windowOpened(WindowEvent e) {}
+		@Override
+		public void windowIconified(WindowEvent e) {}
+		@Override
+		public void windowDeiconified(WindowEvent e) {}
+		@Override
+		public void windowDeactivated(WindowEvent e) {}
+		@Override
+		public void windowClosed(WindowEvent e) {}
+		@Override
+		public void windowActivated(WindowEvent e) {}
+		@Override
+		public void windowClosing(WindowEvent e) {
+			stop();
+		}
 	}
 	
 }

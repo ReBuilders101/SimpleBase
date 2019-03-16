@@ -26,7 +26,6 @@ public class DrawCallbackPanel extends JPanel{
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.clearRect(0, 0, getWidth(), getHeight());
 		if(g instanceof Graphics2D) {
 			callback.draw((Graphics2D) g, getWidth(), getHeight());
 		} else {
