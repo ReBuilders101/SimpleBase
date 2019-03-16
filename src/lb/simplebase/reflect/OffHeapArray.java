@@ -1,6 +1,6 @@
 package lb.simplebase.reflect;
 
-import lb.simplebase.glcore.RequireUndocumented;
+import lb.simplebase.core.RequireUndocumented;
 
 /**
  * Represents an array that can contain any primitive type. The array can have a maximum size of {@link Long#MAX_VALUE}.<br>

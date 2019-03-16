@@ -1,6 +1,6 @@
 package lb.simplebase.function;
 
-import lb.simplebase.glcore.RequireUndocumented;
+import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.reflect.UnsafeUtils;
 
 @FunctionalInterface

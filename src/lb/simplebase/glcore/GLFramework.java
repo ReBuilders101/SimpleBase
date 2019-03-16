@@ -14,6 +14,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.system.MemoryUtil;
 
+import lb.simplebase.core.AnyState;
+import lb.simplebase.core.FrameworkState;
+import lb.simplebase.core.RequireState;
 import lb.simplebase.log.LogHelper;
 import lb.simplebase.log.Logger;
 import lb.simplebase.log.OutputChannel;

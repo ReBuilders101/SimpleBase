@@ -1,4 +1,4 @@
-package lb.simplebase.glcore;
+package lb.simplebase.core;
 
 public enum FrameworkState {
 	
