@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -36,13 +38,16 @@ public final class Framework {
 	private static DrawCallbackPanel smallDcp;
 	private static DrawCallbackPanel mainDcp;
 	
-	private static int fps;
+	private static BufferedImage canvas;
+	private static AffineTransform smallTransform;
+	private static Dimension oldMainSize;
+	private static Dimension oldSmallSize;
+	
 	private static int tps;
 	
 	private static long tick;
 	
 	private static Timer tickTimer;
-	private static Timer frameTimer;
 	
 	@RequireState(FrameworkState.UNINITIALIZED)
 	public static void init() {
@@ -72,10 +77,8 @@ public final class Framework {
 		
 		//Init timers
 		tickTimer = new Timer("TickTimerThread", true);
-		frameTimer = new Timer("FrameTimerThread", true);
 		//Tasks will be set in start()
 		//Set variables
-		fps = 60;
 		tps = 30;
 		tick = 0;
 		scenes = new HashMap<>();
@@ -93,7 +96,6 @@ public final class Framework {
 		case STARTED:
 			//stop timers
 			tickTimer.cancel();
-			frameTimer.cancel();
 		case INITIALIZED:
 			//Dispose frames
 			mainFrame.dispose();
@@ -107,6 +109,10 @@ public final class Framework {
 	@RequireState(FrameworkState.INITIALIZED)
 	public static void start() {
 		if(getState() != FrameworkState.INITIALIZED) return;
+		oldMainSize = new Dimension();
+		oldSmallSize = new Dimension();
+		smallTransform = new AffineTransform();
+		canvas = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		//Show frames
 		mainFrame.pack();
 		mainFrame.setVisible(true);
@@ -121,19 +127,25 @@ public final class Framework {
 				onUpdateTask();
 			}
 		}, 0, 1000 / tps);
-		
-		frameTimer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				mainDcp.repaint();
-				smallDcp.repaint();
-			}
-		}, 0, 1000 / fps);
 		//Set current scene
 		currentScene = scenes.get(DEFAULT_SCENE_NAME);
 		
 		state = FrameworkState.STARTED;
+	}
+	
+	private static void recalculateSizes() {
+		if(!smallDcp.getSize().equals(oldSmallSize)) {
+			if(!mainDcp.getSize().equals(oldMainSize)) {
+				System.out.println("new canvas");
+				canvas = new BufferedImage(mainDcp.getWidth(), mainDcp.getHeight(), BufferedImage.TYPE_INT_ARGB);
+				oldMainSize = mainDcp.getSize();
+			}
+			System.out.println("recalc transform");
+			final double sx = (double) smallDcp.getWidth()  / (double) mainDcp.getWidth();
+			final double sy = (double) smallDcp.getHeight() / (double) mainDcp.getHeight();
+			smallTransform = AffineTransform.getScaleInstance(sx, sy);
+			oldSmallSize = smallDcp.getSize();
+		}
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
@@ -144,11 +156,11 @@ public final class Framework {
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
-	public static void setBorderlessFullscreen(boolean active) {
+	public static void setBorderlessFullscreen() {
 		if(getState() != FrameworkState.INITIALIZED) return;
-		mainFrame.setUndecorated(active);
-		if(active) mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		if(active) smallFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		mainFrame.setUndecorated(true);
+		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		smallFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 	
 	@AnyState
@@ -159,10 +171,6 @@ public final class Framework {
 	@AnyState
 	public static void setExitOnStop(boolean eos) {
 		exitOnStop = eos;
-	}
-	
-	public static void setFPS(int fps) {
-		Framework.fps = fps;
 	}
 	
 	public static void setTPS(int tps) {
@@ -197,15 +205,26 @@ public final class Framework {
 	}
 	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
-		if(currentScene != null) currentScene.draw(g, width, height);
+		g.drawImage(canvas, 0, 0, null);
+		//if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onSmallPanelDraw(Graphics2D g, int width, int height) {
-		if(currentScene != null) currentScene.draw(g, width, height);
+		g.drawImage(canvas, smallTransform, null);
+		//if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onUpdateTask() {
-		if(currentScene != null) currentScene.update(tick);
+		//Draw first
+		if(currentScene != null) {
+			recalculateSizes();
+			Graphics2D draw = canvas.createGraphics();
+			currentScene.draw(draw, canvas.getWidth(), canvas.getHeight());
+			draw.dispose();
+			currentScene.update(tick);
+			mainDcp.repaint();
+			smallDcp.repaint();
+		}
 		tick++; //Increment for every update
 	}
 	
