@@ -109,6 +109,10 @@ public class Vector3D {
 		};
 	}
 	
+	public Vector3D negate() {
+		return new Vector3D(-x, -y, -z);
+	}
+	
 	
 	public static Vector3D of(double x, double y, double z) {
 		return new Vector3D(x, y, z);
@@ -135,5 +139,42 @@ public class Vector3D {
 	
 	public static Vector3D distance(double x1, double y1, double z1, double x2, double y2, double z2) {
 		return new Vector3D(x2 - x1, y2 - y1, z2 - z1);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Vector3D other = (Vector3D) obj;
+		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+			return false;
+		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+			return false;
+		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Vector3D [x=" + x + ", y=" + y + ", z=" + z + "]";
 	}
 }
