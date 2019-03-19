@@ -1,5 +1,6 @@
 package lb.simplebase.linalg;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 public class Matrix2D {
@@ -151,6 +152,10 @@ public class Matrix2D {
 		return new double[] {
 				m00, m01, m10, m11
 		};
+	}
+	
+	public AffineTransform getAffineTransform() {
+		return new AffineTransform(m00, m10, m01, m11, 0, 0);
 	}
 	
 	public static Matrix2D of(double topLeft, double topRight, double bottomLeft, double bottomRight) {
