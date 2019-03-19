@@ -133,6 +133,11 @@ public class Matrix2D {
 		return Vector2D.of(m10, m11);
 	}
 	
+	public double[] getAsArray() {
+		return new double[] {
+				m00, m01, m10, m11
+		};
+	}
 	
 	public static Matrix2D of(double topLeft, double topRight, double bottomLeft, double bottomRight) {
 		return new Matrix2D(topLeft, topRight, bottomLeft, bottomRight);
@@ -144,6 +149,21 @@ public class Matrix2D {
 	
 	public static Matrix2D ofCols(Vector2D col1, Vector2D col2) {
 		return new Matrix2D(col1.getX(), col2.getX(), col1.getY(), col2.getY());
+	}
+	
+	public static Matrix2D of(double[] values) {
+		if(values.length < 4) throw new ArrayIndexOutOfBoundsException("The array must have at least 4 elements");
+		return new Matrix2D(values[0], values[1], values[2], values[3]);
+	}
+	
+	public static Matrix2D of(float[] values) {
+		if(values.length < 4) throw new ArrayIndexOutOfBoundsException("The array must have at least 4 elements");
+		return new Matrix2D(values[0], values[1], values[2], values[3]);
+	}
+	
+	public static Matrix2D of(int[] values) {
+		if(values.length < 4) throw new ArrayIndexOutOfBoundsException("The array must have at least 4 elements");
+		return new Matrix2D(values[0], values[1], values[2], values[3]);
 	}
 	
 }
