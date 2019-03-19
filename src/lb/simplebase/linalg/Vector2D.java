@@ -87,6 +87,12 @@ public class Vector2D {
 		return new Point2D.Double(x, y);
 	}
 	
+	public double[] getAsArray() {
+		return new double[] {
+				x, y
+		};
+	}
+	
 	public boolean isParallel(Vector2D other) {
 		if(isNullVector() || other.isNullVector()) return false;
 		if(x == 0) return other.y == 0;
@@ -110,6 +116,21 @@ public class Vector2D {
 	
 	public static Vector2D of(Dimension2D dimension) {
 		return new Vector2D(dimension.getWidth(), dimension.getHeight());
+	}
+	
+	public static Vector2D of(double[] values) {
+		if(values.length < 2) throw new ArrayIndexOutOfBoundsException("The array must have at least 2 elements");
+		return new Vector2D(values[0], values[1]);
+	}
+	
+	public static Vector2D of(float[] values) {
+		if(values.length < 2) throw new ArrayIndexOutOfBoundsException("The array must have at least 2 elements");
+		return new Vector2D(values[0], values[1]);
+	}
+	
+	public static Vector2D of(int[] values) {
+		if(values.length < 2) throw new ArrayIndexOutOfBoundsException("The array must have at least 2 elements");
+		return new Vector2D(values[0], values[1]);
 	}
 	
 	//Static calculate

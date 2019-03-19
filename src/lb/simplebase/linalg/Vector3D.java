@@ -103,9 +103,30 @@ public class Vector3D {
 		return x == 0 && y == 0 && z == 0;
 	}
 	
+	public double[] getAsArray() {
+		return new double[] {
+				x, y, z
+		};
+	}
+	
 	
 	public static Vector3D of(double x, double y, double z) {
 		return new Vector3D(x, y, z);
+	}
+	
+	public static Vector3D of(double[] values) {
+		if(values.length < 3) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[0], values[1], values[2]);
+	}
+	
+	public static Vector3D of(float[] values) {
+		if(values.length < 3) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[0], values[1], values[2]);
+	}
+	
+	public static Vector3D of(int[] values) {
+		if(values.length < 3) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[0], values[1], values[2]);
 	}
 	
 	public static Vector3D distance(Vector3D first, Vector3D second) {
