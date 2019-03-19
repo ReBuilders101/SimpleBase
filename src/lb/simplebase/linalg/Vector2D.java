@@ -98,10 +98,8 @@ public class Vector2D {
 	}
 	
 	public boolean isParallel(Vector2D other) {
-		if(isNullVector() || other.isNullVector()) return false;
-		if(x == 0) return other.y == 0;
-		double a2b = other.x / x;
-		return y * a2b == other.y;
+		//determinant of a column matrix of the two vectors
+		return (x * other.y) - (other.x * y) == 0;
 	}
 	
 	public boolean isNullVector() {
