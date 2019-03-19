@@ -79,6 +79,10 @@ public class Vector2D {
 		return new Vector2D((int) x, (int) y); 
 	}
 	
+	public Vector2D transform(Matrix2D transformation) {
+		return transformation.transform(this);
+	}
+	
 	public Vector2D getOrthogonalVector() {
 		return new Vector2D(y, -x);
 	}

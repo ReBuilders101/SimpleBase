@@ -137,6 +137,12 @@ public class Matrix3D {
 		return new Matrix3D(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
 	}
 	
+	public Vector3D transform(Vector3D vec) {
+		return Vector3D.of(vec.getX() * m00 + vec.getY() * m01 + vec.getZ() * m02,
+						   vec.getX() * m10 + vec.getZ() * m11 + vec.getZ() * m12,
+						   vec.getX() * m20 + vec.getY() * m21 + vec.getZ() * m22);
+	}
+	
 	public Matrix3D multiply(Matrix3D left) {
 		return new Matrix3D(
 				dotP3D(left.m00, left.m01, left.m02, m00, m10, m20), dotP3D(left.m00, left.m01, left.m02, m01, m11, m21), dotP3D(left.m00, left.m01, left.m02, m02, m12, m22),

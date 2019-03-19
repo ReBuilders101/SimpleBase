@@ -1,5 +1,7 @@
 package lb.simplebase.linalg;
 
+import java.awt.geom.Point2D;
+
 public class Matrix2D {
 
 	public static final Matrix2D IDENTITY = new Matrix2D(1, 0, 0, 1);
@@ -101,6 +103,18 @@ public class Matrix2D {
 		return new Matrix2D(m00, m10, m01, m11);
 	}
 	
+	public Vector2D transform(Vector2D vec) {
+		return Vector2D.of(vec.getX() * m00 + vec.getY() * m01, vec.getX() * m10 + vec.getY() * m11);
+	}
+	
+	public Vector2D transform(Point2D point) {
+		return Vector2D.of(point.getX() * m00 + point.getY() * m01, point.getX() * m10 + point.getY() * m11);
+	}
+	
+	public Point2D transformPoint(Point2D point) {
+		return new Point2D.Double(point.getX() * m00 + point.getY() * m01, point.getX() * m10 + point.getY() * m11);
+	}
+	
 	public double determinant() {
 		return (m00 * m11) - (m01 * m10);
 	}
@@ -164,6 +178,10 @@ public class Matrix2D {
 	public static Matrix2D of(int[] values) {
 		if(values.length < 4) throw new ArrayIndexOutOfBoundsException("The array must have at least 4 elements");
 		return new Matrix2D(values[0], values[1], values[2], values[3]);
+	}
+	
+	public static Matrix2D ofRadianRotation(double angle) {
+		return new Matrix2D(Math.cos(angle), -Math.sin(angle), Math.sin(angle), Math.cos(angle));
 	}
 
 	@Override

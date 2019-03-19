@@ -75,6 +75,10 @@ public class Vector3D {
 		return scaleInverse(getLength());
 	}
 	
+	public Vector3D transform(Matrix3D transformation) {
+		return transformation.transform(this);
+	}
+	
 	public Vector3D getWithIntegerPrecision() {
 		return new Vector3D((int) x, (int) y, (int) z);
 	}
