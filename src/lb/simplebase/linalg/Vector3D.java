@@ -75,6 +75,10 @@ public class Vector3D {
 		return scaleInverse(getLength());
 	}
 	
+	public Vector2D getProjectedCoordinates() {
+		return Vector2D.ofProjectiveCoordinates(this);
+	}
+	
 	public Vector3D transform(Matrix3D transformation) {
 		return transformation.transform(this);
 	}

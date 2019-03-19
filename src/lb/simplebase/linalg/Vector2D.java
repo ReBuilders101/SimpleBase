@@ -95,6 +95,10 @@ public class Vector2D {
 		return new Vector2D(-x, -y);
 	}
 	
+	public Vector3D getProjectiveCoordinates() {
+		return Vector3D.of(x, y, 1);
+	}
+	
 	public double[] getAsArray() {
 		return new double[] {
 				x, y
@@ -137,6 +141,11 @@ public class Vector2D {
 	public static Vector2D of(int[] values) {
 		if(values.length < 2) throw new ArrayIndexOutOfBoundsException("The array must have at least 2 elements");
 		return new Vector2D(values[0], values[1]);
+	}
+	
+	public static Vector2D ofProjectiveCoordinates(Vector3D coords) {
+		if(coords.getZ() == 0) return NULL;
+		return new Vector2D(coords.getX() / coords.getZ(), coords.getY() / coords.getZ());
 	}
 	
 	//Static calculate
