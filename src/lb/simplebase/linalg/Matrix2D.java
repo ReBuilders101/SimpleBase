@@ -54,7 +54,7 @@ public class Matrix2D {
 		if(row == 0 && col == 1) return m01;
 		if(row == 1 && col == 0) return m10;
 		if(row == 1 && col == 1) return m11;
-		return 0;
+		throw new ArrayIndexOutOfBoundsException("row and col must be in range 0 to 1");
 	}
 	
 	//Operations
