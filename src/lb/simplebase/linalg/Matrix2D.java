@@ -165,5 +165,46 @@ public class Matrix2D {
 		if(values.length < 4) throw new ArrayIndexOutOfBoundsException("The array must have at least 4 elements");
 		return new Matrix2D(values[0], values[1], values[2], values[3]);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(m00);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(m01);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(m10);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(m11);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Matrix2D other = (Matrix2D) obj;
+		if (Double.doubleToLongBits(m00) != Double.doubleToLongBits(other.m00))
+			return false;
+		if (Double.doubleToLongBits(m01) != Double.doubleToLongBits(other.m01))
+			return false;
+		if (Double.doubleToLongBits(m10) != Double.doubleToLongBits(other.m10))
+			return false;
+		if (Double.doubleToLongBits(m11) != Double.doubleToLongBits(other.m11))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Matrix2D [m00=" + m00 + ", m01=" + m01 + ", m10=" + m10 + ", m11=" + m11 + "]";
+	}
 	
 }
