@@ -8,9 +8,7 @@ import lb.simplebase.javacore.Utils;
 public abstract class Transition {
 
 	public static double apply(Transition trans, double from, double to, double totalTime, double time) {
-		final double relativeTime = Utils.scale(time, 0, 1, 0, totalTime);
-		final double relativeAmount = trans.getValue(relativeTime);
-		return Utils.scale(relativeAmount, from, to, 0, 1);
+		return trans.apply(from, to, totalTime, time);
 	}
 	
 	public static final Transition LINEAR = new FunctionalTransition(x -> x);
@@ -33,6 +31,12 @@ public abstract class Transition {
 	}
 	
 	public abstract double getValue(double time);
+	
+	public double apply(double from, double to, double totalTime, double time) {
+		final double relativeTime = Utils.scale(time, 0, 1, 0, totalTime);
+		final double relativeAmount = getValue(relativeTime);
+		return Utils.scale(relativeAmount, from, to, 0, 1);
+	}
 	
 	private static class FunctionalTransition extends Transition {
 
