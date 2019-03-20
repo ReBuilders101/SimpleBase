@@ -1,13 +1,10 @@
 package lb.simplebase.javacore;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -37,11 +34,6 @@ public final class Framework {
 	
 	private static DrawCallbackPanel smallDcp;
 	private static DrawCallbackPanel mainDcp;
-	
-	private static BufferedImage canvas;
-	private static AffineTransform smallTransform;
-	private static Dimension oldMainSize;
-	private static Dimension oldSmallSize;
 	
 	private static int tps;
 	
@@ -109,10 +101,7 @@ public final class Framework {
 	@RequireState(FrameworkState.INITIALIZED)
 	public static void start() {
 		if(getState() != FrameworkState.INITIALIZED) return;
-		oldMainSize = new Dimension();
-		oldSmallSize = new Dimension();
-		smallTransform = new AffineTransform();
-		canvas = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+//		canvas = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		//Show frames
 		mainFrame.pack();
 		mainFrame.setVisible(true);
@@ -131,21 +120,6 @@ public final class Framework {
 		currentScene = scenes.get(DEFAULT_SCENE_NAME);
 		
 		state = FrameworkState.STARTED;
-	}
-	
-	private static void recalculateSizes() {
-		if(!smallDcp.getSize().equals(oldSmallSize)) {
-			if(!mainDcp.getSize().equals(oldMainSize)) {
-				System.out.println("new canvas");
-				canvas = new BufferedImage(mainDcp.getWidth(), mainDcp.getHeight(), BufferedImage.TYPE_INT_ARGB);
-				oldMainSize = mainDcp.getSize();
-			}
-			System.out.println("recalc transform");
-			final double sx = (double) smallDcp.getWidth()  / (double) mainDcp.getWidth();
-			final double sy = (double) smallDcp.getHeight() / (double) mainDcp.getHeight();
-			smallTransform = AffineTransform.getScaleInstance(sx, sy);
-			oldSmallSize = smallDcp.getSize();
-		}
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
@@ -205,25 +179,28 @@ public final class Framework {
 	}
 	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
-		g.drawImage(canvas, 0, 0, null);
-		//if(currentScene != null) currentScene.draw(g, width, height);
+		//g.drawImage(canvas, 0, 0, null);
+		if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onSmallPanelDraw(Graphics2D g, int width, int height) {
-		g.drawImage(canvas, smallTransform, null);
-		//if(currentScene != null) currentScene.draw(g, width, height);
+		//g.drawImage(canvas, smallTransform, null);
+		//g.drawImage(canvas.getScaledInstance(width, height, BufferedImage.SCALE_FAST), 0, 0, null);
+		//g.drawImage(canvas, 0, 0, smallDcp.getWidth(), smallDcp.getHeight(), 0, 0, mainDcp.getWidth(), mainDcp.getHeight(), null);
+		if(currentScene != null) currentScene.draw(g, width, height);
 	}
 	
 	private static void onUpdateTask() {
-		//Draw first
 		if(currentScene != null) {
-			recalculateSizes();
-			Graphics2D draw = canvas.createGraphics();
-			currentScene.draw(draw, canvas.getWidth(), canvas.getHeight());
-			draw.dispose();
-			currentScene.update(tick);
+//			recalculateSizes();
+//			Graphics2D draw = canvas.createGraphics();
+//			draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//			currentScene.draw(draw, canvas.getWidth(), canvas.getHeight());
+//			draw.dispose();
+			//Draw
 			mainDcp.repaint();
 			smallDcp.repaint();
+			currentScene.update(tick);
 		}
 		tick++; //Increment for every update
 	}
