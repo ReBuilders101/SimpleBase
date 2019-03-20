@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -45,6 +46,10 @@ public final class Framework {
 	private static JFrame smallFrame;
 	private static JPanel sceneOptions;
 	private static JPanel scenePanel;
+	private static JLabel infoLabel;
+	
+	private static JButton pnext;
+	private static JButton pprev;
 	
 	private static DrawCallbackPanel smallDcp;
 	private static DrawCallbackPanel mainDcp;
@@ -62,6 +67,7 @@ public final class Framework {
 		scenes = new LinkedHashMap<>(); //To preserve order
 		scenePanels = new LinkedHashMap<>();
 		previewButtons = new ArrayList<>();
+		infoLabel = new JLabel("Info");
 		//Create the Frames
 		//Main Frame first
 		mainFrame = new JFrame();
@@ -79,12 +85,31 @@ public final class Framework {
 		preview.add(smallDcp); //Add at top left
 		leftSide.add(preview);
 		JPanel generalOptions = new JGroupBox("General Options");
-		JPanel topControls = new JPanel();
+		JPanel topControls = new JPanel(new GridBagLayout()); //will center components
+		JPanel topButtons = new JPanel();
+		JButton prev = new JButton("<< Set Previous");
+		JButton next = new JButton("Set Next >>");
+		pprev = new JButton("<< Preview Previous");
+		pnext = new JButton("Preview Next >>");
+		prev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+		next.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+		pprev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+		pnext.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+		prev.addActionListener((e) -> setActiveScene(currentScene.getPreviousSceneOptional().orElse(currentScene).getName()));
+		next.addActionListener((e) -> setActiveScene(currentScene.getNextSceneOptional().orElse(currentScene).getName()));
+		pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "<< Normal View", "<< Preview Previous"));
+		pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "Normal View >>", "Preview Next >>"));
+		topButtons.add(prev);
+		topButtons.add(pprev);
+		topButtons.add(pnext);
+		topButtons.add(next);
+		topControls.add(topButtons);
 		generalOptions.setLayout(new BorderLayout());
 		generalOptions.add(topControls, BorderLayout.NORTH);
 		scenePanel = new JPanel();
 		JScrollPane sceneListPane = new JScrollPane(scenePanel);
 		generalOptions.add(sceneListPane, BorderLayout.CENTER);
+		generalOptions.add(infoLabel, BorderLayout.SOUTH);
 		leftSide.add(generalOptions);
 		smallFrame.add(leftSide);
 		sceneOptions = new JGroupBox("Scene Options");
@@ -118,6 +143,12 @@ public final class Framework {
 			if(exitOnStop) System.exit(0);
 		}
 		state = FrameworkState.ENDED;
+	}
+	
+	@RequireState(FrameworkState.STARTED)
+	public static void displayInformation(String text) {
+		if(getState() != FrameworkState.STARTED) return;
+		infoLabel.setText(text);
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
@@ -161,7 +192,7 @@ public final class Framework {
 		JButton set = new JButton("Set active");
 		JButton pre = new JButton("Preview");
 		set.addActionListener((e) -> Framework.handleActivatePress(set, value));
-		pre.addActionListener((e) -> Framework.handlePreviewPress(pre, value));
+		pre.addActionListener((e) -> Framework.handlePreviewPress(pre, value, "Normal View", "Preview"));
 		previewButtons.add(pre);
 		buttons.add(pre);
 		buttons.add(set);
@@ -210,15 +241,17 @@ public final class Framework {
 		Framework.tps = tps;
 	}
 	
-	private static void handlePreviewPress(JButton button, Scene scene) {
-		if(button.getText().equals("Normal View")) { //no pv
+	private static void handlePreviewPress(JButton button, Scene scene, String normal, String pre) {
+		if(button.getText().equals(normal)) { //no pv
 			previewScene = currentScene;
-			button.setText("Preview");
+			button.setText(pre);
 		} else {
 			//reset all buttons
 			previewButtons.forEach((b) -> b.setText("Preview"));
+			pprev.setText("<< Preview Previous");
+			pnext.setText("Preview Next >>");
 			previewScene = scene;
-			if(scene != currentScene) button.setText("Normal View");
+			if(scene != currentScene) button.setText(normal);
 		}
 
 	}
@@ -242,6 +275,10 @@ public final class Framework {
 	public static boolean setActiveScene(String name) {
 		if(getState() != FrameworkState.STARTED) return false;
 		if(name == null || name.isEmpty()) return false;
+		if(name == currentScene.getName()) {
+			displayInformation("Skipped setting active scene");
+			return false;
+		}
 		if(!scenes.containsKey(name)) return false;
 		Scene requested = scenes.get(name);
 		if(requested == null) return false;
@@ -251,6 +288,7 @@ public final class Framework {
 		previewScene = currentScene;
 		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
+		displayInformation("Set new active scene");
 		return true;
 	}
 	
