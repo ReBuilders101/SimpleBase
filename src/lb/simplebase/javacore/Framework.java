@@ -1,18 +1,28 @@
 package lb.simplebase.javacore;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-
+import javax.swing.JScrollPane;
 import lb.simplebase.core.AnyState;
 import lb.simplebase.core.FrameworkState;
 import lb.simplebase.core.RequireState;
@@ -26,11 +36,15 @@ public final class Framework {
 	private static FrameworkState state = FrameworkState.UNINITIALIZED;
 	private static boolean exitOnStop = true;
 	private static Scene currentScene;
+	private static Scene previewScene;
 	
 	private static Map<String, Scene> scenes;
+	private static Map<String, JComponent> scenePanels;
+	private static List<JButton> previewButtons;
 	private static JFrame mainFrame;
 	private static JFrame smallFrame;
 	private static JPanel sceneOptions;
+	private static JPanel scenePanel;
 	
 	private static DrawCallbackPanel smallDcp;
 	private static DrawCallbackPanel mainDcp;
@@ -45,6 +59,9 @@ public final class Framework {
 	public static void init() {
 		//Validate state
 		if(getState() != FrameworkState.UNINITIALIZED) return;
+		scenes = new LinkedHashMap<>(); //To preserve order
+		scenePanels = new LinkedHashMap<>();
+		previewButtons = new ArrayList<>();
 		//Create the Frames
 		//Main Frame first
 		mainFrame = new JFrame();
@@ -62,6 +79,12 @@ public final class Framework {
 		preview.add(smallDcp); //Add at top left
 		leftSide.add(preview);
 		JPanel generalOptions = new JGroupBox("General Options");
+		JPanel topControls = new JPanel();
+		generalOptions.setLayout(new BorderLayout());
+		generalOptions.add(topControls, BorderLayout.NORTH);
+		scenePanel = new JPanel();
+		JScrollPane sceneListPane = new JScrollPane(scenePanel);
+		generalOptions.add(sceneListPane, BorderLayout.CENTER);
 		leftSide.add(generalOptions);
 		smallFrame.add(leftSide);
 		sceneOptions = new JGroupBox("Scene Options");
@@ -73,7 +96,6 @@ public final class Framework {
 		//Set variables
 		tps = 30;
 		tick = 0;
-		scenes = new HashMap<>();
 		//Add default states
 		Scene defaultScene = Scene.createEmpty(DEFAULT_SCENE_NAME);
 		scenes.put(DEFAULT_SCENE_NAME, defaultScene);
@@ -102,6 +124,15 @@ public final class Framework {
 	public static void start() {
 		if(getState() != FrameworkState.INITIALIZED) return;
 //		canvas = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		//Create scene list
+		scenePanel.setLayout(new BoxLayout(scenePanel, BoxLayout.Y_AXIS));
+		int index = 1;
+		for(Scene scene : scenes.values()) {
+			final JComponent sp = createComponent(scene, index++); 
+			scenePanel.add(sp);
+			scenePanels.put(scene.getName(), sp);
+		}
+		scenePanel.add(Box.createHorizontalGlue());
 		//Show frames
 		mainFrame.pack();
 		mainFrame.setVisible(true);
@@ -118,8 +149,36 @@ public final class Framework {
 		}, 0, 1000 / tps);
 		//Set current scene
 		currentScene = scenes.get(DEFAULT_SCENE_NAME);
-		
+		previewScene = currentScene;
+		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		currentScene.setActive(true);
 		state = FrameworkState.STARTED;
+	}
+	
+	private static JComponent createComponent(Scene value, int index) {
+		JPanel ret = new JPanel(new BorderLayout());
+		JPanel buttons = new JPanel();
+		JButton set = new JButton("Set active");
+		JButton pre = new JButton("Preview");
+		set.addActionListener((e) -> Framework.handleActivatePress(set, value));
+		pre.addActionListener((e) -> Framework.handlePreviewPress(pre, value));
+		previewButtons.add(pre);
+		buttons.add(pre);
+		buttons.add(set);
+		ret.add(buttons, BorderLayout.EAST);
+		JLabel idx = new JLabel(String.format("%02d", index));
+		idx.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		ret.add(idx, BorderLayout.WEST);
+		JLabel main = new JLabel(value.getName());
+		main.setToolTipText(value.getDescription());
+		ret.add(main, BorderLayout.CENTER);
+		if(value.isActive()) {
+			ret.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
+		} else {
+			ret.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		}
+		ret.setMaximumSize(new Dimension((int) ret.getMaximumSize().getWidth(), (int) ret.getPreferredSize().getHeight())); //setmaximumSize is bad, but works for boxLayout
+		return ret;
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
@@ -151,6 +210,23 @@ public final class Framework {
 		Framework.tps = tps;
 	}
 	
+	private static void handlePreviewPress(JButton button, Scene scene) {
+		if(button.getText().equals("Normal View")) { //no pv
+			previewScene = currentScene;
+			button.setText("Preview");
+		} else {
+			//reset all buttons
+			previewButtons.forEach((b) -> b.setText("Preview"));
+			previewScene = scene;
+			if(scene != currentScene) button.setText("Normal View");
+		}
+
+	}
+	
+	private static void handleActivatePress(JButton button, Scene scene) {
+		if(scene != currentScene) setActiveScene(scene.getName());
+	}
+	
 	@RequireState(FrameworkState.INITIALIZED)
 	public static boolean addScene(Scene scene) {
 		if(getState() != FrameworkState.INITIALIZED) return false;
@@ -169,7 +245,12 @@ public final class Framework {
 		if(!scenes.containsKey(name)) return false;
 		Scene requested = scenes.get(name);
 		if(requested == null) return false;
+		currentScene.setActive(false);
+		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		currentScene = requested;
+		previewScene = currentScene;
+		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		currentScene.setActive(true);
 		return true;
 	}
 	
@@ -187,7 +268,7 @@ public final class Framework {
 		//g.drawImage(canvas, smallTransform, null);
 		//g.drawImage(canvas.getScaledInstance(width, height, BufferedImage.SCALE_FAST), 0, 0, null);
 		//g.drawImage(canvas, 0, 0, smallDcp.getWidth(), smallDcp.getHeight(), 0, 0, mainDcp.getWidth(), mainDcp.getHeight(), null);
-		if(currentScene != null) currentScene.draw(g, width, height);
+		if(previewScene != null) previewScene.draw(g, width, height);
 	}
 	
 	private static void onUpdateTask() {

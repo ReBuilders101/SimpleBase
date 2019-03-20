@@ -19,6 +19,24 @@ public abstract class Scene {
 	private String description;
 	private Scene nextScene;
 	private Scene previousScene;
+	private boolean active;
+	
+	protected final boolean isActive() {
+		return active;
+	}
+	
+	protected final void setActive(boolean active) {
+		this.active = active;
+		if(active) {
+			onActivate();
+		} else {
+			onDeactivate();
+		}
+	}
+	
+	public abstract void onActivate();
+	
+	public abstract void onDeactivate();
 	
 	public abstract void update(long tick);
 	
@@ -90,6 +108,12 @@ public abstract class Scene {
 			g2d.setColor(Color.WHITE);
 			g2d.fillRect(0, 0, width, height);
 		}
+
+		@Override
+		public void onActivate() {}
+
+		@Override
+		public void onDeactivate() {}
 		
 	}
 	
