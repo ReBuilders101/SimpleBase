@@ -115,4 +115,36 @@ public final class Utils {
 		return Collector.of(StringBuilder::new, StringBuilder::append, StringBuilder::append, StringBuilder::toString);
 	}
 	
+	/**
+	 * Clamps a value between 0 and 1
+	 * @param value The value to be clamped
+	 * @return The clamped value
+	 */
+	public static double clamp(double value) {
+		return clamp(value, 0, 1);
+	}
+	
+	/**
+	 * Clamps a value between <code>min</code> and <code>max</code>
+	 * @param value The value to be clamped
+	 * @param min The minimal value
+	 * @param max the maximal value
+	 * @return The clamped value
+	 */
+	public static double clamp(double value, double min, double max) {
+		if(value > max) return max;
+		if(value < min) return min;
+		return value;
+	}
+	
+	public static double scale(double value, double minOut, double maxOut, double minIn, double maxIn) {
+		value = clamp(value, minIn, maxIn);
+//		final double size = maxIn - minIn;
+//		final double shiftVal = value - minIn;
+//		final double unitVal = shiftVal / size;
+//		final double outSize = maxOut - minOut;
+//		final double outShiftVal = unitVal * outSize;
+//		return outShiftVal + minOut;
+		return (((value - minIn) / (maxIn - minIn)) * (maxOut - minOut) ) + minOut;
+	}
 }

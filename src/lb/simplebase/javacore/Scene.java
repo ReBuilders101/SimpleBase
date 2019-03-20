@@ -97,7 +97,7 @@ public abstract class Scene {
 	private static class EmptyScene extends Scene {
 		
 		private EmptyScene(String uniqueName) {
-			super(uniqueName);
+			super(uniqueName, "A default scene implementation that displays a white background");
 		}
 
 		@Override

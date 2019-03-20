@@ -30,7 +30,7 @@ import lb.simplebase.core.RequireState;
 
 public final class Framework {
 
-	public static final String DEFAULT_SCENE_NAME = "default";
+	public static final String DEFAULT_SCENE_NAME = "DefaultScene";
 	
 	private Framework() {};
 	
