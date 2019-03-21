@@ -288,6 +288,10 @@ public final class Framework {
 		previewScene = currentScene;
 		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
+		//Remove all previews if an scene is activated
+		previewButtons.forEach((b) -> b.setText("Preview"));
+		pprev.setText("<< Preview Previous");
+		pnext.setText("Preview Next >>");
 		displayInformation("Set new active scene");
 		return true;
 	}
@@ -295,6 +299,10 @@ public final class Framework {
 	@AnyState
 	public static long getCurrentTick() {
 		return tick;
+	}
+	
+	public static int getTicks(int milliseconds) {
+		return (milliseconds * tps) / 1000;
 	}
 	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
