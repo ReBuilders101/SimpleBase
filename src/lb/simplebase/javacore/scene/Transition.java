@@ -12,7 +12,14 @@ public abstract class Transition {
 	}
 	
 	public static final Transition LINEAR = new FunctionalTransition(x -> x);
-	public static final Transition EASE = new CubicTransition(0.42D, 0.58D);
+	
+	public static final Transition EASE_IN_QUAD = new FunctionalTransition(x -> x * x);
+	public static final Transition EASE_OUT_QUAD = new FunctionalTransition(x -> x * (2 - x));
+	public static final Transition EASE_IN_OUT_QUAD = new FunctionalTransition(x -> x < 0.5 ? 2 * x * x : -1 + (4 - 2 * x) * x);
+	
+	public static final Transition EASE_IN_CUBIC = new FunctionalTransition(x -> x * x * x);
+	public static final Transition EASE_OUT_CUBIC = new FunctionalTransition(x -> (x - 1) * (x - 1) * (x - 1) + 1);
+	public static final Transition EASE_IN_OUT_CUBIC = new FunctionalTransition(x -> x < 0.5 ? 4 * x * x * x : (x - 1) * (2 * x - 2) * (2 * x - 2) + 1);
 	
 	public static Transition fromFunction(DoubleFunction<Double> func) {
 		return new FunctionalTransition(func);
@@ -20,14 +27,6 @@ public abstract class Transition {
 	
 	public static Transition fromFunction(Function<Double, Double> func) {
 		return new FunctionalTransition((d) -> func.apply(d));
-	}
-	
-	public static Transition fromCubicBezier(double p1x, double p2x) {
-		return new CubicTransition(p1x, p2x);
-	}
-	
-	public static Transition fromCubicBezier(double x) {
-		return new CubicTransition(x, 1 - x);
 	}
 	
 	public abstract double getValue(double time);
@@ -49,25 +48,6 @@ public abstract class Transition {
 		@Override
 		public double getValue(double width) {
 			return func.apply(Utils.clamp(width));
-		}
-		
-	}
-	
-	private static class CubicTransition extends Transition {
-
-		private final double p0;
-		private final double p1;
-		
-		public CubicTransition(double p0, double p1) {
-			this.p0 = Utils.clamp(p0);
-			this.p1 = Utils.clamp(p1);
-		}
-		
-		@Override
-		public double getValue(double width) {
-			final double t = Utils.clamp(width);
-			final double tm1 = 1 - t;
-			return (3 * t * tm1 * tm1 * p0) + (3 * t * t * tm1 * p1) + (t * t * t);
 		}
 		
 	}
