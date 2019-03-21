@@ -54,7 +54,6 @@ public class Grid {
 		final double lineDistYpx = lineDistY * unitYSizePx;
 		
 		double offsetXpx = (minXunits % lineDistX) * unitXSizePx;
-		System.out.println(offsetXpx);
 		int lineXnum = (int) (spanXunits / lineDistX);
 		//don't draw edge lines
 		if(offsetXpx <= 0) {
