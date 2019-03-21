@@ -29,15 +29,32 @@ public class TransitionTask {
 	}
 	
 	public double getCurrentValue() {
-		return done ? endValue : trans.apply(startValue, endValue, totalTime, currentTime);
+		return trans.apply(startValue, endValue, totalTime, currentTime);
 	}
 	
 	public void skipCurrentValue() {
-		currentTime += timeStep;
+		updateTime(timeStep);
+	}
+	
+	protected void updateTime(double deltaT) {
+		currentTime += deltaT;
 		if(currentTime >= totalTime) {
 			currentTime = totalTime;
 			done = true;
+		} else if(currentTime <= 0) {
+			currentTime = 0;
+			done = true;
+		} else {
+			done = false;
 		}
+	}
+	
+	protected void setIsDone(boolean done) {
+		this.done = done;
+	}
+	
+	protected double getTimeStep() {
+		return timeStep;
 	}
 	
 	public void reset() {
