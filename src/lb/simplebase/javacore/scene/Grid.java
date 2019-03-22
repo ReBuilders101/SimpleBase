@@ -85,16 +85,21 @@ public class Grid implements RangedDrawable{
 			g2d.setPaint(paint);
 			g2d.drawLine(0, height - xAxisYpx, width, height - xAxisYpx);
 			g2d.drawLine(yAxisXpx, 0, yAxisXpx, height);
+			
 			//Draw lines
 			int current;
-			for(int i = 0; i < lineXnum; i++) {
-				current = (int) (offsetXpx + i * lineDistXpx);
-				g2d.drawLine(current, height - xAxisYpx - attribute, current, height - xAxisYpx + attribute);
+			if(lineDistX > 0) {
+				for(int i = 0; i < lineXnum; i++) {
+					current = (int) (offsetXpx + i * lineDistXpx);
+					g2d.drawLine(current, height - xAxisYpx - attribute, current, height - xAxisYpx + attribute);
+				}
 			}
 
-			for(int i = 0; i < lineYnum; i++) {
-				current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
-				g2d.drawLine(yAxisXpx - attribute, current, yAxisXpx + attribute, current);
+			if(lineDistY > 0) {
+				for(int i = 0; i < lineYnum; i++) {
+					current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
+					g2d.drawLine(yAxisXpx - attribute, current, yAxisXpx + attribute, current);
+				}
 			}
 			return;
 		}
@@ -104,14 +109,18 @@ public class Grid implements RangedDrawable{
 		//Decide how to draw
 		if(style == GridLineStyle.LINE) {
 			int current;
-			for(int i = 0; i < lineXnum; i++) {
-				current = (int) (offsetXpx + i * lineDistXpx);
-				g2d.drawLine(current, 0, current, height);
+			if(lineDistX > 0) {
+				for(int i = 0; i < lineXnum; i++) {
+					current = (int) (offsetXpx + i * lineDistXpx);
+					g2d.drawLine(current, 0, current, height);
+				}
 			}
 
-			for(int i = 0; i < lineYnum; i++) {
-				current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
-				g2d.drawLine(0, current, width, current);
+			if(lineDistY > 0) {
+				for(int i = 0; i < lineYnum; i++) {
+					current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
+					g2d.drawLine(0, current, width, current);
+				}
 			}
 		} else if(style == GridLineStyle.DOT) {
 			//this time nested loops
