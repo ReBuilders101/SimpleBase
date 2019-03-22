@@ -8,22 +8,25 @@ public abstract class FunctionGraph implements RangedDrawable{
 
 	private int unitStep;
 	private Paint paint;
+	private boolean enabled;
 	private FunctionGraphStyle style;
 	
-	protected FunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep) {
+	protected FunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, boolean initiallyEnabled) {
 		this.unitStep = unitStep;
 		this.style = style;
 		this.paint = paint;
+		this.enabled = initiallyEnabled;
 	}
 	
-	public static FunctionGraph fromFunction(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
-		return new FunctionalFunctionGraph(style, paint, unitStep, func);
+	public static FunctionGraph fromFunction(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func, boolean initiallyEnabled) {
+		return new FunctionalFunctionGraph(style, paint, unitStep, func, initiallyEnabled);
 	}
 	
 	public abstract double getYValue(double xValue);
 
 	@Override
 	public void draw(Graphics2D g2d, int width, int height, double minXunits, double minYunits, double maxXunits, double maxYunits) {
+		if(!enabled) return;
 		final double spanXunits = maxXunits - minXunits;
 		final double spanYunits = maxYunits - minYunits;
 		final double unitXSizePx = width  / spanXunits;
@@ -85,8 +88,8 @@ public abstract class FunctionGraph implements RangedDrawable{
 
 		private final DoubleFunction<Double> func;
 		
-		protected FunctionalFunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
-			super(style, paint, unitStep);
+		protected FunctionalFunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func, boolean initiallyEnabled) {
+			super(style, paint, unitStep, initiallyEnabled);
 			this.func = func;
 		}
 
@@ -95,6 +98,14 @@ public abstract class FunctionGraph implements RangedDrawable{
 			return func.apply(xValue);
 		}
 		
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 	
 }
