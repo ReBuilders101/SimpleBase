@@ -51,30 +51,6 @@ public class Grid implements RangedDrawable{
 		final double lineDistXpx = lineDistX * unitXSizePx;
 		final double lineDistYpx = lineDistY * unitYSizePx;
 		
-		if(style == GridLineStyle.AXIS) {//Different from the others
-			int yAxisXpx, xAxisYpx;
-			if(minXunits >= 0) {//Y-achse am linken rand
-				yAxisXpx = 0;
-			} else if(maxXunits <= 0) { //Y-Achse am rechten rand
-				yAxisXpx = width;
-			} else { //Y-Achse mittendrin, -minX in px vom linken rand
-				yAxisXpx = (int) (-minXunits * unitXSizePx);
-			}
-			
-			if(minYunits >= 0) {//Y-achse am oberen rand
-				xAxisYpx = 0;
-			} else if(maxYunits <= 0) { //Y-Achse am unteren rand
-				xAxisYpx = height;
-			} else { //Y-Achse mittendrin, -minY in px vom oberen rand
-				xAxisYpx = (int) (-minYunits * unitYSizePx);
-			}
-			//Draw axis
-			g2d.setPaint(paint);
-			g2d.drawLine(0, height - xAxisYpx, width, height - xAxisYpx);
-			g2d.drawLine(yAxisXpx, 0, yAxisXpx, height);
-			return;
-		}
-		
 		double offsetXpx = (minXunits % lineDistX) * unitXSizePx;
 		int lineXnum = (int) (spanXunits / lineDistX);
 		//don't draw edge lines
@@ -86,6 +62,41 @@ public class Grid implements RangedDrawable{
 		int lineYnum = (int) (spanYunits / lineDistY);
 		if(offsetYpx <= 0) {
 			offsetYpx += lineDistYpx;
+		}
+		
+		if(style == GridLineStyle.AXIS) {//Different from the others
+			int yAxisXpx, xAxisYpx;
+			if(minXunits >= 0) {//Y-achse am linken rand
+				yAxisXpx = 0;
+			} else if(maxXunits <= 0) { //Y-Achse am rechten rand
+				yAxisXpx = width - 1;
+			} else { //Y-Achse mittendrin, -minX in px vom linken rand
+				yAxisXpx = (int) (-minXunits * unitXSizePx);
+			}
+			
+			if(minYunits >= 0) {//Y-achse am oberen rand
+				xAxisYpx = 1;
+			} else if(maxYunits <= 0) { //Y-Achse am unteren rand
+				xAxisYpx = height;
+			} else { //Y-Achse mittendrin, -minY in px vom oberen rand
+				xAxisYpx = (int) (-minYunits * unitYSizePx);
+			}
+			//Draw axis
+			g2d.setPaint(paint);
+			g2d.drawLine(0, height - xAxisYpx, width, height - xAxisYpx);
+			g2d.drawLine(yAxisXpx, 0, yAxisXpx, height);
+			//Draw lines
+			int current;
+			for(int i = 0; i < lineXnum; i++) {
+				current = (int) (offsetXpx + i * lineDistXpx);
+				g2d.drawLine(current, height - xAxisYpx - attribute, current, height - xAxisYpx + attribute);
+			}
+
+			for(int i = 0; i < lineYnum; i++) {
+				current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
+				g2d.drawLine(yAxisXpx - attribute, current, yAxisXpx + attribute, current);
+			}
+			return;
 		}
 		
 		g2d.setPaint(paint);
