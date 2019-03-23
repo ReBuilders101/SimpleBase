@@ -3,6 +3,8 @@ package lb.simplebase.javacore.scene;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
+import lb.simplebase.javacore.Framework;
+
 public class Grid implements RangedDrawable{
 	
 	private final GridLineStyle style;
@@ -64,6 +66,8 @@ public class Grid implements RangedDrawable{
 			offsetYpx += lineDistYpx;
 		}
 		
+		final int localAttribute = Framework.getAttributePx(attribute);
+		
 		if(style == GridLineStyle.AXIS) {//Different from the others
 			int yAxisXpx, xAxisYpx;
 			if(minXunits >= 0) {//Y-achse am linken rand
@@ -91,14 +95,14 @@ public class Grid implements RangedDrawable{
 			if(lineDistX > 0) {
 				for(int i = 0; i < lineXnum; i++) {
 					current = (int) (offsetXpx + i * lineDistXpx);
-					g2d.drawLine(current, height - xAxisYpx - attribute, current, height - xAxisYpx + attribute);
+					g2d.drawLine(current, height - xAxisYpx - localAttribute, current, height - xAxisYpx + localAttribute);
 				}
 			}
 
 			if(lineDistY > 0) {
 				for(int i = 0; i < lineYnum; i++) {
 					current = height - (int) (offsetYpx + i * lineDistYpx); //Height - ... flips so y points upwards
-					g2d.drawLine(yAxisXpx - attribute, current, yAxisXpx + attribute, current);
+					g2d.drawLine(yAxisXpx - localAttribute, current, yAxisXpx + localAttribute, current);
 				}
 			}
 			return;
@@ -126,7 +130,7 @@ public class Grid implements RangedDrawable{
 			//this time nested loops
 			for(int x = 0; x < lineXnum; x++) {
 				for(int y = 0; y < lineYnum; y++) {
-					g2d.fillOval((int) (offsetXpx + x * lineDistXpx) - (attribute / 2), height - (int) (offsetYpx + y * lineDistYpx) - (attribute / 2), attribute, attribute);
+					g2d.fillOval((int) (offsetXpx + x * lineDistXpx) - (localAttribute / 2), height - (int) (offsetYpx + y * lineDistYpx) - (localAttribute / 2), localAttribute, localAttribute);
 				}
 			}
 		} else if(style == GridLineStyle.CROSS) {
@@ -134,8 +138,8 @@ public class Grid implements RangedDrawable{
 				for(int y = 0; y < lineYnum; y++) {
 					final int currentX = (int) (offsetXpx + x * lineDistXpx);
 					final int currentY = height - (int) (offsetYpx + y * lineDistYpx);
-					g2d.drawLine(currentX, currentY - attribute, currentX, currentY + attribute); //vertical
-					g2d.drawLine(currentX - attribute, currentY, currentX + attribute, currentY); //horizontal
+					g2d.drawLine(currentX, currentY - localAttribute, currentX, currentY + localAttribute); //vertical
+					g2d.drawLine(currentX - localAttribute, currentY, currentX + localAttribute, currentY); //horizontal
 				}
 			}
 		}
