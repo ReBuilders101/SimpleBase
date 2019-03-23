@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Optional;
 
+import javax.swing.JComponent;
+
 public abstract class Scene {
 
 	protected Scene(String uniqueName) {
@@ -20,6 +22,7 @@ public abstract class Scene {
 	private Scene nextScene;
 	private Scene previousScene;
 	private boolean active;
+	private JComponent options;
 	
 	protected final boolean isActive() {
 		return active;
@@ -41,6 +44,17 @@ public abstract class Scene {
 	public abstract void update(long tick);
 	
 	public abstract void draw(Graphics2D g2d, int width, int height);
+	
+	protected abstract JComponent createOptions();
+	
+	public final JComponent getOptions() {
+		if(options == null) {
+			options = createOptions();
+			return options;
+		} else {
+			return options;
+		}
+	}
 	
 	public String getName() {
 		return name;
@@ -114,6 +128,11 @@ public abstract class Scene {
 
 		@Override
 		public void onDeactivate() {}
+
+		@Override
+		protected JComponent createOptions() {
+			return null;
+		}
 		
 	}
 	

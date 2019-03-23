@@ -55,6 +55,7 @@ public final class Framework {
 	private static DrawCallbackPanel mainDcp;
 	
 	private static int tps;
+	private static double attribute;
 	
 	private static long tick;
 	
@@ -113,12 +114,14 @@ public final class Framework {
 		leftSide.add(generalOptions);
 		smallFrame.add(leftSide);
 		sceneOptions = new JGroupBox("Scene Options");
+		sceneOptions.setLayout(new BorderLayout());
 		smallFrame.add(sceneOptions);
 		
 		//Init timers
 		tickTimer = new Timer("TickTimerThread", true);
 		//Tasks will be set in start()
 		//Set variables
+		attribute = 1;
 		tps = 30;
 		tick = 0;
 		//Add default states
@@ -184,6 +187,21 @@ public final class Framework {
 		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
 		state = FrameworkState.STARTED;
+	}
+	
+	@AnyState
+	public static int getAttributeScale() {
+		return (int) attribute;
+	}
+	
+	@AnyState
+	public static void setAttributeScale(double scale) {
+		attribute = scale;
+	}
+	
+	@AnyState
+	public static int getAttributePx(int attribute) {
+		return (int) (Framework.attribute * attribute);
 	}
 	
 	private static JComponent createComponent(Scene value, int index) {
@@ -288,6 +306,8 @@ public final class Framework {
 		previewScene = currentScene;
 		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
+		JComponent comp = currentScene.getOptions(); 
+		if(comp != null) sceneOptions.add(comp, BorderLayout.CENTER);
 		//Remove all previews if an scene is activated
 		previewButtons.forEach((b) -> b.setText("Preview"));
 		pprev.setText("<< Preview Previous");
