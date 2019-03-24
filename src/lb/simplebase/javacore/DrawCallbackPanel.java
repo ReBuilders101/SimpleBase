@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.TimerTask;
 
 import javax.swing.JPanel;
@@ -27,6 +28,7 @@ public class DrawCallbackPanel extends JPanel{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if(g instanceof Graphics2D) {
+			((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			callback.draw((Graphics2D) g, getWidth(), getHeight());
 		} else {
 			System.err.println("Panel Graphics object is not an instance of Graphics2D");
