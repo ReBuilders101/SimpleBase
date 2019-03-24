@@ -1,13 +1,18 @@
 package lb.simplebase.javacore;
 
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.stream.Collector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -66,6 +71,11 @@ public final class Utils {
 		return true;
 	}
 	
+	public static JComponent setMaxHeight(JComponent comp) {
+		comp.setMaximumSize(new Dimension(comp.getMaximumSize().width, comp.getPreferredSize().height));
+		return comp;
+	}
+	
 	public static JPanel getGroupBox(String title) {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(title));
@@ -122,6 +132,26 @@ public final class Utils {
 	 */
 	public static double clamp(double value) {
 		return clamp(value, 0, 1);
+	}
+	
+	/**
+	 * Creates a new {@link Rectangle} that represents the bounds of the transformed rectangle
+	 * @param boundsBefore The area to draw before the transformation
+	 * @param transform The transformation to apply
+	 * @return The new area to draw after the transformation
+	 */
+	public static Rectangle getDrawArea(Rectangle boundsBefore, AffineTransform transform) {
+		return transform.createTransformedShape(boundsBefore).getBounds();
+	}
+	
+	/**
+	 * Creates a new {@link Rectangle2D} that represents the bounds of the transformed rectangle
+	 * @param boundsBefore The area to draw before the transformation
+	 * @param transform The transformation to apply
+	 * @return The new area to draw after the transformation
+	 */
+	public static Rectangle2D getDrawArea(Rectangle2D boundsBefore, AffineTransform transform) {
+		return transform.createTransformedShape(boundsBefore).getBounds2D();
 	}
 	
 	/**
