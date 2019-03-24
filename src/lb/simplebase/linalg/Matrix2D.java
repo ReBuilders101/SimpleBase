@@ -2,7 +2,6 @@ package lb.simplebase.linalg;
 
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 
 public class Matrix2D {
@@ -14,6 +13,8 @@ public class Matrix2D {
 	private final double m01;
 	private final double m10;
 	private final double m11;
+	
+	private AffineTransform transform;
 	
 	private Matrix2D(double topLeft, double topRight, double bottomLeft, double bottomRight) {
 		m00 = topLeft;
@@ -115,7 +116,7 @@ public class Matrix2D {
 	}
 	
 	public Shape transform(Shape shape) {
-		return new Path2D.Double(shape, getAffineTransform());
+		return getAffineTransform().createTransformedShape(shape);
 	}
 	
 	public double determinant() {
@@ -157,7 +158,10 @@ public class Matrix2D {
 	}
 	
 	public AffineTransform getAffineTransform() {
-		return new AffineTransform(m00, m10, m01, m11, 0, 0);
+		if(transform == null) {
+			transform = new AffineTransform(m00, m10, m01, m11, 0, 0);
+		}
+		return transform;
 	}
 	
 	public static Matrix2D of(double topLeft, double topRight, double bottomLeft, double bottomRight) {
