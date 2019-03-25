@@ -25,20 +25,26 @@ public abstract class FunctionGraph implements RangedDrawable{
 	public abstract double getYValue(double xValue);
 
 	@Override
-	public void draw(Graphics2D g2d, int width, int height, double minXunits, double minYunits, double maxXunits, double maxYunits) {
+	public void draw(Graphics2D g2d, int width, int height, double originXoffset, double originYoffset, double spanXunits, double spanYunits) {
 		if(!enabled) return;
-		final double spanXunits = maxXunits - minXunits;
-		final double spanYunits = maxYunits - minYunits;
-		final double unitXSizePx = width  / spanXunits;
-		final double unitYSizePx = height / spanYunits;
 		
-		final double localUnitStep = unitStep <= 0 ? 1D / unitXSizePx : unitStep; //if no step set, use size of one pixel in units
+		final double unit2pixelX = width / spanXunits;
+		final double unit2pixelY = height / spanYunits;
+		
+		//The left  / lower border of the visible area, in units
+		final double minXunits = -((spanXunits / 2) + originXoffset);
+//		final double minYunits = -((spanYunits / 2) + originYoffset);	//Not needed
+		//The right / upper border of the visible area, in units
+		final double maxXunits = (spanXunits / 2) - originXoffset;
+//		final double maxYunits = (spanYunits / 2) - originYoffset;		//Not needed
 		
 		int lastPosX = 0, lastPosY = 0;
+		final double localUnitStep = unitStep <= 0 ? 1D / unit2pixelX : unitStep; //if no step set, use size of one pixel in units
+		
 		double startXval = minXunits;
 		if(style == FunctionGraphStyle.LINE) {
-			lastPosX = (int) ((startXval - minXunits) * unitXSizePx);
-			lastPosY = height - (int) ((getYValue(startXval) - minYunits) * unitYSizePx);
+			lastPosX = (int) (minXunits * unit2pixelX);
+			lastPosY = (int) (getYValue(minXunits) * unit2pixelY);
 			startXval += localUnitStep;
 		}
 		
@@ -46,9 +52,8 @@ public abstract class FunctionGraph implements RangedDrawable{
 		
 		for(double x = startXval; x <= maxXunits; x += localUnitStep) {
 			//Draw at x units
-			double y = getYValue(x);
-			int xPx = (int) ((x - minXunits) * unitXSizePx);
-			int yPx = height - (int) ((y - minYunits) * unitYSizePx); //Flip
+			int xPx = (int) (x * unit2pixelX);
+			int yPx = (int) (getYValue(x) * unit2pixelY);
 
 			if(style == FunctionGraphStyle.LINE) {
 				g2d.drawLine(lastPosX, lastPosY, xPx, yPx);

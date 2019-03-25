@@ -2,27 +2,36 @@ package lb.simplebase.javacore.scene;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import lb.simplebase.linalg.Matrix2D;
 
 public class CoordinateSystem {
 	
 	private boolean autoCalcX;
 	private boolean autoCalcY;
 	
-	private double minX;
-	private double maxX;
-	private double minY;
-	private double maxY;
+	private double originXoffset;
+	private double originYoffset;
+	private double spanXunits;
+	private double spanYunits;
+	private AffineTransform transform;
 	
 	private RangedDrawable gridLayer;
 	private RangedDrawable axisLayer;
 	private List<RangedDrawable> graphLayer;
 	private Paint backgroundPaint;
 	
-	public CoordinateSystem(Paint background, double xSpan, double ySpan, double originXoffset, double originYoffset) {
-		calcX(xSpan, originXoffset);
-		calcY(ySpan, originYoffset);
+	public CoordinateSystem(Paint background, double originXoffset, double originYoffset, double spanXunits, double spanYunits, Matrix2D transform) {
+		this.originXoffset = originXoffset;
+		this.originYoffset = originYoffset;
+		this.spanXunits = spanXunits;
+		this.spanYunits = spanYunits;
+		this.transform = transform == null ? new AffineTransform() : transform.getAffineTransform();
 		
 		autoCalcX = false;
 		autoCalcY = false;
@@ -32,25 +41,15 @@ public class CoordinateSystem {
 	}
 	
 	public CoordinateSystem(Paint background, double xSpan, double ySpan) {
-		this(background, xSpan, ySpan, 0, 0);
-	}
-	
-	private void calcX(double span, double offset) {
-		minX = -((span / 2) + offset);
-		maxX =  ((span / 2) - offset);
-	}
-	
-	private void calcY(double span, double offset) {
-		minY = -((span / 2) + offset);
-		maxY =  ((span / 2) - offset);
+		this(background, 0, 0, xSpan, ySpan, Matrix2D.IDENTITY);
 	}
 	
 	public double getXSpan() {
-		return maxX - minX;
+		return spanXunits;
 	}
 	
 	public double getYSpan() {
-		return maxY - minY;
+		return spanYunits;
 	}
 	
 	public void setGrid(RangedDrawable grid) {
@@ -66,53 +65,50 @@ public class CoordinateSystem {
 	}
 	
 	public void drawAt(Graphics2D g2d, int x, int y, int width, int height) {
+		
 		g2d.setPaint(backgroundPaint);
 		g2d.fillRect(x, y, width, height);
 		
-		Graphics2D clipped = (Graphics2D) g2d.create(x, y, width, height);
-		if(gridLayer != null) gridLayer.draw(clipped, width, height, minX, minY, maxX, maxY);
-		if(axisLayer != null) axisLayer.draw(clipped, width, height, minX, minY, maxX, maxY);
-		graphLayer.forEach((g) -> g.draw(clipped, width, height, minX, minY, maxX, maxY));
-	}
-
-	public double getMinX() {
-		return minX;
-	}
-
-	public void setMinX(double minX) {
-		this.minX = minX;
-	}
-
-	public double getMaxX() {
-		return maxX;
-	}
-
-	public void setMaxX(double maxX) {
-		this.maxX = maxX;
-	}
-
-	public double getMinY() {
-		return minY;
-	}
-
-	public void setMinY(double minY) {
-		this.minY = minY;
-	}
-
-	public double getMaxY() {
-		return maxY;
-	}
-
-	public void setMaxY(double maxY) {
-		this.maxY = maxY;
+		final double unit2pixelX = width / spanXunits;
+		final double unit2pixelY = height / spanYunits;
+		final AffineTransform translate = AffineTransform.getTranslateInstance(width / 2 + (unit2pixelX * originXoffset), height / 2 + (unit2pixelY * originYoffset));
+//		final AffineTransform translateInverse = AffineTransform.getTranslateInstance(-(width / 2 + (unit2pixelX * originXoffset)), -(height / 2 + (unit2pixelY * originYoffset))); //Because inverting 3D matrices can be expensive, explicitly declare it
+		final Graphics2D clipped = (Graphics2D) g2d.create(x, y, width, height);
+		
+		Shape bounds = new Rectangle2D.Double(0, 0, spanXunits, spanYunits);
+//		bounds = translate.createTransformedShape(bounds);
+		bounds = transform.createTransformedShape(bounds);
+//		bounds = translateInverse.createTransformedShape(bounds);
+		Rectangle2D newBounds = bounds.getBounds2D();
+		final int newWidth = (int) (width * (newBounds.getWidth() / spanXunits));
+		final int newHeight = (int) (height * (newBounds.getHeight() / spanYunits));
+				
+		//Apply general transformations
+		clipped.transform(translate); //Move origin to center
+		clipped.scale(1, -1);	//Flip y axis
+		//Apply special transformations
+		clipped.transform(transform);
+		
+		if(gridLayer != null) gridLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight());
+		if(axisLayer != null) axisLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight());
+		graphLayer.forEach((g) ->     g.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight()));
+		clipped.dispose();
 	}
 	
 	public void setOriginXOffset(double offset) {
-		calcX(getXSpan(), offset);
+		originXoffset = offset;
+	}
+	
+	public double getOriginXOffset() {
+		return originXoffset;
 	}
 	
 	public void setOriginYOffset(double offset) {
-		calcY(getYSpan(), offset);
+		originYoffset = offset;
+	}
+	
+	public double getOriginYOffset() {
+		return originYoffset;
 	}
 
 	public void drawAt(Graphics2D g2d, double x, double y, double width, double height) {
