@@ -71,14 +71,14 @@ public class CoordinateSystem {
 		
 		final double unit2pixelX = width / spanXunits;
 		final double unit2pixelY = height / spanYunits;
-		final AffineTransform translate = AffineTransform.getTranslateInstance(width / 2 + (unit2pixelX * originXoffset), height / 2 + (unit2pixelY * originYoffset));
-//		final AffineTransform translateInverse = AffineTransform.getTranslateInstance(-(width / 2 + (unit2pixelX * originXoffset)), -(height / 2 + (unit2pixelY * originYoffset))); //Because inverting 3D matrices can be expensive, explicitly declare it
+		final AffineTransform translate = AffineTransform.getTranslateInstance(width / 2 + (unit2pixelX * originXoffset), (height / 2 + (unit2pixelY * -originYoffset)));
+		final AffineTransform translateInverse = AffineTransform.getTranslateInstance(-(width / 2 + (unit2pixelX * originXoffset)), -(height / 2 + (unit2pixelY * -originYoffset))); //Because inverting 3D matrices can be expensive, explicitly declare it
 		final Graphics2D clipped = (Graphics2D) g2d.create(x, y, width, height);
 		
 		Shape bounds = new Rectangle2D.Double(0, 0, spanXunits, spanYunits);
-//		bounds = translate.createTransformedShape(bounds);
+		bounds = translate.createTransformedShape(bounds);
 		bounds = transform.createTransformedShape(bounds);
-//		bounds = translateInverse.createTransformedShape(bounds);
+		bounds = translateInverse.createTransformedShape(bounds);
 		Rectangle2D newBounds = bounds.getBounds2D();
 		final int newWidth = (int) (width * (newBounds.getWidth() / spanXunits));
 		final int newHeight = (int) (height * (newBounds.getHeight() / spanYunits));
