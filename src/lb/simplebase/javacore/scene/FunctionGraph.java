@@ -1,24 +1,23 @@
 package lb.simplebase.javacore.scene;
 
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.util.function.DoubleFunction;
 
 public abstract class FunctionGraph implements RangedDrawable{
 
 	private int unitStep;
-	private Paint paint;
+	private LineStyle paint;
 	private boolean enabled;
 	private FunctionGraphStyle style;
 	
-	protected FunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep) {
+	protected FunctionGraph(FunctionGraphStyle style, LineStyle paint, int unitStep) {
 		this.unitStep = unitStep;
 		this.style = style;
 		this.paint = paint;
 		this.enabled = true;
 	}
 	
-	public static FunctionGraph fromFunction(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
+	public static FunctionGraph fromFunction(FunctionGraphStyle style, LineStyle paint, int unitStep, DoubleFunction<Double> func) {
 		return new FunctionalFunctionGraph(style, paint, unitStep, func);
 	}
 	
@@ -48,7 +47,8 @@ public abstract class FunctionGraph implements RangedDrawable{
 			startXval += localUnitStep;
 		}
 		
-		g2d.setPaint(paint);
+		g2d.setPaint(paint.getPaint());
+		g2d.setStroke(paint.getStroke());
 		
 		for(double x = startXval; x <= maxXunits; x += localUnitStep) {
 			//Draw at x units
@@ -73,11 +73,11 @@ public abstract class FunctionGraph implements RangedDrawable{
 		this.unitStep = unitStep;
 	}
 
-	public Paint getPaint() {
+	public LineStyle getLineStyle() {
 		return paint;
 	}
 
-	public void setPaint(Paint paint) {
+	public void setLineStyle(LineStyle paint) {
 		this.paint = paint;
 	}
 
@@ -93,7 +93,7 @@ public abstract class FunctionGraph implements RangedDrawable{
 
 		private final DoubleFunction<Double> func;
 		
-		protected FunctionalFunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
+		protected FunctionalFunctionGraph(FunctionGraphStyle style, LineStyle paint, int unitStep, DoubleFunction<Double> func) {
 			super(style, paint, unitStep);
 			this.func = func;
 		}

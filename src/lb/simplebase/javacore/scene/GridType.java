@@ -1,5 +1,5 @@
 package lb.simplebase.javacore.scene;
 
-public enum GridLineStyle {
+public enum GridType {
 	LINE, CROSS, DOT, AXIS;
 }

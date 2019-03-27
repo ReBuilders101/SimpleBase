@@ -1,19 +1,17 @@
 package lb.simplebase.javacore.scene;
 
 import java.awt.Graphics2D;
-import java.awt.Paint;
-
 import lb.simplebase.javacore.Framework;
 
 public class Grid implements RangedDrawable{
 	
-	private GridLineStyle style;
-	private Paint paint;
+	private GridType style;
+	private LineStyle paint;
 	private final double lineDistX;
 	private final double lineDistY;
 	private final int attribute;
 	
-	public Grid(GridLineStyle style, Paint paint, double lineDistX, double lineDistY, int attribute) {
+	public Grid(GridType style, LineStyle paint, double lineDistX, double lineDistY, int attribute) {
 		this.style = style;
 		this.paint = paint;
 		this.lineDistX = lineDistX;
@@ -25,7 +23,7 @@ public class Grid implements RangedDrawable{
 		return attribute;
 	}
 	
-	public Paint getGridPaint() {
+	public LineStyle getLineStyle() {
 		return paint;
 	}
 	
@@ -37,7 +35,7 @@ public class Grid implements RangedDrawable{
 		return lineDistY;
 	}
 	
-	public GridLineStyle getStyle() {
+	public GridType getType() {
 		return style;
 	}
 	
@@ -58,7 +56,8 @@ public class Grid implements RangedDrawable{
 		
 		final int attributePx = Framework.getAttributePx(attribute);
 		
-		g2d.setPaint(paint);
+		g2d.setPaint(paint.getPaint());
+		g2d.setStroke(paint.getStroke());
 		
 		switch (style) {
 		case AXIS:
@@ -125,11 +124,11 @@ public class Grid implements RangedDrawable{
 		}
 	}
 
-	public void setStyle(GridLineStyle style) {
+	public void setStyle(GridType style) {
 		this.style = style;
 	}
 
-	public void setPaint(Paint paint) {
+	public void setLineStyle(LineStyle paint) {
 		this.paint = paint;
 	}
 	
