@@ -307,7 +307,10 @@ public final class Framework {
 		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
 		JComponent comp = currentScene.getOptions(); 
+		sceneOptions.removeAll();
 		if(comp != null) sceneOptions.add(comp, BorderLayout.CENTER);
+		sceneOptions.revalidate();
+		sceneOptions.repaint();
 		//Remove all previews if an scene is activated
 		previewButtons.forEach((b) -> b.setText("Preview"));
 		pprev.setText("<< Preview Previous");
