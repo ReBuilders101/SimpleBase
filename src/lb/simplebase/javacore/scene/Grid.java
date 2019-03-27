@@ -124,7 +124,7 @@ public class Grid implements RangedDrawable{
 		}
 	}
 
-	public void setStyle(GridType style) {
+	public void setType(GridType style) {
 		this.style = style;
 	}
 

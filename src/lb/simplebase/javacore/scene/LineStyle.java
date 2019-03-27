@@ -3,14 +3,21 @@ package lb.simplebase.javacore.scene;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.PaintContext;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.ColorModel;
 
 /**
  * A {@link LineStyle} describes properties of a drawn line.
  * It contains a {@link Paint} and a {@link Stroke} object.
  * This class is immutable.
  */
-public class LineStyle {
+public class LineStyle implements Paint, Stroke{
 
 	private final Paint  paint;
 	private final Stroke stroke;
@@ -73,6 +80,21 @@ public class LineStyle {
 	 */
 	public LineStyle withPaint(Paint paint) {
 		return new LineStyle(paint, stroke);
+	}
+
+	@Override
+	public int getTransparency() {
+		return paint.getTransparency();
+	}
+
+	@Override
+	public Shape createStrokedShape(Shape p) {
+		return stroke.createStrokedShape(p);
+	}
+
+	@Override
+	public PaintContext createContext(ColorModel arg0, Rectangle arg1, Rectangle2D arg2, AffineTransform arg3, RenderingHints arg4) {
+		return paint.createContext(arg0, arg1, arg2, arg3, arg4);
 	}
 	
 }
