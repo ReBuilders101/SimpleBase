@@ -11,15 +11,15 @@ public abstract class FunctionGraph implements RangedDrawable{
 	private boolean enabled;
 	private FunctionGraphStyle style;
 	
-	protected FunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, boolean initiallyEnabled) {
+	protected FunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep) {
 		this.unitStep = unitStep;
 		this.style = style;
 		this.paint = paint;
-		this.enabled = initiallyEnabled;
+		this.enabled = true;
 	}
 	
-	public static FunctionGraph fromFunction(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func, boolean initiallyEnabled) {
-		return new FunctionalFunctionGraph(style, paint, unitStep, func, initiallyEnabled);
+	public static FunctionGraph fromFunction(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
+		return new FunctionalFunctionGraph(style, paint, unitStep, func);
 	}
 	
 	public abstract double getYValue(double xValue);
@@ -93,8 +93,8 @@ public abstract class FunctionGraph implements RangedDrawable{
 
 		private final DoubleFunction<Double> func;
 		
-		protected FunctionalFunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func, boolean initiallyEnabled) {
-			super(style, paint, unitStep, initiallyEnabled);
+		protected FunctionalFunctionGraph(FunctionGraphStyle style, Paint paint, int unitStep, DoubleFunction<Double> func) {
+			super(style, paint, unitStep);
 			this.func = func;
 		}
 

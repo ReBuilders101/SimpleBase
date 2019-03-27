@@ -12,7 +12,7 @@ import lb.simplebase.linalg.Matrix2D;
 
 public class CoordinateSystem {
 	
-	private boolean autoCalcX;
+//	private boolean autoCalcX;
 	private boolean autoCalcY;
 	
 	private double originXoffset;
@@ -33,7 +33,7 @@ public class CoordinateSystem {
 		this.spanYunits = spanYunits;
 		this.transform = transform == null ? new AffineTransform() : transform.getAffineTransform();
 		
-		autoCalcX = false;
+//		autoCalcX = false;
 		autoCalcY = false;
 		
 		backgroundPaint = background;
@@ -67,24 +67,27 @@ public class CoordinateSystem {
 	public void drawAt(Graphics2D g2d, int x, int y, int width, int height) {
 		
 		g2d.setPaint(backgroundPaint);
-		g2d.fillRect(x, y, width, height);
+		if(backgroundPaint != null) g2d.fillRect(x, y, width, height);
 		
 		final double unit2pixelX = width / spanXunits;
-		final double unit2pixelY = height / spanYunits;
-		final AffineTransform translate = AffineTransform.getTranslateInstance(width / 2 + (unit2pixelX * originXoffset), (height / 2 + (unit2pixelY * -originYoffset)));
-		final AffineTransform translateInverse = AffineTransform.getTranslateInstance(-(width / 2 + (unit2pixelX * originXoffset)), -(height / 2 + (unit2pixelY * -originYoffset))); //Because inverting 3D matrices can be expensive, explicitly declare it
+		double localSpanYunits = spanYunits;
+		if(autoCalcY) localSpanYunits = height / unit2pixelX;
+		final double unit2pixelY = height / localSpanYunits;
+//		final AffineTransform translate = AffineTransform.getTranslateInstance(width / 2 + (unit2pixelX * originXoffset), (height / 2 + (unit2pixelY * -originYoffset)));
+//		final AffineTransform translateInverse = AffineTransform.getTranslateInstance(-(width / 2 + (unit2pixelX * originXoffset)), -(height / 2 + (unit2pixelY * -originYoffset))); //Because inverting 3D matrices can be expensive, explicitly declare it
 		final Graphics2D clipped = (Graphics2D) g2d.create(x, y, width, height);
 		
-		Shape bounds = new Rectangle2D.Double(0, 0, spanXunits, spanYunits);
-		bounds = translate.createTransformedShape(bounds);
+		Shape bounds = new Rectangle2D.Double(0, 0, spanXunits, localSpanYunits);
+//		bounds = translate.createTransformedShape(bounds);
 		bounds = transform.createTransformedShape(bounds);
-		bounds = translateInverse.createTransformedShape(bounds);
+//		bounds = translateInverse.createTransformedShape(bounds);
 		Rectangle2D newBounds = bounds.getBounds2D();
 		final int newWidth = (int) (width * (newBounds.getWidth() / spanXunits));
-		final int newHeight = (int) (height * (newBounds.getHeight() / spanYunits));
+		final int newHeight = (int) (height * (newBounds.getHeight() / localSpanYunits));
 				
 		//Apply general transformations
-		clipped.transform(translate); //Move origin to center
+//		clipped.transform(translate); //Move origin to center
+		clipped.translate(width / 2 + (unit2pixelX * originXoffset), (height / 2 + (unit2pixelY * -originYoffset)));
 		clipped.scale(1, -1);	//Flip y axis
 		//Apply special transformations
 		clipped.transform(transform);
@@ -99,6 +102,14 @@ public class CoordinateSystem {
 		originXoffset = offset;
 	}
 	
+	public void setTransform(AffineTransform transform) {
+		this.transform = transform;
+	}
+	
+	public void setTransform(Matrix2D transform) {
+		this.transform = transform.getAffineTransform();
+	}
+	
 	public double getOriginXOffset() {
 		return originXoffset;
 	}
@@ -109,6 +120,14 @@ public class CoordinateSystem {
 	
 	public double getOriginYOffset() {
 		return originYoffset;
+	}
+	
+//	public void setAutoSizeX(boolean value) {
+//		autoCalcX = value;
+//	}
+//	
+	public void setAutoSizeY(boolean value) {
+		autoCalcY = value;
 	}
 
 	public void drawAt(Graphics2D g2d, double x, double y, double width, double height) {
