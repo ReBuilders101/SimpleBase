@@ -9,6 +9,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import lb.simplebase.javacore.Utils;
 import lb.simplebase.linalg.Matrix2D;
 
 public class CoordinateSystem {
@@ -27,7 +28,9 @@ public class CoordinateSystem {
 	private List<RangedDrawable> graphLayer;
 	private Paint backgroundPaint;
 	
-	public CoordinateSystem(Paint background, double originXoffset, double originYoffset, double spanXunits, double spanYunits, Matrix2D transform) {
+	private int spanLimit;
+	
+	public CoordinateSystem(Paint background, double originXoffset, double originYoffset, double spanXunits, double spanYunits, Matrix2D transform, int spanLimit) {
 		this.originXoffset = originXoffset;
 		this.originYoffset = originYoffset;
 		this.spanXunits = spanXunits;
@@ -37,12 +40,14 @@ public class CoordinateSystem {
 //		autoCalcX = false;
 		autoCalcY = false;
 		
+		this.spanLimit = spanLimit;
+		
 		backgroundPaint = background;
 		graphLayer = new ArrayList<>();
 	}
 	
 	public CoordinateSystem(Paint background, double xSpan, double ySpan) {
-		this(background, 0, 0, xSpan, ySpan, Matrix2D.IDENTITY);
+		this(background, 0, 0, xSpan, ySpan, Matrix2D.IDENTITY, 100);
 	}
 	
 	public double getXSpan() {
@@ -59,6 +64,14 @@ public class CoordinateSystem {
 	
 	public void setAxis(RangedDrawable axis) {
 		axisLayer = axis;
+	}
+	
+	public void setSpanLimit(int limit) {
+		spanLimit = limit;
+	}
+	
+	public int getSpanLimit() {
+		return spanLimit;
 	}
 	
 	public void addGraph(RangedDrawable graph) {
@@ -87,10 +100,12 @@ public class CoordinateSystem {
 		}
 //		bounds = translateInverse.createTransformedShape(bounds);
 		Rectangle2D newBounds = bounds.getBounds2D();
-		final int newWidth = (int) (width * (newBounds.getWidth() / spanXunits));
-		final int newHeight = (int) (height * (newBounds.getHeight() / localSpanYunits));
+		final double boundSpanX = Utils.clamp(newBounds.getWidth(), 0, spanLimit);
+		final double boundSpanY = Utils.clamp(newBounds.getHeight(), 0, spanLimit);
+		final int newWidth = (int) (width * (boundSpanX / spanXunits));
+		final int newHeight = (int) (height * (boundSpanY / localSpanYunits));
 		
-		if(newHeight == 0 || newWidth == 0 || newBounds.getWidth() == 0 || newBounds.getHeight() == 0) return;
+		if(newHeight == 0 || newWidth == 0 || boundSpanX == 0 || boundSpanY == 0) return;
 		
 		//Apply general transformations
 //		clipped.transform(translate); //Move origin to center
@@ -99,9 +114,9 @@ public class CoordinateSystem {
 		//Apply special transformations
 		clipped.transform(transform);
 		
-		if(gridLayer != null) gridLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight());
-		if(axisLayer != null) axisLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight());
-		graphLayer.forEach((g) ->     g.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, newBounds.getWidth(), newBounds.getHeight()));
+		if(gridLayer != null) gridLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, boundSpanX, boundSpanY);
+		if(axisLayer != null) axisLayer.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, boundSpanX, boundSpanY);
+		graphLayer.forEach((g) ->     g.draw(clipped, newWidth, newHeight, originXoffset, originYoffset, boundSpanX, boundSpanY));
 		clipped.dispose();
 	}
 	
