@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,12 +80,18 @@ public class CoordinateSystem {
 		
 		Shape bounds = new Rectangle2D.Double(0, 0, spanXunits, localSpanYunits);
 //		bounds = translate.createTransformedShape(bounds);
-		bounds = transform.createTransformedShape(bounds);
+		try {
+			bounds = transform.createInverse().createTransformedShape(bounds);
+		} catch (NoninvertibleTransformException e) {
+			//Just leave bounds as is, so a line will be drawn at determinant 0
+		}
 //		bounds = translateInverse.createTransformedShape(bounds);
 		Rectangle2D newBounds = bounds.getBounds2D();
 		final int newWidth = (int) (width * (newBounds.getWidth() / spanXunits));
 		final int newHeight = (int) (height * (newBounds.getHeight() / localSpanYunits));
-				
+		
+		if(newHeight == 0 || newWidth == 0 || newBounds.getWidth() == 0 || newBounds.getHeight() == 0) return;
+		
 		//Apply general transformations
 //		clipped.transform(translate); //Move origin to center
 		clipped.translate(width / 2 + (unit2pixelX * originXoffset), (height / 2 + (unit2pixelY * -originYoffset)));

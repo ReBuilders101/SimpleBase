@@ -328,6 +328,10 @@ public final class Framework {
 		return (milliseconds * tps) / 1000;
 	}
 	
+	public static long getTicks(long milliseconds) {
+		return (milliseconds * tps) / 1000;
+	}
+	
 	private static void onMainPanelDraw(Graphics2D g, int width, int height) {
 		//g.drawImage(canvas, 0, 0, null);
 		if(currentScene != null) currentScene.draw(g, width, height);
