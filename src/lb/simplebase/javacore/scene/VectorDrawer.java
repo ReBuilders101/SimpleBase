@@ -1,8 +1,6 @@
 package lb.simplebase.javacore.scene;
 
 import java.awt.Graphics2D;
-import java.awt.Paint;
-
 import lb.simplebase.javacore.Framework;
 import lb.simplebase.linalg.Vector2D;
 
