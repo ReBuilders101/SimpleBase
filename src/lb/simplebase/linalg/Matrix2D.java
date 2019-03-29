@@ -4,6 +4,8 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import lb.simplebase.javacore.Utils;
+
 public class Matrix2D {
 
 	public static final Matrix2D IDENTITY = new Matrix2D(1, 0, 0, 1);
@@ -96,6 +98,11 @@ public class Matrix2D {
 	//Helper for fast dot product without creating a Vector2D object
 	private static double dotP2D(double x1, double y1, double x2, double y2) {
 		return (x1 * x2) + (y1 * y2);
+	}
+	
+	public boolean isRightHanded() {
+		final double deltaAngle = Utils.clampAngle(getSecondColumn().getPolarAngle() - getFirstColumn().getPolarAngle());
+		return deltaAngle >= 0;
 	}
 	
 	public Matrix2D scale(double factor) {

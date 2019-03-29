@@ -167,6 +167,35 @@ public final class Utils {
 		return value;
 	}
 	
+	/**
+	 * Clamps a value between min and max by adding or subtracting the interval from the initial
+	 * value until it is between min and max.
+	 * @param value The value
+	 * @param min The minimal value
+	 * @param max The maximal value
+	 * @return The value between min and max
+	 */
+	public static double clampCyclic(double value, double min, double max) {
+		if(value > max) {
+			return clampCyclic(value - (max - min), min, max);
+		}else if(value < min) {
+			return clampCyclic(value + (max - min), min, max);
+		} else {
+			return value;
+		}
+	}
+	
+	/**
+	 * Clamps a radian angle between <code>-pi</code> and <code>pi</code>.
+	 * To get an angle between <code>0</code> and <code>2pi</code>, use {@link #clampCyclic(double, double, double)}
+	 * or add <code>pi</code> to the result.
+	 * @param radianAngle The angle
+	 * @return The angle between <code>-pi</code> and <code>pi</code>
+	 */
+	public static double clampAngle(double radianAngle) {
+		return clampCyclic(radianAngle, -Math.PI, Math.PI);
+	}
+	
 	public static double scale(double value, double minOut, double maxOut, double minIn, double maxIn) {
 		value = clamp(value, minIn, maxIn);
 //		final double size = maxIn - minIn;

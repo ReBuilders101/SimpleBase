@@ -22,7 +22,11 @@ public class Vector2D {
 	}
 	
 	public double getY() {
-		return x;
+		return y;
+	}
+	
+	public double getPolarAngle() {
+		return Math.atan2(y, x);
 	}
 	
 	public Vector2D add(Vector2D toAdd) {
@@ -141,6 +145,10 @@ public class Vector2D {
 	public static Vector2D of(int[] values) {
 		if(values.length < 2) throw new ArrayIndexOutOfBoundsException("The array must have at least 2 elements");
 		return new Vector2D(values[0], values[1]);
+	}
+	
+	public static Vector2D ofPolar(double radius, double theta) {
+		return new Vector2D(Math.cos(theta) * radius, Math.sin(theta) * radius);
 	}
 	
 	public static Vector2D ofProjectiveCoordinates(Vector3D coords) {
