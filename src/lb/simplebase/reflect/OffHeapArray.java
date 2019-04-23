@@ -1,5 +1,7 @@
 package lb.simplebase.reflect;
 
+import java.util.Iterator;
+
 import lb.simplebase.core.RequireUndocumented;
 
 /**
@@ -13,7 +15,7 @@ import lb.simplebase.core.RequireUndocumented;
  * @param <T> The element type
  */
 @RequireUndocumented("sun.misc.Unsafe")
-public class OffHeapArray<T> extends AllocatedMemory{
+public final class OffHeapArray<T> extends AllocatedMemory implements Iterable<T>{
 
 	private FixedSizeObject<T> fixed;
 	private long elementsize;
@@ -97,6 +99,26 @@ public class OffHeapArray<T> extends AllocatedMemory{
 	protected void finalize() throws Throwable {
 		super.finalize();
 		freeMemory();
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return new Iterator<T>() {
+
+			private long currentIndex = 0;
+			
+			@Override
+			public boolean hasNext() {
+				return currentIndex < getSize() - 1;
+			}
+
+			@Override
+			public T next() {
+				T ret = get(currentIndex);
+				currentIndex++;
+				return ret;
+			}
+		};
 	}
 	
 }
