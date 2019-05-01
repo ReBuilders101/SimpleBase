@@ -20,8 +20,8 @@ import static org.lwjgl.opengl.GL11.GL_FALSE;
  */
 public final class GLShaderLoader {
 	
-	public static final String DEFAULT_VERTEX_SHADER = "lb/simplebase/core/DefaultVertexShader.glsl";
-	public static final String DEFAULT_FRAGMENT_SHADER = "lb/simplebase/core/DefaultFragmentShader.glsl";
+	public static final String DEFAULT_VERTEX_SHADER = "lb/simplebase/glcore/DefaultVertexShader.glsl";
+	public static final String DEFAULT_FRAGMENT_SHADER = "lb/simplebase/glcore/DefaultFragmentShader.glsl";
 	
 	private GLShaderLoader() {}
 	
@@ -97,6 +97,20 @@ public final class GLShaderLoader {
 		final int program = GL20.glCreateProgram();
 		slAttachShader(DEFAULT_VERTEX_SHADER, program, GL20.GL_VERTEX_SHADER);
 		slAttachShader(DEFAULT_FRAGMENT_SHADER, program, GL20.GL_FRAGMENT_SHADER);
+		slLinkProgram(program);
+		return program;
+	}
+	
+	/**
+	 * Creates a shader program that uses the vertex and fragment shaders in the parameters.<br>
+	 * Every call generates a new program.<br>
+	 * Program and shaders are automatically cleaned up.
+	 * @return A default shader program
+	 */
+	public static int slBasicProgram(String vertexShader, String fragmentShader) {
+		final int program = GL20.glCreateProgram();
+		slAttachShader(vertexShader, program, GL20.GL_VERTEX_SHADER);
+		slAttachShader(fragmentShader, program, GL20.GL_FRAGMENT_SHADER);
 		slLinkProgram(program);
 		return program;
 	}
