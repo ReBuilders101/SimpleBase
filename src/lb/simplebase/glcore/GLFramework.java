@@ -18,6 +18,7 @@ import lb.simplebase.core.AnyState;
 import lb.simplebase.core.FrameworkState;
 import lb.simplebase.core.RequireState;
 import lb.simplebase.log.LogHelper;
+import lb.simplebase.log.LogLevel;
 import lb.simplebase.log.Logger;
 import lb.simplebase.log.OutputChannel;
 
@@ -31,7 +32,7 @@ public final class GLFramework {
 	//The window handle, if created
 	private static long windowId = 0;
 	//The logger foe this class
-	private static Logger logger = LogHelper.create(GLFramework.class);
+	private static Logger logger = LogHelper.create(GLFramework.class, LogLevel.INFO);
 	//The exit code to use when an error occurrs
 	private static int errorExitCode = 1;
 	//The current state of the framework
@@ -85,7 +86,7 @@ public final class GLFramework {
 	@RequireState(FrameworkState.INITIALIZED)
 	public static void gfStart() {
 		if(state != FrameworkState.INITIALIZED) {
-			logger.error("Cannot call gfIStart() when the framework has not been initialized or already been started");
+			logger.error("Cannot call gfStart() when the framework has not been initialized or already been started");
 			return;
 		}
 		windowId = GLFW.glfwCreateWindow(width, height, title, monitor, MemoryUtil.NULL);
@@ -118,13 +119,16 @@ public final class GLFramework {
 			disposeActions.forEach((r) -> r.run()); //Run all actions first
 			GLFW.glfwDestroyWindow(windowId); //Destroy the window if one had been created
 			GLFW.glfwTerminate(); //Teminate, if initialized
+			if(exitOnStop) System.exit(0); //If requested, exit the Application
 			break;
 		case INITIALIZED:
 			disposeActions.forEach((r) -> r.run()); //Run all actions first
 			GLFW.glfwTerminate(); //Teminate, if initialized
+			if(exitOnStop) System.exit(0); //If requested, exit the Application
 			break;
 		case UNINITIALIZED:
 			disposeActions.forEach((r) -> r.run()); //Run all actions always, except when state is ENDED, because then they have been run already
+			if(exitOnStop) System.exit(0); //If requested, exit the Application
 			break;
 		case ENDED:
 			if(exitOnStop) System.exit(0); //If requested, exit the Application
