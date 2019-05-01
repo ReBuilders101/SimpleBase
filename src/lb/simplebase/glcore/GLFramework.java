@@ -201,6 +201,12 @@ public final class GLFramework {
 		return windowId;
 	}
 	
+	@RequireState(FrameworkState.STARTED)
+	public static void gfSwapWindowBuffers() {
+		if(state != FrameworkState.STARTED) return;
+		GLFW.glfwSwapBuffers(windowId);
+	}
+	
 	@AnyState
 	public static void gfAddTerminateTask(Runnable task) {
 		disposeActions.add(task);
