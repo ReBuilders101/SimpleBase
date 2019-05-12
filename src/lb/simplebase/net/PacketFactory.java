@@ -2,6 +2,8 @@ package lb.simplebase.net;
 
 import java.util.Arrays;
 
+import lb.simplebase.io.ByteBuffer;
+
 /**
  * Encodes and decodes packets from / to bytes
  * <p>

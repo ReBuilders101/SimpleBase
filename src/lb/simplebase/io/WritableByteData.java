@@ -1,4 +1,6 @@
-package lb.simplebase.net;
+package lb.simplebase.io;
+
+import lb.simplebase.net.ByteData;
 
 /**
  * This interface provides additional methods for writing primitives and strings. All methods

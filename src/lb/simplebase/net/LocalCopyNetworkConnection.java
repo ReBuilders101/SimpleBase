@@ -1,5 +1,7 @@
 package lb.simplebase.net;
 
+import lb.simplebase.io.ByteBuffer;
+
 /**
  * @deprecated Only for testing
  */

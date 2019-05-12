@@ -1,6 +1,4 @@
-package lb.simplebase.binfile;
-
-import lb.simplebase.net.ReadableByteData;
+package lb.simplebase.io;
 
 /**
  * A class that can be used to read different data types from a byte array

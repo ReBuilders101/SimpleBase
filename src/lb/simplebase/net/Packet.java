@@ -1,5 +1,8 @@
 package lb.simplebase.net;
 
+import lb.simplebase.io.ReadableByteData;
+import lb.simplebase.io.WritableByteData;
+
 /**
  * A packet represents data that can be sent through a network connection.<br>
  * @see PacketReceiver

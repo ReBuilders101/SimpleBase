@@ -1,7 +1,9 @@
-package lb.simplebase.net;
+package lb.simplebase.io;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+
+import lb.simplebase.net.ByteData;
 
 /**
  * An object that stores byte data and is both readable and writeable.

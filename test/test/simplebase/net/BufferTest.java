@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.net.ByteBuffer;
+import lb.simplebase.io.ByteBuffer;
 
 class BufferTest {
 

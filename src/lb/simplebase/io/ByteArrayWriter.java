@@ -1,8 +1,6 @@
-package lb.simplebase.binfile;
+package lb.simplebase.io;
 
 import java.io.ByteArrayOutputStream;
-
-import lb.simplebase.net.WritableByteData;
 
 public class ByteArrayWriter implements WritableByteData{
 
