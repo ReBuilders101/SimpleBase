@@ -3,8 +3,6 @@ package lb.simplebase.io;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-import lb.simplebase.net.ByteData;
-
 /**
  * An object that stores byte data and is both readable and writeable.
  * All read methods throw {@link ArrayIndexOutOfBoundsException}s when the read pointer is larger than the size of the array.

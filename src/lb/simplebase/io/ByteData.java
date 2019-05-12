@@ -1,4 +1,4 @@
-package lb.simplebase.net;
+package lb.simplebase.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

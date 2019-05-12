@@ -1,7 +1,5 @@
 package lb.simplebase.io;
 
-import lb.simplebase.net.ByteData;
-
 /**
  * This interface provides additional methods for reading primitives and strings directly. All methods
  * depend on the {@link #readByte()} method, which is defined by the implementation. by default,
