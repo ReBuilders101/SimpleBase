@@ -21,6 +21,8 @@ public class NetworkManagerServer extends NetworkManager{
 	private static volatile int ID = 0;
 	private static final long CAN_ACCEPT_TEST_DELAY = 1L;
 	
+	private volatile int nextConnectionID = 0;
+	
 	private final boolean isLocalOnly;
 	private final int id;
 	private boolean closed;
@@ -262,7 +264,7 @@ public class NetworkManagerServer extends NetworkManager{
 	 * Cenerate a TargetId for new connections
 	 */
 	private TargetIdentifier generateNewTargetId(Socket socket) {
-		return new TargetIdentifier.NetworkTargetIdentifier("ServerToClient-"+getConnectionCount(), (InetSocketAddress) socket.getRemoteSocketAddress());
+		return new TargetIdentifier.NetworkTargetIdentifier("ServerToClient-" + nextConnectionID++, (InetSocketAddress) socket.getRemoteSocketAddress());
 	}
 	
 	/**
