@@ -20,4 +20,9 @@ public class ByteArrayWriter implements WritableByteData{
 		baos.write(b);
 	}
 
+	@Override
+	public ByteArrayOutputStream getAsWriteableIOStream() {
+		return baos;
+	}
+
 }
