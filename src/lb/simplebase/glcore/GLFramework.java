@@ -114,6 +114,7 @@ public final class GLFramework {
 	
 	//Stop after loop has ended
 	private static void gfStopImpl() {
+		logger.info("Stopping from state " + state);
 		switch (state) {
 		case STARTED:
 			disposeActions.forEach((r) -> r.run()); //Run all actions first
@@ -134,6 +135,7 @@ public final class GLFramework {
 			if(exitOnStop) System.exit(0); //If requested, exit the Application
 			break;
 		}
+		logger.info("Stopped successfully without exiting");
 		state = FrameworkState.ENDED;
 	}
 	
