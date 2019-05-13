@@ -1,6 +1,6 @@
 package lb.simplebase.net;
 
-import lb.simplebase.io.ByteBuffer;
+import lb.simplebase.io.ByteArrayBuffer;
 
 /**
  * @deprecated Only for testing
@@ -21,7 +21,7 @@ import lb.simplebase.io.ByteBuffer;
 	@Override
 	public void sendPacketToTarget(Packet packet) throws ConnectionStateException {
 		if(getState() == ConnectionState.OPEN){
-			final ByteBuffer data = new ByteBuffer(); //Data storage for copying
+			final ByteArrayBuffer data = new ByteArrayBuffer(); //Data storage for copying
 			packet.writeData(data);
 			final PacketIdMapping mapping = getPacketFactory().getMappingContainer().getMappingFor(packet.getClass()); //get Mapping to create instance
 			if(mapping == null)

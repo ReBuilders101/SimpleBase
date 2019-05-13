@@ -7,20 +7,31 @@ import java.io.IOException;
 /**
  * All data contained in an implementing object can be represented as a byte array, available through the {@link #getAsArray()} method.
  * The {@link ByteData}-object is neither readable or writable directly, but it contains methods to be converted into a readable or
- * writable IO Stream.<br><b>Changes to these streams, including writing byte data, are not reflected in changes to this object.</b>
- * @see #getAsReadableIOStream()
- * @see #getAsWriteableIOStream()
+ * writable IO Stream.<br>
+ * Not threadsafe.
  */
 public interface ByteData {
 	
 	/**
-	 * Gets all (relevant) data of the object as a byte array.
+	 * Gets all (relevant) data of the object as a byte array.<br>
+	 * <b>If only read access is required, use {@link #getAsReadOnlyArray()} instead.</b><br>
 	 * The created array may change form call to call, depending on the state of the object,
 	 * however the returned array should never change, so it must be copied before returning it.
-	 * In case of nested arrays, a depp copy is not necessary. 
+	 * In case of nested arrays, a deep copy is not necessary.<br>
+	 * <b>Changes to this array must not affect this ByteData object.</b>
 	 * @return The byte array
 	 */
 	public byte[] getAsArray();
+	
+	/**
+	 * Gets all (relevant) data of the object as a byte array.<br>
+	 * <b>If writing to the array is required, use {@link #getAsArray()} instead.</b><br>
+	 * The created array may change form call to call, depending on the state of the object,
+	 * and can, depending on the implementation, be either the array backing this ByteData implementation, or be a flat copy of this array.
+	 * <b>Changes to this array may affect this ByteData object, but this behavior is not guaranteed.</b>
+	 * @return The byte array
+	 */
+	public byte[] getAsReadOnlyArray();
 	
 	/**
 	 * Creates a new {@link ByteArrayInputStream} backed by the byte array returned by {@link #getAsArray()} at the time this
@@ -29,7 +40,7 @@ public interface ByteData {
 	 * @return A {@link ByteArrayInputStream} containing the same data as currently returned by {@link #getAsArray()}.
 	 */
 	public default ByteArrayInputStream getAsReadableIOStream() {
-		return new ByteArrayInputStream(getAsArray());
+		return new ByteArrayInputStream(getAsArray()); //Cannot use getAsReadOnlyArray, because param is stored in BAIS object
 	}
 	
 	/**
@@ -41,7 +52,7 @@ public interface ByteData {
 	public default ByteArrayOutputStream getAsWriteableIOStream(){
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			baos.write(getAsArray());
+			baos.write(getAsReadOnlyArray()); //Data is copied in BAOS
 		} catch (IOException e) {
 			e.printStackTrace(); //This cannot happen. Really. I promise (see VVV). Added a log call anyways.
 			//Not happening because:
@@ -58,7 +69,7 @@ public interface ByteData {
 	 * @return The length of the byte data
 	 */
 	public default int getLength() {
-		return getAsArray().length;
+		return getAsReadOnlyArray().length;
 	}
 	
 //	

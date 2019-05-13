@@ -1,5 +1,7 @@
 package lb.simplebase.io;
 
+import java.util.Arrays;
+
 /**
  * A class that can be used to read different data types from a byte array
  */
@@ -19,7 +21,7 @@ public class ByteArrayReader implements ReadableByteData{
 	
 	@Override
 	public byte[] getAsArray() {
-		return data;
+		return Arrays.copyOf(data, data.length);
 	}
 
 	@Override
@@ -39,6 +41,11 @@ public class ByteArrayReader implements ReadableByteData{
 	@Override
 	public boolean canRead() {
 		return index < data.length;
+	}
+
+	@Override
+	public byte[] getAsReadOnlyArray() {
+		return data;
 	}
 
 }

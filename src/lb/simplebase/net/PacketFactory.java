@@ -2,7 +2,7 @@ package lb.simplebase.net;
 
 import java.util.Arrays;
 
-import lb.simplebase.io.ByteBuffer;
+import lb.simplebase.io.ByteArrayBuffer;
 
 /**
  * Encodes and decodes packets from / to bytes
@@ -107,7 +107,7 @@ public class PacketFactory {
 	 * @throws PacketMappingNotFoundException When the packetId mapping was not found (duh)
 	 */
 	private void makePacket() throws PacketMappingNotFoundException {
-		ByteBuffer packetData = new ByteBuffer(tempData); //copy packet data
+		ByteArrayBuffer packetData = new ByteArrayBuffer(tempData); //copy packet data
 		PacketIdMapping mapping = mapCon.getMappingFor(packetId); //Mapping for id
 		if(mapping == null)
 			throw new PacketMappingNotFoundException("mapping not found for id while constructing packet", packetId);
@@ -131,21 +131,21 @@ public class PacketFactory {
 	 * @throws PacketMappingNotFoundException When the packet class cloud not be converted into an id
 	 */
 	public byte[] createPacketData(Packet packet) throws PacketMappingNotFoundException {
-		final ByteBuffer packetData = new ByteBuffer();
+		final ByteArrayBuffer packetData = new ByteArrayBuffer();
 		packet.writeData(packetData); //Write packet data
 		//create new buffer that also has metadata
 		final int packetDataLength = packetData.getLength();
 		if(!mapCon.hasMappingFor(packet.getClass()))
 			throw new PacketMappingNotFoundException("No mapping was found when trying to send packet", packet);
 		final int packetId = mapCon.getMappingFor(packet.getClass()).getPacketId(); //The mapping must exist, otherwise ^^
-		final ByteBuffer allData = new ByteBuffer();
+		final ByteArrayBuffer allData = new ByteArrayBuffer();
 		//Write data to buffer
 		allData.write(PACKET_HEADER_PRIV);
 		allData.writeInt(packetId);
 		allData.writeInt(packetDataLength);
 		allData.write(packetData);
 		//create array
-		return allData.getAsArray();
+		return allData.getAsReadOnlyArray();
 	}
 	
 	protected void notifyConnectionClosed() {

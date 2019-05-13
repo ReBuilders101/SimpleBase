@@ -8,7 +8,7 @@ import java.util.Arrays;
  * All read methods throw {@link ArrayIndexOutOfBoundsException}s when the read pointer is larger than the size of the array.
  * <br><b>Not Threadsafe.</b>
  */
-public class ByteBuffer implements WritableByteData, ReadableByteData{
+public class ByteArrayBuffer implements WritableByteData, ReadableByteData{
 
 	private ByteArrayOutputStream writeData;
 	private byte[] readData;
@@ -16,38 +16,38 @@ public class ByteBuffer implements WritableByteData, ReadableByteData{
 	private boolean readInvalid;
 	
 	/**
-	 * Creates a new {@link ByteBuffer} without any data
+	 * Creates a new {@link ByteArrayBuffer} without any data
 	 */
-	public ByteBuffer() {
+	public ByteArrayBuffer() {
 		writeData = new ByteArrayOutputStream();
 		readPointer = 0;
 		readInvalid = true; //Invalid, so readData will be initialized on first access
 	}
 	
 	/**
-	 * Creates a new {@link ByteBuffer} that initially contains the byte data in the parameter
+	 * Creates a new {@link ByteArrayBuffer} that initially contains the byte data in the parameter
 	 * @param data The data that will be initially contained
 	 */
-	public ByteBuffer(ByteData data) {
+	public ByteArrayBuffer(ByteData data) {
 		writeData = data.getAsWriteableIOStream(); //Use stream with data already contained
 		readPointer = 0;
 		readInvalid = true; //Invalid, so readData will be initialized on first access
 	}
 	
 	/**
-	 * Creates a new {@link ByteBuffer} that initially contains the byte data in the parameter
+	 * Creates a new {@link ByteArrayBuffer} that initially contains the byte data in the parameter
 	 * @param data The data that will be initially contained
 	 */
-	public ByteBuffer(byte[] data) {
+	public ByteArrayBuffer(byte[] data) {
 		this();
 		write(data);
 	}
 	
 	/**
-	 * Creates a new byte array containing the byte data of this {@link ByteBuffer}.<br>
-	 * Changes to the returned array will <b>not</b> change this {@link ByteBuffer}, and changes
-	 * to this {@link ByteBuffer} will <b>not</b> affect the returned array.
-	 * @return An array containing the byte data of this {@link ByteBuffer}
+	 * Creates a new byte array containing the byte data of this {@link ByteArrayBuffer}.<br>
+	 * Changes to the returned array will <b>not</b> change this {@link ByteArrayBuffer}, and changes
+	 * to this {@link ByteArrayBuffer} will <b>not</b> affect the returned array.
+	 * @return An array containing the byte data of this {@link ByteArrayBuffer}
 	 */
 	@Override
 	public byte[] getAsArray() {
@@ -130,17 +130,23 @@ public class ByteBuffer implements WritableByteData, ReadableByteData{
 	}
 	
 	/**
-	 * Writes all byte data from another {@link ByteBuffer} into this {@link ByteBuffer}.
-	 * @param buf The {@link ByteBuffer} containing the data
+	 * Writes all byte data from another {@link ByteArrayBuffer} into this {@link ByteArrayBuffer}.
+	 * @param buf The {@link ByteArrayBuffer} containing the data
 	 */
-	public void write(ByteBuffer buf) {
-		final byte[] data = buf.getAsArray();
+	public void write(ByteData buf) {
+		final byte[] data = buf.getAsReadOnlyArray();
 		write(data);
 	}
 
 	@Override
 	public boolean canRead() {
 		return readPointer < writeData.size();
+	}
+
+	@Override
+	public byte[] getAsReadOnlyArray() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

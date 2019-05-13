@@ -7,15 +7,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.io.ByteBuffer;
+import lb.simplebase.io.ByteArrayBuffer;
 
 class BufferTest {
 
-	ByteBuffer buffer;
+	ByteArrayBuffer buffer;
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		buffer = new ByteBuffer();
+		buffer = new ByteArrayBuffer();
 	}
 
 	@AfterEach
@@ -51,7 +51,7 @@ class BufferTest {
 		final byte[] data = new byte[] { 2, 34, (byte) 255, 96};
 		buffer.write(data);
 		
-		byte[] newData = buffer.getAsArray();
+		byte[] newData = buffer.getAsReadOnlyArray();
 		assertArrayEquals(data, newData, "Arrays not equal");
 	}
 	
