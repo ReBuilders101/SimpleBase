@@ -119,9 +119,12 @@ public final class EventBus {
 	private WeakReference<Class<? extends Event>> getKey(Class<? extends Event> type, boolean mayCreateKey, Supplier<Set<EventHandlerImpl>> newSet) {
 		WeakReference<Class<? extends Event>> key = null;
 		for(WeakReference<Class<? extends Event>> ref : handlersMap.keySet()) {
-			Class<? extends Event> value = ref.get();
-			if(value == null) continue; //If reference is cleared, it doesn't havce to be checked
-			if(value == type) { //Class.equals() also uses ==, also a class can only be loaded once
+			Class<? extends Event> weakValue = ref.get();
+			if(weakValue == null) { //If reference is cleared, remove it from the map
+				handlersMap.remove(ref); //If a WeakReference is unloaded, it cannot come back. This means that the key (and value) can be removed
+				continue;
+			}
+			if(weakValue == type) { //Class.equals() also uses ==, also a class can only be loaded once
 				key = ref; //The key is found
 				break;
 			}
