@@ -94,6 +94,7 @@ public final class EventBus {
 				return false;
 			}
 		}
+		if(!method.isAnnotationPresent(EventHandler.class)) return false; //Method must have EventHandler annotation
 		if(method.getExceptionTypes().length != 0) return false; //The method must not throw checked exceptions
 		//Check params for event type
 		final Class<?>[] params = method.getParameterTypes();
