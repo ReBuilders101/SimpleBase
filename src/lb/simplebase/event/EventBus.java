@@ -14,18 +14,22 @@ import java.util.function.Supplier;
 import lb.simplebase.event.EventHandlerImpl.EventHandlerFunctional;
 import lb.simplebase.event.EventHandlerImpl.EventHandlerReflection;
 
-public final class EventBus {
+public class EventBus {
 	
 	//TODO: A WeakHashMap could be used, but that could lead to ConcurrentModificationExceptions
 	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
 	private boolean isActive;
 	
-	protected ThreadLocal<Boolean> isHandlingEvents;	//Check for each thread separately
+	protected final ThreadLocal<Boolean> isHandlingEvents;	//Check for each thread separately
 	
-	public EventBus() {
+	protected EventBus() {
 		handlersMap = new HashMap<>();
 		isActive = true;
 		isHandlingEvents = ThreadLocal.withInitial(() -> false);
+	}
+	
+	public static EventBus create() {
+		return new EventBus();
 	}
 	
 	public int register(final Class<?> handlerContainer) {
@@ -81,7 +85,6 @@ public final class EventBus {
 //		}//Syncronisation not needed anymore. We now have a local reference to the handler list.
 		if(handlerSet == null) return false; //Just to be safe
 //		synchronized (handlerSet) { //Because HashSet's iterator is fail-fast, we have to prevent concurrent modification here too
-			isHandlingEvents.set(true); //Begin Processing, now new events can no longer be posted on this thread
 			try {	//Protection against bad sync (should not be necessary)
 				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
 					if(handler == null) continue; //HashSet allows a null value
@@ -89,8 +92,6 @@ public final class EventBus {
 				}
 			} catch(ConcurrentModificationException ex) {
 				return true; //It is not really a success, but false would indicate that no handlers have been called, which may also be not correct
-			} finally {
-				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 			}
 //		}//End sync on set, iterator is done
 		return true;
@@ -152,7 +153,12 @@ public final class EventBus {
 	
 	//Overridable for concurrent implementation: post on another thread
 	protected void postEvent(final EventHandlerImpl handler, final Event event) {
-		handler.checkAndPostEvent(event);
+		try {
+			isHandlingEvents.set(true);//Moved this here so it can be overridden to set in different threads
+			handler.checkAndPostEvent(event);
+		} finally {
+			isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
+		}
 	}
 	
 	private boolean isHandlerThread() {

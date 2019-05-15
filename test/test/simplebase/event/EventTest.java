@@ -14,7 +14,7 @@ class EventTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		bus = new EventBus();
+		bus = EventBus.create();
 		EventSubscribers.idx = 0;
 		EventSubscribers.received = false;
 		EventSubscribers.received2 = false;
