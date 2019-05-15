@@ -17,7 +17,7 @@ import lb.simplebase.event.EventHandlerImpl.EventHandlerReflection;
 public final class EventBus {
 	
 	//TODO: A WeakHashMap could be used, but that could lead to ConcurrentModificationExceptions
-	private Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
+	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
 	private boolean isActive;
 	
 	protected ThreadLocal<Boolean> isHandlingEvents;	//Check for each thread separately
@@ -28,7 +28,7 @@ public final class EventBus {
 		isHandlingEvents = ThreadLocal.withInitial(() -> false);
 	}
 	
-	public int register(Class<?> handlerContainer) {
+	public int register(final Class<?> handlerContainer) {
 		//returns the amount of registered methods
 		if(handlerContainer == null) return 0;
 		if(isHandlerThread()) return 0;
@@ -45,7 +45,7 @@ public final class EventBus {
 		return num;//Number of regsitered methods
 	}
 	
-	public synchronized <T extends Event> boolean register(Consumer<T> handler, Class<T> eventType) {
+	public synchronized <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType) {
 		if(handler == null) return false;	//Handler can't be null (obv)
 		if(isHandlerThread()) return false; //If handlers can register new handlers, this would lead to a concurrent modification exception (this is the same thread, so synchronized doesn't prevent that
 		final EventHandlerImpl eventHandler = EventHandlerFunctional.create(handler, eventType);
@@ -54,7 +54,7 @@ public final class EventBus {
 	}
 	
 	//TODO can we just sync the whole method and get rid of the map / set syncs?
-	public synchronized boolean post(Event event) {
+	public synchronized boolean post(final Event event) {
 		if(event == null) return false;
 		if(isHandlerThread()) return false;	//Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
@@ -83,7 +83,7 @@ public final class EventBus {
 		return true;
 	}
 	
-	private boolean registerMethod(Method method) {
+	private boolean registerMethod(final Method method) {
 		//Validate method
 		if(method == null) return false;
 		if(!Modifier.isStatic(method.getModifiers())) return false; //Method must be static
@@ -108,7 +108,7 @@ public final class EventBus {
 		return registerHandler(eventHandler);
 	}
 	
-	private synchronized boolean registerHandler(EventHandlerImpl handler) {//Sync only needed here, the other methods don't use the map
+	private synchronized boolean registerHandler(final EventHandlerImpl handler) {//Sync only needed here, the other methods don't use the map
 		final WeakReference<Class<? extends Event>> key = getKey(handler.getEventType(), true, HashSet::new); //Get the key, or create it if necessary
 		if(key == null) return false;
 		Set<EventHandlerImpl> handlerSet = handlersMap.get(key);
@@ -117,7 +117,7 @@ public final class EventBus {
 		 //Don't add a handler twice: contains() uses equals, so the same reflected method can not be added twice
 	}
 	
-	private WeakReference<Class<? extends Event>> getKey(Class<? extends Event> type, boolean mayCreateKey, Supplier<Set<EventHandlerImpl>> newSet) {
+	private WeakReference<Class<? extends Event>> getKey(final Class<? extends Event> type, final boolean mayCreateKey, final Supplier<Set<EventHandlerImpl>> newSet) {
 		WeakReference<Class<? extends Event>> key = null;
 		for(WeakReference<Class<? extends Event>> ref : handlersMap.keySet()) {
 			Class<? extends Event> weakValue = ref.get();
@@ -139,7 +139,7 @@ public final class EventBus {
 	}
 	
 	//Overridable for concurrent implementation: post on another thread
-	protected void postEvent(EventHandlerImpl handler, Event event) {
+	protected void postEvent(final EventHandlerImpl handler, final Event event) {
 		handler.checkAndPostEvent(event);
 	}
 	
@@ -147,7 +147,7 @@ public final class EventBus {
 		return isHandlingEvents.get();
 	}
 	
-	public void setActive(boolean active) {
+	public void setActive(final boolean active) {
 		isActive = active;
 	}
 	
