@@ -2,21 +2,24 @@ package lb.simplebase.event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.function.Consumer;
 
 //Package visibility
 //Not generic, because there is no way for EventBus to cast the posted event to the required subtype due to type erasure
 //They all implement hashcode because they will be used in hashsets / hashmaps
-abstract class EventHandlerImpl {
+abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
-	private Class<? extends Event> checkType;
+	private final Class<? extends Event> checkType;
+	private final AbstractEventPriority priority;
+	private final boolean receiveCancelled;
 	
-	protected EventHandlerImpl(Class<? extends Event> checkType) {
+	protected EventHandlerImpl(final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
 		this.checkType = checkType;
+		this.priority = priority;
+		this.receiveCancelled = receiveCancelled;
 	}
 	
-	public void checkAndPostEvent(Event instance) {
+	public void checkAndPostEvent(final Event instance) {
 		if(instance == null) return;
 		if(instance.getClass() != checkType) return;
 		postEventImpl(instance);
@@ -24,6 +27,21 @@ abstract class EventHandlerImpl {
 	
 	public Class<? extends Event> getEventType() {
 		return checkType;
+	}
+	
+	public boolean canReceiveCancelledEvents() {
+		return receiveCancelled;
+	}
+	
+	public AbstractEventPriority getPriority() {
+		return priority;
+	}
+	
+
+
+	@Override
+	public int compareTo(EventHandlerImpl var1) {
+		return EventPriority.COMPARATOR.compare(this.getPriority(), var1.getPriority());
 	}
 	
 	@Override
@@ -51,7 +69,7 @@ abstract class EventHandlerImpl {
 		return true;
 	}
 	
-	protected abstract void postEventImpl(Event instance);
+	protected abstract void postEventImpl(final Event instance);
 	
 	
 	
@@ -61,13 +79,13 @@ abstract class EventHandlerImpl {
 
 		private Method toCall;
 		
-		private EventHandlerReflection(Method toCall, Class<? extends Event> checkType) {
-			super(checkType);
+		private EventHandlerReflection(final Method toCall, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+			super(checkType, priority, receiveCancelled);
 			this.toCall = toCall;
 		}
 
 		@Override
-		protected void postEventImpl(Event instance) {
+		protected void postEventImpl(final Event instance) {
 			try {
 				toCall.invoke(null, instance);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -75,17 +93,11 @@ abstract class EventHandlerImpl {
 			}
 		}
 		
-		protected static EventHandlerReflection create(Method toCall, Class<? extends Event> checkType) {
+		protected static EventHandlerReflection create(final Method toCall, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
 			if(checkType == null || toCall == null) return null;	//Objects must not be null
-			if(!Modifier.isStatic(toCall.getModifiers())) return null;//Method must be static
-			if(!toCall.isAccessible()){	//Only change accessibility flag when necessary, to avoid security checks
-				try {
-					toCall.setAccessible(true);
-				} catch(SecurityException ex) {
-					return null;
-				}
-			}
-			return new EventHandlerReflection(toCall, checkType);
+			if(priority == null) return null;
+			if(!toCall.isAccessible()) return null;	//If it's not accessible, don't try to force it
+			return new EventHandlerReflection(toCall, checkType, priority, receiveCancelled);
 		}
 
 		@Override
@@ -121,8 +133,8 @@ abstract class EventHandlerImpl {
 
 		private Consumer<T> handler;
 		
-		private EventHandlerFunctional(Consumer<T> handler, Class<? extends Event> checkType) {
-			super(checkType);
+		private EventHandlerFunctional(final Consumer<T> handler, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+			super(checkType, priority, receiveCancelled);
 			this.handler = handler;
 		}
 
@@ -136,9 +148,10 @@ abstract class EventHandlerImpl {
 			}
 		}
 		
-		public static <T extends Event> EventHandlerFunctional<T> create(Consumer<T> toCall, Class<T> checkType) {
+		public static <T extends Event> EventHandlerFunctional<T> create(final Consumer<T> toCall, final Class<T> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
 			if(checkType == null || toCall == null) return null;	//Objects must not be null
-			return new EventHandlerFunctional<>(toCall, checkType);
+			if(priority == null) return null;
+			return new EventHandlerFunctional<>(toCall, checkType, priority, receiveCancelled);
 		}
 
 		@Override
@@ -166,4 +179,7 @@ abstract class EventHandlerImpl {
 			return true;
 		}
 	}
+
+
+	
 }

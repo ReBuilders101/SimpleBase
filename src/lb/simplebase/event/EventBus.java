@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -45,10 +46,22 @@ public final class EventBus {
 		return num;//Number of regsitered methods
 	}
 	
-	public synchronized <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType) {
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType) {
+		return register(handler, eventType, EventPriority.DEFAULT, false);
+	}
+	
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final boolean receiveCancelled) {
+		return register(handler, eventType, EventPriority.DEFAULT, receiveCancelled);
+	}
+	
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final AbstractEventPriority priority) {
+		return register(handler, eventType, priority, false);
+	}
+	
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final AbstractEventPriority priority, final boolean receiveCancelled) {
 		if(handler == null) return false;	//Handler can't be null (obv)
 		if(isHandlerThread()) return false; //If handlers can register new handlers, this would lead to a concurrent modification exception (this is the same thread, so synchronized doesn't prevent that
-		final EventHandlerImpl eventHandler = EventHandlerFunctional.create(handler, eventType);
+		final EventHandlerImpl eventHandler = EventHandlerFunctional.create(handler, eventType, priority, receiveCancelled);
 		if(eventHandler == null) return false;
 		return registerHandler(eventHandler);
 	}
@@ -56,6 +69,7 @@ public final class EventBus {
 	//TODO can we just sync the whole method and get rid of the map / set syncs?
 	public synchronized boolean post(final Event event) {
 		if(event == null) return false;
+		if(!isActive()) return false;
 		if(isHandlerThread()) return false;	//Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
@@ -87,13 +101,8 @@ public final class EventBus {
 		//Validate method
 		if(method == null) return false;
 		if(!Modifier.isStatic(method.getModifiers())) return false; //Method must be static
-		if(!method.isAccessible()) {	//If not accessible, make it so
-			try {
-				method.setAccessible(true);
-			} catch(SecurityException ex) {
-				return false;
-			}
-		}
+		if(!Modifier.isPublic(method.getModifiers())) return false; //And also public
+		if(!method.isAccessible()) return false;	//Must be accessible to work
 		if(!method.isAnnotationPresent(EventHandler.class)) return false; //Method must have EventHandler annotation
 		if(method.getExceptionTypes().length != 0) return false; //The method must not throw checked exceptions
 		//Check params for event type
@@ -102,14 +111,17 @@ public final class EventBus {
 		final Class<?> param = params[0]; //This is the only parameter, which should be the event type
 		if(param == null) return false;	//Make sure it's not null
 		if(!Event.class.isAssignableFrom(param)) return false;	//If param is not a subclass of Event, abort
+		//Now read annotation content for craete params
+		EventHandler handlerAnno = method.getDeclaredAnnotation(EventHandler.class);
+		if(handlerAnno == null) return false;
 		@SuppressWarnings("unchecked")	//Checks have been made above
-		final EventHandlerImpl eventHandler = EventHandlerReflection.create(method, (Class<? extends Event>) param);
+		final EventHandlerImpl eventHandler = EventHandlerReflection.create(method, (Class<? extends Event>) param, handlerAnno.priority(), handlerAnno.receiveCancelled());
 		if(eventHandler == null) return false;
 		return registerHandler(eventHandler);
 	}
 	
 	private synchronized boolean registerHandler(final EventHandlerImpl handler) {//Sync only needed here, the other methods don't use the map
-		final WeakReference<Class<? extends Event>> key = getKey(handler.getEventType(), true, HashSet::new); //Get the key, or create it if necessary
+		final WeakReference<Class<? extends Event>> key = getKey(handler.getEventType(), true, TreeSet::new); //Get the key, or create it if necessary
 		if(key == null) return false;
 		Set<EventHandlerImpl> handlerSet = handlersMap.get(key);
 		if(handlerSet == null) return false;

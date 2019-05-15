@@ -9,5 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface EventHandler {
-
+	
+	boolean receiveCancelled() default false;
+	EventPriority priority() default EventPriority.DEFAULT;
+	
 }
