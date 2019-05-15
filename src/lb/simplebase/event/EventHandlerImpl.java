@@ -22,6 +22,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 	public void checkAndPostEvent(final Event instance) {
 		if(instance == null) return;
 		if(instance.getClass() != checkType) return;
+		if(instance.isCancelled() && !receiveCancelled) return;	//Don't process cancelled events unless requested
 		postEventImpl(instance);
 	}
 	
@@ -41,7 +42,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
 	@Override
 	public int compareTo(EventHandlerImpl var1) {
-		return EventPriority.COMPARATOR.compare(this.getPriority(), var1.getPriority());
+		return EventPriority.COMPARATOR.compare(var1.getPriority(), this.getPriority());
 	}
 	
 	@Override
@@ -96,7 +97,6 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		protected static EventHandlerReflection create(final Method toCall, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
 			if(checkType == null || toCall == null) return null;	//Objects must not be null
 			if(priority == null) return null;
-			if(!toCall.isAccessible()) return null;	//If it's not accessible, don't try to force it
 			return new EventHandlerReflection(toCall, checkType, priority, receiveCancelled);
 		}
 

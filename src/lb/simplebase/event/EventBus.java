@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -102,9 +101,10 @@ public final class EventBus {
 		if(method == null) return false;
 		if(!Modifier.isStatic(method.getModifiers())) return false; //Method must be static
 		if(!Modifier.isPublic(method.getModifiers())) return false; //And also public
-		if(!method.isAccessible()) return false;	//Must be accessible to work
+//		if(!method.isAccessible()) return false;	//--Must be accessible to work-- IsAccessible refers to the flag, not general accessibility
 		if(!method.isAnnotationPresent(EventHandler.class)) return false; //Method must have EventHandler annotation
 		if(method.getExceptionTypes().length != 0) return false; //The method must not throw checked exceptions
+		if(method.getReturnType() != void.class) return false; //The method must return void
 		//Check params for event type
 		final Class<?>[] params = method.getParameterTypes();
 		if(params.length != 1) return false;	//There must be exactly one type parameter
