@@ -1,4 +1,4 @@
-package lb.simplebase.function;
+package lb.simplebase.util;
 
 import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.reflect.UnsafeUtils;

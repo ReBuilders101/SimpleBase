@@ -1,4 +1,4 @@
-package lb.simplebase.function;
+package lb.simplebase.util;
 
 @FunctionalInterface
 public interface TriConsumer<T,S,U> {

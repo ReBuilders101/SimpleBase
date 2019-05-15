@@ -2,7 +2,7 @@ package lb.simplebase.reflect;
 
 import java.util.function.BiFunction;
 
-import lb.simplebase.function.TriConsumer;
+import lb.simplebase.util.TriConsumer;
 import sun.misc.Unsafe;
 
 /**

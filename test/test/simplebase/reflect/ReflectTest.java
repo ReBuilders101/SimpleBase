@@ -8,9 +8,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.function.ReflectedMethodNE;
 import lb.simplebase.reflect.ReflectionUtils;
 import lb.simplebase.reflect.Signature;
+import lb.simplebase.util.ReflectedMethodNE;
 
 class ReflectTest {
 

@@ -1,4 +1,4 @@
-package lb.simplebase.function;
+package lb.simplebase.util;
 
 import java.awt.Graphics2D;
 

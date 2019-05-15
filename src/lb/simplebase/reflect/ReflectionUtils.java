@@ -5,7 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import lb.simplebase.function.ReflectedMethod;
+
+import lb.simplebase.util.ReflectedMethod;
 
 /**
  * Contains static utility methods for reflection. 

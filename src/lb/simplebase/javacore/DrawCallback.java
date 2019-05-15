@@ -2,7 +2,8 @@ package lb.simplebase.javacore;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import lb.simplebase.function.TriConsumer;
+
+import lb.simplebase.util.TriConsumer;
 
 @FunctionalInterface
 public interface DrawCallback extends TriConsumer<Graphics2D, Integer, Integer>{
