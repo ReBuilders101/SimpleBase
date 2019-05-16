@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method a an event hander. To register the handler to ae {@link EventBus},
+ * Marks a method as an event hander. To register the handler to an {@link EventBus},
  * use {@link EventBus#register(Class)} with the class containing the annotated method as a parameter.
  */
 @Retention(RUNTIME)
