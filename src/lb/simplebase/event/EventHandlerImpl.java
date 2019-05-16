@@ -11,18 +11,18 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
 	private final Class<? extends Event> checkType;
 	private final AbstractEventPriority priority;
-	private final boolean receiveCancelled;
+	private final boolean receiveCanceled;
 	
-	protected EventHandlerImpl(final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+	protected EventHandlerImpl(final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCanceled) {
 		this.checkType = checkType;
 		this.priority = priority;
-		this.receiveCancelled = receiveCancelled;
+		this.receiveCanceled = receiveCanceled;
 	}
 	
 	public void checkAndPostEvent(final Event instance) {
 		if(instance == null) return;
 		if(instance.getClass() != checkType) return;
-		if(instance.isCancelled() && !receiveCancelled) return;	//Don't process cancelled events unless requested
+		if(instance.isCanceled() && !receiveCanceled) return;	//Don't process cancelled events unless requested
 		postEventImpl(instance);
 	}
 	
@@ -30,8 +30,8 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		return checkType;
 	}
 	
-	public boolean canReceiveCancelledEvents() {
-		return receiveCancelled;
+	public boolean canReceiveCanceledEvents() {
+		return receiveCanceled;
 	}
 	
 	public AbstractEventPriority getPriority() {

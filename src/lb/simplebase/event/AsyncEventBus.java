@@ -4,8 +4,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
+/**
+ * A concurrent implementation of {@link EventBus} that executes handlers
+ * on a different thread than the post method was called on.
+ */
 public class AsyncEventBus extends EventBus {
 	
 	private static final AtomicInteger threadId = new AtomicInteger();
@@ -40,16 +43,27 @@ public class AsyncEventBus extends EventBus {
 	}
 	
 	
-	
-	public static AsyncEventBus createSingleThread() {
+	/**
+	 * Creates a new event bus that calls handlers on a single thread. The handler thread
+	 * may change, but there will always only be one handler running at a time.
+	 * @return The new asynchronous {@link EventBus}
+	 */
+	public static EventBus createSingleThread() {
 		return new AsyncEventBus(Executors.newSingleThreadExecutor(executorFactory));
 	}
 	
-	public static AsyncEventBus createThreadPool() {
+	/**
+	 * Returns a new event bus that calls handlers on multiple different threads in a thread pool.
+	 * @deprecated Should not be used, because it is not guaranteed to run the handlers in order of their priority.
+	 * @return The new asynchronous {@link EventBus}
+	 */
+	@Deprecated
+	public static EventBus createThreadPool() {
 		return new AsyncEventBus(Executors.newCachedThreadPool(executorFactory));
 	}
-	
-	public static AsyncEventBus createCustom(Function<ThreadFactory, ExecutorService> serviceCreator) {
-		return new AsyncEventBus(serviceCreator.apply(executorFactory));
+
+	@Override
+	public boolean isSynchronous() {
+		return false;
 	}
 }
