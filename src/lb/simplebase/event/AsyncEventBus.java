@@ -1,5 +1,6 @@
 package lb.simplebase.event;
 
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -31,13 +32,20 @@ public class AsyncEventBus extends EventBus {
 	}
 	
 	@Override
-	protected void postEvent(EventHandlerImpl handler, Event event) {
+	protected void postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
 		taskRunner.execute(() -> {
 			isHandlingEvents.set(true);//Set inside lambda, so the worker thread is blocked from posting
 			try {
-				handler.checkAndPostEvent(event);
+				try {	//Protection against bad sync (should not be necessary)
+					for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
+						if(handler == null) continue; //HashSet allows a null value
+						handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
+					}
+				} catch(ConcurrentModificationException ex) {
+					//Just return
+				}
 			} finally {
-				isHandlingEvents.set(false);
+				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 			}
 		});
 	}

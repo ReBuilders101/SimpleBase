@@ -139,32 +139,22 @@ public class EventBus {
 	 * @see #isSynchronous()
 	 */
 	//TODO can we just sync the whole method and get rid of the map / set syncs?
-	public synchronized boolean post(final Event event) {
-		if(event == null) return false;
-		if(!isActive()) return false;
-		if(isHandlerThread()) return false;	//Can't post an event from an event handler (at least for single-thread busses) 
+	public synchronized EventResult post(final Event event) {
+		if(event == null || !isActive() || isHandlerThread()) return EventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
 		final Set<EventHandlerImpl> handlerSet;
 //		synchronized (handlersMap) {//Make sure the handlers map is not changed while traversing keys and finding the handlers set for this event
 			WeakReference<Class<? extends Event>> key = getKey(eventClass, false, null);
-			if(key == null) return false;
+			if(key == null) return EventResult.createFailed(event, this);;
 			//Next, get all Handlers
 			handlerSet = handlersMap.get(key);
 //		}//Syncronisation not needed anymore. We now have a local reference to the handler list.
-		if(handlerSet == null) return false; //Just to be safe
-		if(handlerSet.isEmpty()) return false;
+		if(handlerSet == null || handlerSet.isEmpty()) return EventResult.createFailed(event, this);; //Just to be safe
 //		synchronized (handlerSet) { //Because HashSet's iterator is fail-fast, we have to prevent concurrent modification here too
-			try {	//Protection against bad sync (should not be necessary)
-				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
-					if(handler == null) continue; //HashSet allows a null value
-					postEvent(handler, event);	//This is in a separate method so we can have an async implemetation in a subclass
-				}
-			} catch(ConcurrentModificationException ex) {
-				return true; //It is not really a success, but false would indicate that no handlers have been called, which may also be not correct
-			}
+			postImpl(handlerSet, event);
 //		}//End sync on set, iterator is done
-		return true;
+		return EventResult.createSynchronous(event, this);
 	}
 	
 	//Registers a single method as handler through reflection. Used by register(Class<?>)
@@ -225,10 +215,17 @@ public class EventBus {
 	}
 	
 	//Overridable for concurrent implementation: post on another thread
-	protected void postEvent(final EventHandlerImpl handler, final Event event) {
+	protected void postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
+		isHandlingEvents.set(true);//Moved this here so it can be overridden to set in different threads
 		try {
-			isHandlingEvents.set(true);//Moved this here so it can be overridden to set in different threads
-			handler.checkAndPostEvent(event);
+			try {	//Protection against bad sync (should not be necessary)
+				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
+					if(handler == null) continue; //HashSet allows a null value
+					handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
+				}
+			} catch(ConcurrentModificationException ex) {
+				//Just return
+			}
 		} finally {
 			isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 		}
