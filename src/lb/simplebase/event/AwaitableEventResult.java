@@ -21,11 +21,12 @@ public class AwaitableEventResult extends EventResult{
 	}
 	
 	public EventPriority getAwaitPriority() {
+		if(!wasPostedSuccessfully()) return null;
 		return syncHandler.getPriority() instanceof EventPriority ? (EventPriority) syncHandler.getPriority() : null;
 	}
 	
 	public void awaitPriority() throws InterruptedException{
-		if(hasRun()) return;
+		if(cannotUseBarrier()) return;
 		try {
 			syncHandler.getWaiter().await();
 		} catch (BrokenBarrierException e) {
@@ -39,7 +40,7 @@ public class AwaitableEventResult extends EventResult{
 	}
 	
 	public void allowCompletion() throws InterruptedException {
-		if(hasRun()) return;
+		if(cannotUseBarrier()) return;
 		try {
 			syncHandler.getWaiter().await();
 		} catch (BrokenBarrierException e) {
@@ -75,5 +76,17 @@ public class AwaitableEventResult extends EventResult{
 			if(different) return ex;
 		}
 		return t;
+	}
+	
+	private boolean cannotUseBarrier() {
+		return hasRun() || !wasPostedSuccessfully();
+	}
+	
+	public static AwaitableEventResult createAwaitable(Event object, CountDownLatch completionWaiter, EventHandlerAwaitable syncHandler, EventBus handlingBus) {
+		return new AwaitableEventResult(true, object, completionWaiter, syncHandler, handlingBus);
+	}
+	
+	public static AwaitableEventResult createFailed(Event object, EventBus handlingBus) {
+		return new AwaitableEventResult(false, object, null, null, handlingBus);
 	}
 }

@@ -4,7 +4,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -188,7 +191,7 @@ public class EventBus {
 	}
 	
 	//Gets the WeakReference instance that is used as the key for a class type.
-	private boolean ensureKeyExists(final Class<? extends Event> type, boolean mayCreateNew, final Supplier<HandlerList> newList) {
+	protected boolean ensureKeyExists(final Class<? extends Event> type, boolean mayCreateNew, final Supplier<HandlerList> newList) {
 		if(handlersMap.containsKey(type)) return true;
 		if(!mayCreateNew || type == null || newList == null) return false;
 		handlersMap.put(type, newList.get());
@@ -214,8 +217,12 @@ public class EventBus {
 	}
 	
 	//If true, this thread is currently executing an event handler any may not post events / register handlers on this bus
-	private boolean isHandlerThread() {
+	protected boolean isHandlerThread() {
 		return isHandlingEvents.get();
+	}
+	
+	protected Map<Class<? extends Event>, HandlerList> getHandlersMap() {
+		return handlersMap;
 	}
 	
 	/**

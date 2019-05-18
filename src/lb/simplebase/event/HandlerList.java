@@ -33,9 +33,9 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return handlers.isEmpty();
 	}
 	
-	public EventHandlerAwaitable getWaitHandler(boolean mayCreate, AbstractEventPriority priority, Class<? extends Event> checkType) {
-		if(!(waiter == null && mayCreate && priority != null && checkType != null)) return waiter;
-		waiter = new EventHandlerAwaitable(checkType, priority);
+	public EventHandlerAwaitable getOrCreateWaitHandler(boolean mayCreate, Class<? extends Event> checkType) {
+		if(!(waiter == null && mayCreate && checkType != null)) return waiter;
+		waiter = new EventHandlerAwaitable(checkType, EventPriority.DEFAULT);
 		waiter.init();
 		registerHandler(waiter);
 		return waiter;
