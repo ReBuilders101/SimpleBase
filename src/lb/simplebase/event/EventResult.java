@@ -48,11 +48,13 @@ public class EventResult {
 	}
 	
 	public void waitForHandlers() throws InterruptedException{
+		if(getEventBus().isHandlingEvents.get()) throw new UnsupportedOperationException("Cannot wait for Handlers to complete while handler is still running on the same thread");
 		if(isHandlingCompleted()) return;
 		waiter.await();//Wait for completion
 	}
 	
 	public void waitForHandlers(long timeout, TimeUnit unit) throws InterruptedException{
+		if(getEventBus().isHandlingEvents.get()) throw new UnsupportedOperationException("Cannot wait for Handlers to complete while handler is still running on the same thread");
 		if(isHandlingCompleted()) return;
 		waiter.await(timeout, unit); //Wait for completion
 	}
