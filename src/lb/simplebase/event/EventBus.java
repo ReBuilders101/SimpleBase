@@ -50,6 +50,7 @@ public class EventBus {
 	 * <ul>
 	 * <li>be public</li>
 	 * <li>be static</li>
+	 * <li>be defined in a class that is public</li>
 	 * <li>not have a return value (<code>void</code>)</li>
 	 * <li>not throw any checked exceptions (<code>throws</code>)</li>
 	 * <li>accept a single parameter, which extends {@link Event}</li>
