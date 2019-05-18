@@ -103,4 +103,10 @@ public class AwaitableEventResult extends EventResult{
 	public static AwaitableEventResult createFailed(Event object, EventBus handlingBus) {
 		return new AwaitableEventResult(false, object, null, null, handlingBus);
 	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		skipAll();	//Make sure that the handler thread may continue, for example if a method returns without allowCompletion() being called
+		super.finalize();
+	}
 }
