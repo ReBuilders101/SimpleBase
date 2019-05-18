@@ -59,7 +59,7 @@ public class AsyncEventBus extends EventBus {
 				try {	//Protection against bad sync (should not be necessary)
 					for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
 						if(handler == null) continue; //HashSet allows a null value
-						handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
+						handler.checkAndPostEvent(event, this, true);	//This is in a separate method so we can have an async implemetation in a subclass
 					}
 				} catch(ConcurrentModificationException ex) {}	//TODO log warning
 			} finally {
@@ -79,7 +79,7 @@ public class AsyncEventBus extends EventBus {
 				try {	//Protection against bad sync (should not be necessary)
 					for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
 						if(handler == null) continue; //HashSet allows a null value
-						handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
+						handler.checkAndPostEvent(event, this, false);	//This is in a separate method so we can have an async implemetation in a subclass
 					}
 				} catch(ConcurrentModificationException ex) {}	//TODO log warning
 			} finally {

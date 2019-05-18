@@ -14,7 +14,7 @@ public class AwaitableEventResult extends EventResult{
 	}
 
 	private boolean completed;
-	
+	private boolean hadTurn;
 
 	public boolean hasRun() {
 		return completed;
@@ -26,28 +26,42 @@ public class AwaitableEventResult extends EventResult{
 	}
 	
 	public void awaitPriority() throws InterruptedException{
-		if(cannotUseBarrier()) return;
+		if(cannotUseBarrier() || hadTurn) return;
 		try {
 			syncHandler.getWaiter().await();
 		} catch (BrokenBarrierException e) {
 			syncHandler.breakBarrier();
-			throw new InterruptedException("Barrier Broken: " + e.getMessage());
+			completed = true;
+			hadTurn = true;
+			throw new InterruptedException("Barrier Broken: " + e.getMessage()); //throws exits method -> handling flag will not be set
 		}
+		//Here the main thread handler begins
+		hadTurn = true;
+		getEventBus().isHandlingEvents.set(true);
 	}
 	
 	public boolean isCanceled() {
 		return getCurrentEvent().isCanceled();
 	}
 	
+	public void skipAll() throws InterruptedException {
+		awaitPriority();
+		allowCompletion();
+	}
+	
 	public void allowCompletion() throws InterruptedException {
 		if(cannotUseBarrier()) return;
+		if(!hadTurn) return; //The turn must have been used by calling awaitPriority() before
 		try {
 			syncHandler.getWaiter().await();
 		} catch (BrokenBarrierException e) {
 			syncHandler.breakBarrier();
 			throw new InterruptedException("Barrier Broken: " + e.getMessage());
+		} finally {
+			//Either handling is complete or broken. Reset flag and make this object unusable anyways
+			completed = true;
+			getEventBus().isHandlingEvents.set(false);
 		}
-		completed = true;
 	}
 	
 	/**
@@ -79,7 +93,7 @@ public class AwaitableEventResult extends EventResult{
 	}
 	
 	private boolean cannotUseBarrier() {
-		return hasRun() || !wasPostedSuccessfully();
+		return hasRun() || !wasPostedSuccessfully() || syncHandler.isBroken();
 	}
 	
 	public static AwaitableEventResult createAwaitable(Event object, CountDownLatch completionWaiter, EventHandlerAwaitable syncHandler, EventBus handlingBus) {

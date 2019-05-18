@@ -216,6 +216,10 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 			broken = true;
 		}
 		
+		public boolean isBroken() {
+			return broken;
+		}
+		
 		@Override
 		protected void postEventImpl(Event instance) {
 			
@@ -223,8 +227,10 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 				waiter.await(); //Waits for a call to awaitPriority(); -> must wait for main thread or unlock main thread for its handler
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
+				return;
 			} catch (BrokenBarrierException e) {
 				broken = true;
+				return;	//When the barrier is broken, let other handlers continue normally. It will be fixed for the next post() call
 			}
 			
 
@@ -232,8 +238,10 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 				waiter.await(); //Waits for a call to allowCompletion(); -> must not run until allowed to complete the next handlers
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
+				return;
 			} catch (BrokenBarrierException e) {
 				broken = true;
+				return;
 			}	
 		}
 		

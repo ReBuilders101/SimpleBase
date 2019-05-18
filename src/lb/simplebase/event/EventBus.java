@@ -4,10 +4,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -205,7 +202,7 @@ public class EventBus {
 			try {	//Protection against bad sync (should not be necessary)
 				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
 					if(handler == null) continue; //HashSet allows a null value
-					handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
+					handler.checkAndPostEvent(event, this, false);	//This is in a separate method so we can have an async implemetation in a subclass
 				}
 			} catch(ConcurrentModificationException ex) {
 				//Just return
