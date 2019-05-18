@@ -1,13 +1,10 @@
 package lb.simplebase.event;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -24,7 +21,8 @@ import lb.simplebase.event.EventHandlerImpl.EventHandlerReflection;
 public class EventBus {
 	
 	//TODO: A WeakHashMap could be used, but that could lead to ConcurrentModificationExceptions
-	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
+//	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
+	private final Map<Class<? extends Event>, HandlerList> handlersMap;
 	private boolean isActive;
 	
 	protected final ThreadLocal<Boolean> isHandlingEvents;	//Check for each thread separately
@@ -33,7 +31,7 @@ public class EventBus {
 	 * Protected constructor. Use {@link #create()} to create a new instance.
 	 */
 	protected EventBus() {
-		handlersMap = new HashMap<>();
+		handlersMap = new WeakHashMap<>();
 		isActive = true;
 		isHandlingEvents = ThreadLocal.withInitial(() -> false);
 	}
@@ -143,12 +141,11 @@ public class EventBus {
 		if(event == null || !isActive() || isHandlerThread()) return EventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
-		final Set<EventHandlerImpl> handlerSet;
+		final HandlerList handlerSet;
 //		synchronized (handlersMap) {//Make sure the handlers map is not changed while traversing keys and finding the handlers set for this event
-			WeakReference<Class<? extends Event>> key = getKey(eventClass, false, null);
-			if(key == null) return EventResult.createFailed(event, this);;
+			if(!ensureKeyExists(eventClass, false, null)) return EventResult.createFailed(event, this);
 			//Next, get all Handlers
-			handlerSet = handlersMap.get(key);
+			handlerSet = handlersMap.get(eventClass);
 //		}//Syncronisation not needed anymore. We now have a local reference to the handler list.
 		if(handlerSet == null || handlerSet.isEmpty()) return EventResult.createFailed(event, this);; //Just to be safe
 //		synchronized (handlerSet) { //Because HashSet's iterator is fail-fast, we have to prevent concurrent modification here too
@@ -183,34 +180,19 @@ public class EventBus {
 	
 	//Registers an EventHandler of any implementation. Does interaction with the map and is therefor synchronized. Used by all register() methods
 	private synchronized boolean registerHandler(final EventHandlerImpl handler) {//Sync only needed here, the other methods don't use the map
-		final WeakReference<Class<? extends Event>> key = getKey(handler.getEventType(), true, TreeSet::new); //Get the key, or create it if necessary
-		if(key == null) return false;
-		Set<EventHandlerImpl> handlerSet = handlersMap.get(key);
+		if(!ensureKeyExists(handler.getEventType(), true, HandlerList::createNaturalOrdered)); //Get the key, or create it if necessary
+		HandlerList handlerSet = handlersMap.get(handler.getEventType());
 		if(handlerSet == null) return false;
-		return handlerSet.add(handler);//Add the handler to the set. add methods checks contains() before adding.
+		return handlerSet.registerHandler(handler);//Add the handler to the set. add methods checks contains() before adding.
 		 //Don't add a handler twice: contains() uses equals, so the same reflected method can not be added twice
 	}
 	
-	//Gets the WeakReference instance that is used as the key for a class type. //TODO Remove when HashMap is replaced ny WeakHashMap
-	private WeakReference<Class<? extends Event>> getKey(final Class<? extends Event> type, final boolean mayCreateKey, final Supplier<Set<EventHandlerImpl>> newSet) {
-		WeakReference<Class<? extends Event>> key = null;
-		for(WeakReference<Class<? extends Event>> ref : handlersMap.keySet()) {
-			Class<? extends Event> weakValue = ref.get();
-			if(weakValue == null) { //If reference is cleared, remove it from the map
-				handlersMap.remove(ref); //If a WeakReference is unloaded, it cannot come back. This means that the key (and value) can be removed
-				continue;
-			}
-			if(weakValue == type) { //Class.equals() also uses ==, also a class can only be loaded once
-				key = ref; //The key is found
-				break;
-			}
-		}
-		if(key == null && mayCreateKey && newSet != null) { //If no key was found, but we can make one, and we have a way of creating sets
-			key = new WeakReference<>(type);	//Create a new Weak Reference to the type, to allow the class to unload. The newly created weakReferece is also the returned value
-			final Set<EventHandlerImpl> value = newSet.get(); //Then make a new set (there should be no keys with null values)
-			handlersMap.put(key, value); //And then add it to the map
-		}
-		return key;
+	//Gets the WeakReference instance that is used as the key for a class type.
+	private boolean ensureKeyExists(final Class<? extends Event> type, boolean mayCreateNew, final Supplier<HandlerList> newList) {
+		if(handlersMap.containsKey(type)) return true;
+		if(!mayCreateNew || type == null || newList == null) return false;
+		handlersMap.put(type, newList.get());
+		return true;
 	}
 	
 	//Overridable for concurrent implementation: post on another thread
