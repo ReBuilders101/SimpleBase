@@ -34,7 +34,7 @@ public class AsyncEventBus extends EventBus {
 		taskRunner = service;
 	}
 	
-	public AwaitableEventResult postAwaitable(Event event) {
+	public synchronized AwaitableEventResult postAwaitable(Event event) {
 		if(event == null || !isActive() || isHandlerThread()) return AwaitableEventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
