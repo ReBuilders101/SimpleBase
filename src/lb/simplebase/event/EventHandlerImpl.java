@@ -2,6 +2,8 @@ package lb.simplebase.event;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.function.Consumer;
 
 //Package visibility
@@ -181,5 +183,52 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 	}
 
 
+	static class EventHandlerAwaitable extends EventHandlerImpl {
+
+		private CyclicBarrier waiter;
+		private volatile boolean broken = false;
+		
+		protected EventHandlerAwaitable(Class<? extends Event> checkType, AbstractEventPriority priority) {
+			super(checkType, priority, true);
+		}
+
+		public void init() {
+			if(broken || waiter == null) {
+				waiter = new CyclicBarrier(2);
+			} else {
+				waiter.reset();
+			}
+		}
+		
+		public void breakBarrier() {
+			broken = true;
+		}
+		
+		@Override
+		protected void postEventImpl(Event instance) {
+			
+			try {
+				waiter.await(); //Waits for a call to awaitPriority(); -> must wait for main thread or unlock main thread for its handler
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} catch (BrokenBarrierException e) {
+				broken = true;
+			}
+			
+
+			try {
+				waiter.await(); //Waits for a call to allowCompletion(); -> must not run until allowed to complete the next handlers
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} catch (BrokenBarrierException e) {
+				broken = true;
+			}	
+		}
+		
+		public CyclicBarrier getWaiter() {
+			return waiter;
+		}
+	}
+	
 	
 }

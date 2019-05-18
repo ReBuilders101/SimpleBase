@@ -65,20 +65,10 @@ public class AsyncEventBus extends EventBus {
 	 * may change, but there will always only be one handler running at a time.
 	 * @return The new asynchronous {@link EventBus}
 	 */
-	public static EventBus createSingleThread() {
+	public static AsyncEventBus createSingleThread() {
 		return new AsyncEventBus(Executors.newSingleThreadExecutor(executorFactory));
 	}
 	
-	/**
-	 * Returns a new event bus that calls handlers on multiple different threads in a thread pool.
-	 * @deprecated Should not be used, because it is not guaranteed to run the handlers in order of their priority.
-	 * @return The new asynchronous {@link EventBus}
-	 */
-	@Deprecated
-	public static EventBus createThreadPool() {
-		return new AsyncEventBus(Executors.newCachedThreadPool(executorFactory));
-	}
-
 	@Override
 	public boolean isSynchronous() {
 		return false;
