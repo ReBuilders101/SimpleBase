@@ -1,74 +1,46 @@
 package lb.simplebase.event;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import lb.simplebase.util.DelegateFuture;
+import java.util.concurrent.CountDownLatch;
 
 public class EventResult {
 
-	private final Future<Event> processedObject;
+//	private final Future<Event> processedObject;
+	private final CountDownLatch waiter;
+	
 	private final Event currentObject;
 	private final EventBus handlingBus;
 	private final boolean posted;
 
 	
-	protected EventResult(final boolean wasPosted, final Event object, final Future<Event> processedObject, final EventBus handlingBus) {
-		this.processedObject = processedObject;
+	protected EventResult(final boolean wasPosted, final Event object, final CountDownLatch waiter, final EventBus handlingBus) {
+		this.waiter = waiter;
 		this.handlingBus = handlingBus;
 		this.currentObject = object;
 		this.posted = wasPosted;
 	}
 
-	//WASCANCELED ACCESS
-	
-	public Future<Boolean> wasCanceled() {
-		return new DelegateFuture<>(processedObject, (e) -> e.isCanceled());
+	public boolean wasCanceled() throws InterruptedException {
+		waitForHandlers();
+		return currentObject.isCanceled();
 	}
-	
-	public boolean waitForWasCanceled() throws InterruptedException {
-		if(isHandlingCompleted()) return  currentObject.isCanceled();
-		try {
-			return wasCanceled().get();
-		} catch (ExecutionException e) {
-			return currentObject.isCanceled();
-		}
-	}
-	
-	//EVENT ACCESS
 	
 	public Event getCurrentEvent() {
 		return currentObject;
 	}
 	
-	public Future<Event> getHandledEvent() {
-		return processedObject;
+	public Event getHandledEvent() throws InterruptedException {
+		waitForHandlers();
+		return currentObject;
 	}
-	
-	public Event waitForHandledEvent() throws InterruptedException {
-		if(isHandlingCompleted()) return currentObject;
-		try {
-			return processedObject.get();
-		} catch (ExecutionException e) {
-			return currentObject;
-		}
-	}
-	
-	//GENERAL WAIT
 	
 	public void waitForHandlers() throws InterruptedException{
 		if(isHandlingCompleted()) return;
-		try { 
-			processedObject.get();
-		} catch (ExecutionException e) {
-			//If execution fails, just return, because execution is over anyways
-		}
+		waiter.await();//Wait for completion
 	}
 	
-	//STATE / NOT ASYNC
-	
 	public boolean isHandlingCompleted() {
-		return processedObject.isDone();
+		if(waiter == null) return true;
+		return waiter.getCount() == 0L;
 	}
 	
 	public EventBus getEventBus() {
@@ -85,11 +57,16 @@ public class EventResult {
 	
 	public static EventResult createSynchronous(final Event event, final EventBus bus) {
 		if(!bus.isSynchronous()) return null;
-		return new EventResult(true, event, CompletableFuture.completedFuture(event), bus);
+		return new EventResult(true, event, null, bus);
+	}
+	
+	public static EventResult createAsynchronous(final Event event, final EventBus bus, CountDownLatch completeWaiter) {
+		if(bus.isSynchronous()) return null;
+		return new EventResult(true, event, completeWaiter, bus);
 	}
 	
 	public static EventResult createFailed(final Event event, final EventBus bus) {
-		return new EventResult(false, event, CompletableFuture.completedFuture(event), bus);
+		return new EventResult(false, event, null, bus);
 	}
 	
 }

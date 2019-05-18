@@ -1,6 +1,7 @@
 package lb.simplebase.event;
 
 import java.util.ConcurrentModificationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -31,8 +32,16 @@ public class AsyncEventBus extends EventBus {
 		taskRunner = service;
 	}
 	
+	public AwaitableEventResult postAwaitable(Event event, AbstractEventPriority awaitPriority) {
+		
+		
+		
+		return null;
+	}
+	
 	@Override
-	protected void postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
+	protected EventResult postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
+		final CountDownLatch completionRelease = new CountDownLatch(1);
 		taskRunner.execute(() -> {
 			isHandlingEvents.set(true);//Set inside lambda, so the worker thread is blocked from posting
 			try {
@@ -41,13 +50,13 @@ public class AsyncEventBus extends EventBus {
 						if(handler == null) continue; //HashSet allows a null value
 						handler.checkAndPostEvent(event, this);	//This is in a separate method so we can have an async implemetation in a subclass
 					}
-				} catch(ConcurrentModificationException ex) {
-					//Just return
-				}
+				} catch(ConcurrentModificationException ex) {}	//TODO log warning
 			} finally {
 				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
+				completionRelease.countDown();	//Make sure eventResult is completed
 			}
 		});
+		return EventResult.createAsynchronous(event, this, completionRelease);
 	}
 	
 	

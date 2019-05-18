@@ -152,9 +152,8 @@ public class EventBus {
 //		}//Syncronisation not needed anymore. We now have a local reference to the handler list.
 		if(handlerSet == null || handlerSet.isEmpty()) return EventResult.createFailed(event, this);; //Just to be safe
 //		synchronized (handlerSet) { //Because HashSet's iterator is fail-fast, we have to prevent concurrent modification here too
-			postImpl(handlerSet, event);
+			return postImpl(handlerSet, event);
 //		}//End sync on set, iterator is done
-		return EventResult.createSynchronous(event, this);
 	}
 	
 	//Registers a single method as handler through reflection. Used by register(Class<?>)
@@ -215,7 +214,7 @@ public class EventBus {
 	}
 	
 	//Overridable for concurrent implementation: post on another thread
-	protected void postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
+	protected EventResult postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
 		isHandlingEvents.set(true);//Moved this here so it can be overridden to set in different threads
 		try {
 			try {	//Protection against bad sync (should not be necessary)
@@ -229,6 +228,7 @@ public class EventBus {
 		} finally {
 			isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 		}
+		return EventResult.createSynchronous(event, this);
 	}
 	
 	//If true, this thread is currently executing an event handler any may not post events / register handlers on this bus
