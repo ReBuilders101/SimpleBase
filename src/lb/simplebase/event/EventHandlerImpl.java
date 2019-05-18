@@ -21,8 +21,9 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		this.receiveCanceled = receiveCanceled;
 	}
 	
-	public void checkAndPostEvent(final Event instance, final EventBus bus) {
+	public void checkAndPostEvent(final Event instance, final EventBus bus, boolean mayStop) {
 		if(instance == null) return;
+		if(isBlocking() && !mayStop) return;	//Don't post on awaitableEventHandler when it should not block
 		if(instance.getClass() != checkType) return;
 		if(instance.isCanceled() && !receiveCanceled) return;	//Don't process cancelled events unless requested
 		postEventImpl(instance);
@@ -40,7 +41,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		return priority;
 	}
 	
-
+	protected abstract boolean isBlocking();
 
 	@Override
 	public int compareTo(EventHandlerImpl var1) {
@@ -126,6 +127,11 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 				return false;
 			return true;
 		}
+
+		@Override
+		protected boolean isBlocking() {
+			return false;
+		}
 	}
 	
 	
@@ -180,6 +186,11 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 				return false;
 			return true;
 		}
+
+		@Override
+		protected boolean isBlocking() {
+			return false;
+		}
 	}
 
 
@@ -192,12 +203,13 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 			super(checkType, priority, true);
 		}
 
-		public void init() {
+		public EventHandlerAwaitable init() {
 			if(broken || waiter == null) {
 				waiter = new CyclicBarrier(2);
 			} else {
 				waiter.reset();
 			}
+			return this;
 		}
 		
 		public void breakBarrier() {
@@ -227,6 +239,11 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		
 		public CyclicBarrier getWaiter() {
 			return waiter;
+		}
+
+		@Override
+		protected boolean isBlocking() {
+			return true;
 		}
 	}
 	
