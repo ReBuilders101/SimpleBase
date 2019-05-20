@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import lb.simplebase.event.EventHandlerImpl.EventHandlerAwaitable;
+import lb.simplebase.event.HandlerList.HandlerListAwaitable;
 
 /**
  * A concurrent implementation of {@link EventBus} that executes handlers
@@ -34,7 +35,7 @@ public class AsyncEventBus extends EventBus {
 		taskRunner = service;
 	}
 	
-	public synchronized AwaitableEventResult postAwaitable(Event event) {
+	public synchronized AwaitableEventResult postAwaitable(Event event, AbstractEventPriority priority) {
 		if(event == null || !isActive() || isHandlerThread()) return AwaitableEventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
@@ -42,16 +43,18 @@ public class AsyncEventBus extends EventBus {
 		//Next, get all Handlers
 		final HandlerList handlerSet = getHandlersMap().get(eventClass);
 		if(handlerSet == null || handlerSet.isEmpty()) return AwaitableEventResult.createFailed(event, this);; //Just to be safe
-		return postAwaitableImpl(handlerSet, event);
+		return postAwaitableImpl(handlerSet, event, priority);
 	}
 	
-	private AwaitableEventResult postAwaitableImpl(final HandlerList handlerSet, final Event event) {
+	private AwaitableEventResult postAwaitableImpl(final HandlerList handlerSet, final Event event, AbstractEventPriority priority) {
 		final CountDownLatch completionRelease = new CountDownLatch(1);
-		final EventHandlerAwaitable syncHandler = handlerSet.getOrCreateWaitHandler(true, event.getClass());
+		final HandlerListAwaitable localSet = handlerSet.awaitable(event.getClass(), priority);
+		final EventHandlerAwaitable syncHandler = localSet.getWaiter();
+		syncHandler.init(); //setup cyclicBarrier
 		taskRunner.execute(() -> {
 			isHandlingEvents.set(true);//Set inside lambda, so the worker thread is blocked from posting
 			try {	//Protection against bad sync (should not be necessary)
-				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
+				for(EventHandlerImpl handler : localSet) { //Now iterate over the handlers from local set
 					if(handler == null) continue; //HashSet allows a null value
 					handler.checkAndPostEvent(event, this, true);	//This is in a separate method so we can have an async implemetation in a subclass
 				}

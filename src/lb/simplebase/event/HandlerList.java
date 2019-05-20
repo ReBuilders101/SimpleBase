@@ -12,12 +12,11 @@ import lb.simplebase.event.EventHandlerImpl.EventHandlerAwaitable;
 class HandlerList implements Iterable<EventHandlerImpl>{
 
 	private final Set<EventHandlerImpl> handlers;
-	private EventHandlerAwaitable waiter;
+	
 	
 	protected HandlerList(Set<EventHandlerImpl> set) {
 		if(!set.isEmpty()) set.clear();
 		handlers = set;
-		waiter = null;
 	}
 	
 	@Override
@@ -33,11 +32,8 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return handlers.isEmpty();
 	}
 	
-	public EventHandlerAwaitable getOrCreateWaitHandler(boolean mayCreate, Class<? extends Event> checkType) {
-		if(!(waiter == null && mayCreate && checkType != null)) return waiter.init();
-		waiter = new EventHandlerAwaitable(checkType, EventPriority.DEFAULT);
-		registerHandler(waiter.init());
-		return waiter;
+	public HandlerListAwaitable awaitable(Class<? extends Event> checkType, AbstractEventPriority priority) {
+		return new HandlerListAwaitable(new EventHandlerAwaitable(checkType, priority), this);
 	}
 	
 	public static HandlerList createNaturalOrdered() {
@@ -52,4 +48,59 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return new HandlerList(new HashSet<>());
 	}
 	
+	
+	static class HandlerListAwaitable implements Iterable<EventHandlerImpl> {
+
+		private final EventHandlerAwaitable waiter;
+		private final HandlerList delegate;
+		
+		protected HandlerListAwaitable(EventHandlerAwaitable waiter, HandlerList delegate) {
+			this.waiter = waiter;
+			this.delegate = delegate;
+		}
+		
+		//Will be uninitialized
+		public EventHandlerAwaitable getWaiter() {
+			return waiter;
+		}
+		
+		public HandlerList getDelegate() {
+			return delegate;
+		}
+		
+		@Override
+		public Iterator<EventHandlerImpl> iterator() {
+			return new Iterator<EventHandlerImpl>() {
+				
+				private boolean waited = false;
+				private EventHandlerImpl scheduled = null;
+				private final Iterator<EventHandlerImpl> iter = delegate.iterator();
+				
+				@Override
+				public boolean hasNext() {
+					return iter.hasNext() || !waited || scheduled != null; //If iter can supply, or if we have a scheduled value, or if the waiter must still be sent
+				}
+
+				@Override
+				public EventHandlerImpl next() {
+					if(scheduled != null) {		//Scheduled will always be returned in the next iteration
+						final EventHandlerImpl r = scheduled;
+						scheduled = null;
+						return r;
+					}
+					//If nothing was scheduled, get the next thing from the delegate
+					
+					EventHandlerImpl impl = iter.next();
+					if(impl.getPriority().getRanking() <= waiter.getPriority().getRanking()) { //If the next one should be after / at the same time with waiter
+						scheduled = impl;	//Return waiter instead and schedule the handler for the next iteration
+						waited = true;
+						return waiter;
+					}
+					return impl;	//Otherwise, return normally
+				}
+			};
+		}
+
+
+	}
 }

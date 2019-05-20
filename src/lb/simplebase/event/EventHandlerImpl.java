@@ -1,5 +1,6 @@
 package lb.simplebase.event;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.BrokenBarrierException;
@@ -11,12 +12,12 @@ import java.util.function.Consumer;
 //They all implement hashcode because they will be used in hashsets / hashmaps
 abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
-	private final Class<? extends Event> checkType;
+	private final WeakReference<Class<? extends Event>> checkType;
 	private final AbstractEventPriority priority;
 	private final boolean receiveCanceled;
 	
 	protected EventHandlerImpl(final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCanceled) {
-		this.checkType = checkType;
+		this.checkType = new WeakReference<>(checkType);
 		this.priority = priority;
 		this.receiveCanceled = receiveCanceled;
 	}
@@ -24,13 +25,13 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 	public void checkAndPostEvent(final Event instance, final EventBus bus, boolean mayStop) {
 		if(instance == null) return;
 		if(isBlocking() && !mayStop) return;	//Don't post on awaitableEventHandler when it should not block
-		if(instance.getClass() != checkType) return;
+		if(instance.getClass() != checkType.get()) return;	//If WeakReference doesn't exist anymore, it tests event != null, which will return
 		if(instance.isCanceled() && !receiveCanceled) return;	//Don't process cancelled events unless requested
 		postEventImpl(instance);
 	}
 	
 	public Class<? extends Event> getEventType() {
-		return checkType;
+		return checkType.get();
 	}
 	
 	public boolean canReceiveCanceledEvents() {

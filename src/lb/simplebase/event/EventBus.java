@@ -134,7 +134,7 @@ public class EventBus {
 	 * <p>
 	 * If {@link #isSynchronous()} returns <code>true</code>, all handlers will have returned when this method returns.
 	 * @param event The event to be posted
-	 * @return Whether the event was handled by at least one event handler
+	 * @return An {@link EventResult} object containing information about how the event was handled
 	 * @see #isSynchronous()
 	 */
 	//TODO can we just sync the whole method and get rid of the map / set syncs?
