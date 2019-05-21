@@ -61,62 +61,65 @@ public final class Framework {
 	
 	private static Timer tickTimer;
 	
+	private static boolean singleFrame;
+	
 	@RequireState(FrameworkState.UNINITIALIZED)
 	public static void init() {
 		//Validate state
 		if(getState() != FrameworkState.UNINITIALIZED) return;
 		scenes = new LinkedHashMap<>(); //To preserve order
-		scenePanels = new LinkedHashMap<>();
 		previewButtons = new ArrayList<>();
-		infoLabel = new JLabel("Info");
 		//Create the Frames
 		//Main Frame first
 		mainFrame = new JFrame();
-		mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		mainFrame.setDefaultCloseOperation(singleFrame ? JFrame.EXIT_ON_CLOSE : JFrame.DO_NOTHING_ON_CLOSE);
 		mainDcp = new DrawCallbackPanel(Framework::onMainPanelDraw);
 		mainFrame.add(mainDcp);
-		//Then small frame
-		smallFrame = new JFrame();
-		smallFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		smallFrame.addWindowListener(new WindowListenerStopOnClose());
-		smallDcp = new DrawCallbackPanel(Framework::onSmallPanelDraw);
-		smallFrame.setLayout(new GridLayout(1, 2));
-		JPanel leftSide = new JPanel(new GridLayout(2, 1));
-		JPanel preview = new JGroupBox("Live Preview", new BorderLayout());
-		preview.add(smallDcp); //Add at top left
-		leftSide.add(preview);
-		JPanel generalOptions = new JGroupBox("General Options");
-		JPanel topControls = new JPanel(new GridBagLayout()); //will center components
-		JPanel topButtons = new JPanel();
-		JButton prev = new JButton("<< Set Previous");
-		JButton next = new JButton("Set Next >>");
-		pprev = new JButton("<< Preview Previous");
-		pnext = new JButton("Preview Next >>");
-		prev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
-		next.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
-		pprev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
-		pnext.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
-		prev.addActionListener((e) -> setActiveScene(currentScene.getPreviousSceneOptional().orElse(currentScene).getName()));
-		next.addActionListener((e) -> setActiveScene(currentScene.getNextSceneOptional().orElse(currentScene).getName()));
-		pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "<< Normal View", "<< Preview Previous"));
-		pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "Normal View >>", "Preview Next >>"));
-		topButtons.add(prev);
-		topButtons.add(pprev);
-		topButtons.add(pnext);
-		topButtons.add(next);
-		topControls.add(topButtons);
-		generalOptions.setLayout(new BorderLayout());
-		generalOptions.add(topControls, BorderLayout.NORTH);
-		scenePanel = new JPanel();
-		JScrollPane sceneListPane = new JScrollPane(scenePanel);
-		generalOptions.add(sceneListPane, BorderLayout.CENTER);
-		generalOptions.add(infoLabel, BorderLayout.SOUTH);
-		leftSide.add(generalOptions);
-		smallFrame.add(leftSide);
-		sceneOptions = new JGroupBox("Scene Options");
-		sceneOptions.setLayout(new BorderLayout());
-		smallFrame.add(sceneOptions);
-		
+		if(!singleFrame) {
+			scenePanels = new LinkedHashMap<>();
+			//Then small frame
+			smallFrame = new JFrame();
+			smallFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			smallFrame.addWindowListener(new WindowListenerStopOnClose());
+			smallDcp = new DrawCallbackPanel(Framework::onSmallPanelDraw);
+			smallFrame.setLayout(new GridLayout(1, 2));
+			infoLabel = new JLabel("Info");
+			JPanel leftSide = new JPanel(new GridLayout(2, 1));
+			JPanel preview = new JGroupBox("Live Preview", new BorderLayout());
+			preview.add(smallDcp); //Add at top left
+			leftSide.add(preview);
+			JPanel generalOptions = new JGroupBox("General Options");
+			JPanel topControls = new JPanel(new GridBagLayout()); //will center components
+			JPanel topButtons = new JPanel();
+			JButton prev = new JButton("<< Set Previous");
+			JButton next = new JButton("Set Next >>");
+			pprev = new JButton("<< Preview Previous");
+			pnext = new JButton("Preview Next >>");
+			prev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+			next.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+			pprev.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+			pnext.setBorder(BorderFactory.createEmptyBorder(5, 20, 5, 20));
+			prev.addActionListener((e) -> setActiveScene(currentScene.getPreviousSceneOptional().orElse(currentScene).getName()));
+			next.addActionListener((e) -> setActiveScene(currentScene.getNextSceneOptional().orElse(currentScene).getName()));
+			pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "<< Normal View", "<< Preview Previous"));
+			pprev.addActionListener((e) -> handlePreviewPress(pprev, currentScene.getPreviousSceneOptional().orElse(currentScene), "Normal View >>", "Preview Next >>"));
+			topButtons.add(prev);
+			topButtons.add(pprev);
+			topButtons.add(pnext);
+			topButtons.add(next);
+			topControls.add(topButtons);
+			generalOptions.setLayout(new BorderLayout());
+			generalOptions.add(topControls, BorderLayout.NORTH);
+			scenePanel = new JPanel();
+			JScrollPane sceneListPane = new JScrollPane(scenePanel);
+			generalOptions.add(sceneListPane, BorderLayout.CENTER);
+			generalOptions.add(infoLabel, BorderLayout.SOUTH);
+			leftSide.add(generalOptions);
+			smallFrame.add(leftSide);
+			sceneOptions = new JGroupBox("Scene Options");
+			sceneOptions.setLayout(new BorderLayout());
+			smallFrame.add(sceneOptions);
+		}
 		//Init timers
 		tickTimer = new Timer("TickTimerThread", true);
 		//Tasks will be set in start()
@@ -141,7 +144,7 @@ public final class Framework {
 		case INITIALIZED:
 			//Dispose frames
 			mainFrame.dispose();
-			smallFrame.dispose();
+			if(smallFrame != null) smallFrame.dispose();
 		case UNINITIALIZED:
 			if(exitOnStop) System.exit(0);
 		}
@@ -151,27 +154,38 @@ public final class Framework {
 	@RequireState(FrameworkState.STARTED)
 	public static void displayInformation(String text) {
 		if(getState() != FrameworkState.STARTED) return;
+		if(singleFrame) return;
 		infoLabel.setText(text);
+	}
+	
+	@RequireState(FrameworkState.INITIALIZED)
+	public static JFrame getMainFrame() {
+		if(getState() != FrameworkState.INITIALIZED) return null;
+		return mainFrame;
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
 	public static void start() {
 		if(getState() != FrameworkState.INITIALIZED) return;
 //		canvas = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-		//Create scene list
-		scenePanel.setLayout(new BoxLayout(scenePanel, BoxLayout.Y_AXIS));
-		int index = 1;
-		for(Scene scene : scenes.values()) {
-			final JComponent sp = createComponent(scene, index++); 
-			scenePanel.add(sp);
-			scenePanels.put(scene.getName(), sp);
-		}
-		scenePanel.add(Box.createHorizontalGlue());
 		//Show frames
 		mainFrame.pack();
 		mainFrame.setVisible(true);
-		smallFrame.pack();
-		smallFrame.setVisible(true);
+		//Create scene list
+		currentScene = scenes.get(DEFAULT_SCENE_NAME);
+		if(!singleFrame) {
+			scenePanel.setLayout(new BoxLayout(scenePanel, BoxLayout.Y_AXIS));
+			int index = 1;
+			for(Scene scene : scenes.values()) {
+				final JComponent sp = createComponent(scene, index++); 
+				scenePanel.add(sp);
+				scenePanels.put(scene.getName(), sp);
+			}
+			scenePanel.add(Box.createHorizontalGlue());
+			smallFrame.pack();
+			smallFrame.setVisible(true);
+			scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		}
 		tick = 0;
 		//Start timers
 		tickTimer.scheduleAtFixedRate(new TimerTask() {
@@ -182,9 +196,7 @@ public final class Framework {
 			}
 		}, 0, 1000 / tps);
 		//Set current scene
-		currentScene = scenes.get(DEFAULT_SCENE_NAME);
 		previewScene = currentScene;
-		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
 		state = FrameworkState.STARTED;
 	}
@@ -205,6 +217,7 @@ public final class Framework {
 	}
 	
 	private static JComponent createComponent(Scene value, int index) {
+		if(singleFrame) return null;
 		JPanel ret = new JPanel(new BorderLayout());
 		JPanel buttons = new JPanel();
 		JButton set = new JButton("Set active");
@@ -234,7 +247,13 @@ public final class Framework {
 	public static void setTitle(String title) {
 		if(getState() != FrameworkState.INITIALIZED) return;
 		mainFrame.setTitle(title);
-		smallFrame.setTitle(title + " - Options");
+		if(!singleFrame) smallFrame.setTitle(title + " - Options");
+	}
+	
+	@RequireState(FrameworkState.UNINITIALIZED)
+	public static void setSingleFrame() {
+		if(getState() != FrameworkState.UNINITIALIZED) return;
+		singleFrame = true;
 	}
 	
 	@RequireState(FrameworkState.INITIALIZED)
@@ -242,7 +261,7 @@ public final class Framework {
 		if(getState() != FrameworkState.INITIALIZED) return;
 		mainFrame.setUndecorated(true);
 		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		smallFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		if(!singleFrame) smallFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 	
 	@AnyState
@@ -260,6 +279,7 @@ public final class Framework {
 	}
 	
 	private static void handlePreviewPress(JButton button, Scene scene, String normal, String pre) {
+		if(singleFrame) return;
 		if(button.getText().equals(normal)) { //no pv
 			previewScene = currentScene;
 			button.setText(pre);
@@ -301,11 +321,12 @@ public final class Framework {
 		Scene requested = scenes.get(name);
 		if(requested == null) return false;
 		currentScene.setActive(false);
-		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		if(!singleFrame) scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 		currentScene = requested;
 		previewScene = currentScene;
-		scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		if(!singleFrame) scenePanels.get(currentScene.getName()).setBorder(BorderFactory.createLineBorder(Color.BLUE));
 		currentScene.setActive(true);
+		if(singleFrame) return true;
 		JComponent comp = currentScene.getOptions(); 
 		sceneOptions.removeAll();
 		if(comp != null) sceneOptions.add(comp, BorderLayout.CENTER);
@@ -353,7 +374,7 @@ public final class Framework {
 //			draw.dispose();
 			//Draw
 			mainDcp.repaint();
-			smallDcp.repaint();
+			if(!singleFrame) smallDcp.repaint();
 			currentScene.update(tick);
 		}
 		tick++; //Increment for every update
