@@ -46,11 +46,11 @@ public class FlatIterator<T> implements Iterator<T>{
 	}
 	
 	public static <T> Iterator<T> createFlatOfIterator(Iterable<Iterator<T>> iters) {
-		return StreamSupport.stream(iters.spliterator(), false).flatMap((i) -> StreamSupport.stream(((Iterable<T>) () -> i).spliterator(), false)).iterator(); //Good luck understanding this
+		return StreamSupport.stream(iters.spliterator(), false).flatMap((i) -> streamIterator(i)).iterator(); //Good luck understanding this
 	}
 	
 	public static <T> Iterator<T> createFlatOfIterable(Iterable<Iterable<T>> iters) {
-		return StreamSupport.stream(iters.spliterator(), false).flatMap((i) -> StreamSupport.stream(i.spliterator(), false)).iterator();
+		return StreamSupport.stream(iters.spliterator(), false).flatMap((i) -> streamIterable(i)).iterator();
 	}
 	
 	public static <T> Iterable<T> ofIterator(Iterator<T> iterator) {
@@ -59,5 +59,9 @@ public class FlatIterator<T> implements Iterator<T>{
 	
 	public static <T> Stream<T> streamIterator(Iterator<T> iterator) {
 		return StreamSupport.stream(ofIterator(iterator).spliterator(), false);
+	}
+	
+	public static <T> Stream<T> streamIterable(Iterable<T> iterable) {
+		return StreamSupport.stream(iterable.spliterator(), false);
 	}
 }
