@@ -1,11 +1,14 @@
 package lb.simplebase.net;
 
+import lb.simplebase.net.todo.ConnectionStateFuture;
+import lb.simplebase.net.todo.PacketSendFuture;
+
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
  */
 @ClientSide
-public class NetworkManagerClient extends NetworkManager{
+public class NetworkManagerClient extends NetworkManager implements lb.simplebase.net.common.NetworkManagerClient{
 
 	NetworkConnection serverConnection;
 	TargetIdentifier serverId;
@@ -40,14 +43,14 @@ public class NetworkManagerClient extends NetworkManager{
 	 * @param packet The Packet that should be sent
 	 * @return Whether the {@link Packet} was sent successfully
 	 */
-	public boolean sendPacketToServer(Packet packet) {
+	public PacketSendFuture sendPacketToServer(Packet packet) {
 		try {
 			serverConnection.sendPacketToTarget(packet);
 		} catch (ConnectionStateException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-		return true;
+		return null;
 	}
 	
 	/**
@@ -55,20 +58,21 @@ public class NetworkManagerClient extends NetworkManager{
 	 * If the connection is already open, or could not be made, <code>false</code> is returned.
 	 * @return Whether the connection was opened successfully
 	 */
-	public boolean openConnectionToServer() {
+	public ConnectionStateFuture openConnectionToServer() {
 		try {
 			serverConnection.connect();
 		} catch (ConnectionStateException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
-		return true;
+		return null;
 	}
 	
 	/**
 	 * Whether the connection to the server is open, that means that packets can be sent to the server.
 	 * @return Whether the connection to the server is open
 	 */
+	@Deprecated
 	public boolean isServerConnectionOpen() {
 		return serverConnection.isConnectionOpen();
 	}
@@ -85,6 +89,7 @@ public class NetworkManagerClient extends NetworkManager{
 	 * The {@link ConnectionState} of the connection to the server.
 	 * @return The {@link ConnectionState} of the connection to the server
 	 */
+	@Deprecated
 	public ConnectionState getServerConnectionState() {
 		return serverConnection.getState();
 	}
@@ -93,6 +98,7 @@ public class NetworkManagerClient extends NetworkManager{
 	 * The {@link TargetIdentifier} of the server that this {@link NetworkManagerClient} is connected to
 	 * @return The {@link TargetIdentifier} of the server
 	 */
+	@Deprecated
 	public TargetIdentifier getServerId() {
 		return serverId;
 	}
@@ -108,8 +114,25 @@ public class NetworkManagerClient extends NetworkManager{
 	 * {@link Packet}s can be sent through the connection, and this client is removed from the server's list of clients.
 	 */
 	@Override
+	@Deprecated
 	public void close() {
 		serverConnection.close();
+	}
+
+	@Override
+	public ConnectionState getConnectionState() {
+		return serverConnection.getState();
+	}
+
+	@Override
+	public ConnectionStateFuture closeConnectionToServer() {
+		serverConnection.close();
+		return null;
+	}
+
+	@Override
+	public TargetIdentifier getServerIndentifier() {
+		return serverId;
 	}
 
 }
