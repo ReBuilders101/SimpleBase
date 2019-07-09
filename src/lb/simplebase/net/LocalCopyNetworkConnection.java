@@ -1,6 +1,12 @@
 package lb.simplebase.net;
 
 import lb.simplebase.io.ByteArrayBuffer;
+import lb.simplebase.net.done.ConnectionState;
+import lb.simplebase.net.done.NetworkManager;
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.PacketIdMapping;
+import lb.simplebase.net.done.PacketMappingNotFoundException;
+import lb.simplebase.net.done.TargetIdentifier;
 
 /**
  * @deprecated Only for testing

@@ -12,10 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.Packet;
-import lb.simplebase.net.PacketIdMapping;
-import lb.simplebase.net.TargetIdentifier;
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.PacketIdMapping;
 import lb.simplebase.net.done.SocketNetworkManagerClient;
+import lb.simplebase.net.done.TargetIdentifier;
 
 class NetworkTest {
 

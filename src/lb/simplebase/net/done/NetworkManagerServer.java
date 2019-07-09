@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import lb.simplebase.net.Packet;
-import lb.simplebase.net.TargetIdentifier;
-import lb.simplebase.net.todo.ConnectionStateFuture;
-import lb.simplebase.net.todo.MultiPacketSendFuture;
-import lb.simplebase.net.todo.PacketSendFuture;
-import lb.simplebase.net.todo.ServerStateFuture;
+import lb.simplebase.net.ConnectionStateFuture;
+import lb.simplebase.net.MultiPacketSendFuture;
+import lb.simplebase.net.PacketSendFuture;
+import lb.simplebase.net.ServerStateFuture;
 
 @ServerSide
 public interface NetworkManagerServer {

@@ -1,4 +1,4 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -14,26 +14,27 @@ import java.util.function.Supplier;
  */
 public abstract class FutureState implements AsyncResult{
 
-	private Future<Void> task;
-	private Supplier<FutureState> thisSupply = () -> this;
+	private final Future<Void> task;
+	private final Supplier<FutureState> thisSupply = () -> this;
+	private volatile State state;
 	
 	protected FutureState(boolean failed, Consumer<FutureState> asyncTask) {
 		quickFailed = failed;
 		if(failed) {
 			this.task = CompletableFuture.completedFuture(null);
-			started = true;
+			state = State.FINISHED;
 		} else {
 			Callable<Void> newTask = () -> {
 				asyncTask.accept(thisSupply.get());
+				taskDoneHandler();
 				return null;
 			};
-			started = false;
+			state = State.IDLE;
 			this.task = new FutureTask<>(newTask);
 		}
 	}
 	
 	private final boolean quickFailed;
-	private volatile boolean started;
 	
 	/**
 	 * Whether the operation represented by this {@link FutureState} failed quickly.
@@ -45,9 +46,13 @@ public abstract class FutureState implements AsyncResult{
 		return quickFailed;
 	}
 	
+	protected synchronized void taskDoneHandler() {
+		state = State.FINISHED;
+	}
+	
 	protected synchronized void run() {
-		if(!started) { //It is a FutureTask
-			started = true;
+		if(state == State.IDLE) { //It is a FutureTask
+			state = State.WORKING;
 			((FutureTask<Void>) task).run();
 		}
 	}
@@ -63,5 +68,13 @@ public abstract class FutureState implements AsyncResult{
 			//Callable is created from a consumer, so exceptions should not be possible
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
+	public static enum State {
+		IDLE, WORKING, FINISHED;
 	}
 }

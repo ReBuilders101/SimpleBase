@@ -1,8 +1,6 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.net.Socket;
-
-import lb.simplebase.net.done.AbstractNetworkConnection;
 
 /**
  * Saves information about the state of a {@link AbstractNetworkConnection}.

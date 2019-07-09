@@ -1,4 +1,4 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 /**
  * This {@link Exception} is thrown when the {@link PacketIdMapping} for a packet id or packet could not be found.

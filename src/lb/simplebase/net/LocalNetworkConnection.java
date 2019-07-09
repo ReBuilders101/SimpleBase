@@ -1,6 +1,10 @@
 package lb.simplebase.net;
 
 import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.ConnectionState;
+import lb.simplebase.net.done.NetworkManager;
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.TargetIdentifier;
 
 public class LocalNetworkConnection extends AbstractNetworkConnection{
 

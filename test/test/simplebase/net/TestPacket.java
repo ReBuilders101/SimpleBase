@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import lb.simplebase.io.ReadableByteData;
 import lb.simplebase.io.WritableByteData;
-import lb.simplebase.net.Packet;
+import lb.simplebase.net.done.Packet;
 
 public class TestPacket implements Packet{
 

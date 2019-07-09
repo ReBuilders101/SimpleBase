@@ -12,8 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.ConnectionState;
+import lb.simplebase.net.done.NetworkManager;
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.PacketReceiver;
 import lb.simplebase.net.done.ServerSide;
-import lb.simplebase.net.todo.PacketSendFuture;
+import lb.simplebase.net.done.TargetIdentifier;
 
 /**
  * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link AbstractNetworkConnection}s to clients.

@@ -1,12 +1,12 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import lb.simplebase.net.done.AbstractNetworkConnection;
-import lb.simplebase.net.done.SocketNetworkManagerClient;
+import lb.simplebase.net.NetworkManagerServer;
+import lb.simplebase.net.PacketThreadReceiver;
 
 /**
  * The {@link NetworkManager} handles all {@link AbstractNetworkConnection}s in a network for one target.

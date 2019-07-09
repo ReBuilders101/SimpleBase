@@ -1,9 +1,8 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.util.Arrays;
 
 import lb.simplebase.io.ByteArrayBuffer;
-import lb.simplebase.net.done.AbstractNetworkConnection;
 
 /**
  * Encodes and decodes packets from / to bytes

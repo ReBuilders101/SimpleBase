@@ -6,6 +6,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.PacketReceiver;
+import lb.simplebase.net.done.TargetIdentifier;
+
 /**
  * A {@link PacketReceiver} that processes received {@link Packet}s in another thread.<br>
  * Every instance has its own thread, but all {@link Packet}s for one instance are processed on the same thread.

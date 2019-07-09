@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.ConnectionState;
+import lb.simplebase.net.done.TargetIdentifier;
 
 //Instead of binding Sockets, bind connections here
 /**
@@ -28,13 +30,13 @@ final class LocalServerManager {
 	 * @return A {@link AbstractNetworkConnection} to the server, from the server's perspective
 	 * @throws ConnectionStateException When the server was not found or when the server refused the connection
 	 */
-	protected static LocalNetworkConnection getLocalConnectionServer(LocalNetworkConnection connection) throws ConnectionStateException{
+	protected static LocalNetworkConnection getLocalConnectionServer(LocalNetworkConnection connection) {
 		TargetIdentifier key = connection.getRemoteTargetId();
 		NetworkManagerServer server = servers.get(key);
 		if(server != null) {
 			return server.attemptLocalConnection(connection);
 		} else {
-			throw new ConnectionStateException("Server for local connection was not found", connection, ConnectionState.UNCONNECTED);
+			
 		}
 	}
 	

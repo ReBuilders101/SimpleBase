@@ -1,8 +1,8 @@
-package lb.simplebase.net.todo;
+package lb.simplebase.net;
 
-import lb.simplebase.net.FailableFutureState;
-import lb.simplebase.net.Packet;
 import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.FailableFutureState;
+import lb.simplebase.net.done.Packet;
 
 public class PacketSendFuture extends FailableFutureState{
 

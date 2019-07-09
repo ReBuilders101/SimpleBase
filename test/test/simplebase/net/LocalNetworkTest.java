@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.Packet;
-import lb.simplebase.net.PacketIdMapping;
-import lb.simplebase.net.TargetIdentifier;
+import lb.simplebase.net.done.Packet;
+import lb.simplebase.net.done.PacketIdMapping;
 import lb.simplebase.net.done.SocketNetworkManagerClient;
+import lb.simplebase.net.done.TargetIdentifier;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LocalNetworkTest {

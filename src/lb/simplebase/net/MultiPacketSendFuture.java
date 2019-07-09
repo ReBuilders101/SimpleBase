@@ -1,8 +1,8 @@
-package lb.simplebase.net.todo;
+package lb.simplebase.net;
 
 import java.util.function.Consumer;
 
-import lb.simplebase.net.FutureState;
+import lb.simplebase.net.done.FutureState;
 
 public class MultiPacketSendFuture extends FutureState{
 

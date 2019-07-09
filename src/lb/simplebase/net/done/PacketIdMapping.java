@@ -1,4 +1,4 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;

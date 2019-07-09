@@ -1,10 +1,7 @@
 package lb.simplebase.net.done;
 
-import lb.simplebase.net.ConnectionState;
-import lb.simplebase.net.Packet;
-import lb.simplebase.net.TargetIdentifier;
-import lb.simplebase.net.todo.ConnectionStateFuture;
-import lb.simplebase.net.todo.PacketSendFuture;
+import lb.simplebase.net.ConnectionStateFuture;
+import lb.simplebase.net.PacketSendFuture;
 
 /**
  * A client side manager for a single network session.

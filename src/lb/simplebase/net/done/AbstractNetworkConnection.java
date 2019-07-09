@@ -3,17 +3,11 @@ package lb.simplebase.net.done;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import lb.simplebase.net.ConnectionState;
-import lb.simplebase.net.ConnectionStateException;
+import lb.simplebase.net.ConnectionStateFuture;
 import lb.simplebase.net.LocalNetworkConnection;
-import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.Packet;
-import lb.simplebase.net.PacketFactory;
+import lb.simplebase.net.PacketSendFuture;
 import lb.simplebase.net.RemoteNetworkConnection;
-import lb.simplebase.net.TargetIdentifier;
-import lb.simplebase.net.todo.ConnectionStateFuture;
-import lb.simplebase.net.todo.PacketSendFuture;
 
 /**
  * A {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>

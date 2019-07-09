@@ -1,4 +1,4 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 public interface AsyncResult {
 
