@@ -1,4 +1,4 @@
-package lb.simplebase.net.common;
+package lb.simplebase.net.done;
 
 import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.Packet;
@@ -10,6 +10,7 @@ import lb.simplebase.net.todo.PacketSendFuture;
  * A client side manager for a single network session.
  * Used to send packets to a server and to handle incoming packets
  */
+@ClientSide
 public interface NetworkManagerClient {
 	
 	/**

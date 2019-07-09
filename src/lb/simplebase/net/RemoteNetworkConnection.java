@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
-class RemoteNetworkConnection extends NetworkConnection{
+import lb.simplebase.net.done.AbstractNetworkConnection;
+
+public class RemoteNetworkConnection extends AbstractNetworkConnection{
 
 	private final Socket connection;
 	private final Thread socketListenerThread;
@@ -12,7 +14,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 	
 	private static volatile int ID = 0; 
 	
-	protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
+	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
 		this(source, target, packetHandler, new Socket());
 	}
 

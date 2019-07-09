@@ -2,8 +2,10 @@ package lb.simplebase.net;
 
 import java.net.Socket;
 
+import lb.simplebase.net.done.AbstractNetworkConnection;
+
 /**
- * Saves information about the state of a {@link NetworkConnection}.
+ * Saves information about the state of a {@link AbstractNetworkConnection}.
  */
 public enum ConnectionState {
 	/**
@@ -37,7 +39,7 @@ public enum ConnectionState {
 	}
 	
 	/**
-	 * The {@link ConnectionState} of a {@link NetworkConnection} created with this {@link Socket}.
+	 * The {@link ConnectionState} of a {@link AbstractNetworkConnection} created with this {@link Socket}.
 	 * @param socket The {@link Socket} for the connection
 	 * @return The state of the connection
 	 */

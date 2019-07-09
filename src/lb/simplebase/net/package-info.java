@@ -20,11 +20,11 @@
  * be used for both modes. A local connection does not need network connection information, and so the
  * {@link lb.simplebase.net.TargetIdentifier.LocalTargetIdentifier} implementation can be used.
  * </li></ul>
- * The class {@link lb.simplebase.net.NetworkConnection} represents both types of connections.
+ * The class {@link lb.simplebase.net.done.AbstractNetworkConnection} represents both types of connections.
  * <p>
  * A network party or target is represented by an instance of {@link lb.simplebase.net.NetworkManager}.
  * There are two different subclasses for clients an servers,
- * {@link lb.simplebase.net.NetworkManagerClient} and {@link lb.simplebase.net.NetworkManagerServer}
+ * {@link lb.simplebase.net.done.SocketNetworkManagerClient} and {@link lb.simplebase.net.NetworkManagerServer}
  * This class manages connections and allows you to send data to other targets, and handles received
  * data. This class will be the main interface point between this API and the program.
  * </p><p>

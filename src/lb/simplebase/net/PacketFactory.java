@@ -3,6 +3,7 @@ package lb.simplebase.net;
 import java.util.Arrays;
 
 import lb.simplebase.io.ByteArrayBuffer;
+import lb.simplebase.net.done.AbstractNetworkConnection;
 
 /**
  * Encodes and decodes packets from / to bytes
@@ -34,7 +35,7 @@ public class PacketFactory {
 	public static final byte[] PACKET_HEADER = Arrays.copyOf(PACKET_HEADER_PRIV, PACKET_HEADER_PRIV.length);
 	
 	private final PacketIdMappingContainer mapCon;
-	private final NetworkConnection finishedPacketReceiver;
+	private final AbstractNetworkConnection finishedPacketReceiver;
 	
 	private Mode mode = Mode.SEARCH_HEADER; 
 	private int accStep = 0;
@@ -42,11 +43,11 @@ public class PacketFactory {
 	private int packetId = 0;
 	
 	/**
-	 * Creates a new {@link PacketFactory} for this {@link NetworkConnection}.
+	 * Creates a new {@link PacketFactory} for this {@link AbstractNetworkConnection}.
 	 * @param mapCon The {@link PacketIdMappingContainer} that contains all packet &lt;-&gt; id mappings
-	 * @param finishedPacketReceiver The {@link NetworkConnection} that will receive finished {@link Packet}s
+	 * @param finishedPacketReceiver The {@link AbstractNetworkConnection} that will receive finished {@link Packet}s
 	 */
-	public PacketFactory(PacketIdMappingContainer mapCon, NetworkConnection finishedPacketReceiver) {
+	public PacketFactory(PacketIdMappingContainer mapCon, AbstractNetworkConnection finishedPacketReceiver) {
 		this.mapCon = mapCon;
 		this.finishedPacketReceiver = finishedPacketReceiver;
 	}

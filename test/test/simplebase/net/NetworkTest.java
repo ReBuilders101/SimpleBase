@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.Packet;
 import lb.simplebase.net.PacketIdMapping;
 import lb.simplebase.net.TargetIdentifier;
+import lb.simplebase.net.done.SocketNetworkManagerClient;
 
 class NetworkTest {
 
@@ -24,7 +24,7 @@ class NetworkTest {
 	static TargetIdentifier clientFromServer;
 	
 	NetworkManagerServer serverManager;
-	NetworkManagerClient clientManager;
+	SocketNetworkManagerClient clientManager;
 	
 	CyclicBarrier barrier = new CyclicBarrier(2);
 	
@@ -39,7 +39,7 @@ class NetworkTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		serverManager = new NetworkManagerServer(this::getPacket, server);
-		clientManager = new NetworkManagerClient(this::getPacket, clientFromClient, server);
+		clientManager = new SocketNetworkManagerClient(this::getPacket, clientFromClient, server);
 	}
 
 	@AfterEach

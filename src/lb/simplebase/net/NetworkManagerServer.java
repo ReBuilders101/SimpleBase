@@ -11,10 +11,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
+import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.ServerSide;
 import lb.simplebase.net.todo.PacketSendFuture;
 
 /**
- * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link NetworkConnection}s to clients.
+ * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link AbstractNetworkConnection}s to clients.
  * All {@link Packet}s that are received are processed with an {@link ExecutorService}.
  */
 @ServerSide
@@ -29,12 +31,12 @@ public class NetworkManagerServer extends NetworkManager{
 	private final int id;
 	private boolean closed;
 	
-	private final Map<TargetIdentifier, NetworkConnection> connections;
+	private final Map<TargetIdentifier, AbstractNetworkConnection> connections;
 	private final int connectionLimit;
 	
 	private final ServerSocket server;
 	private final Thread socketConnectionAcceptor;
-	private final Consumer<NetworkConnection> conHand;
+	private final Consumer<AbstractNetworkConnection> conHand;
 	
 	/**
 	 * Creates a new {@link NetworkManagerServer}. The created instance will not contain any connections, but it will immediately start listening
@@ -47,7 +49,7 @@ public class NetworkManagerServer extends NetworkManager{
 	 * @param singleThread Whether the packets should only be processed on one thread at a time. See {@link PacketThreadReceiver#hasSingleThread()}.
 	 * @throws IOException When the {@link ServerSocket} used to listen for connections could not be created
 	 */
-	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit, Consumer<NetworkConnection> newConnectionHandler, boolean singleThread) throws IOException {
+	public NetworkManagerServer(PacketReceiver threadReceiver, TargetIdentifier localId, int connectionLimit, Consumer<AbstractNetworkConnection> newConnectionHandler, boolean singleThread) throws IOException {
 		super(threadReceiver, localId, singleThread);
 		this.connectionLimit = connectionLimit;
 		this.connections = Collections.synchronizedMap(new HashMap<>()); //Sync map, because it is accessed from two threads 
@@ -102,14 +104,14 @@ public class NetworkManagerServer extends NetworkManager{
 	
 	/**
 	 * Sends the {@link Packet} to the specified client. If the {@link TargetIdentifier} does not identify one of this {@link NetworkManagerServer}'s
-	 * clients, or if the {@link NetworkConnection} to that client is closed, or if an exception occurred while sending the {@link Packet}'s
+	 * clients, or if the {@link AbstractNetworkConnection} to that client is closed, or if an exception occurred while sending the {@link Packet}'s
 	 * data, this method returns <code>false</code>. Otherwise, if the {@link Packet} was sent successfully, <code>true</code> is returned.
 	 * @param packet The packet that should be sent
 	 * @param clientId The {@link TargetIdentifier} of the target, which should be one of the clients connected to this {@link NetworkManagerServer}
 	 * @return Whether the packet was sent successfully
 	 */
 	public boolean sendPacketToClient(Packet packet, TargetIdentifier clientId) {
-		NetworkConnection connection = connections.get(clientId);
+		AbstractNetworkConnection connection = connections.get(clientId);
 		if(connection == null || !connection.isConnectionOpen()) return false;
 		try {
 			connection.sendPacketToTarget(packet);
@@ -128,7 +130,7 @@ public class NetworkManagerServer extends NetworkManager{
 	public boolean sendPacketsToAllClients(Packet packet) {
 		boolean allSuccessful = true;
 		synchronized(connections) {
-			for(NetworkConnection connection : connections.values()) {
+			for(AbstractNetworkConnection connection : connections.values()) {
 				if(connection.isConnectionOpen()) {
 					try {
 						connection.sendPacketToTarget(packet);
@@ -170,7 +172,7 @@ public class NetworkManagerServer extends NetworkManager{
 	 * @return Whether the connection was closed successfully
 	 */
 	public boolean closeConnectionTo(TargetIdentifier target) {
-		NetworkConnection con = connections.get(target);
+		AbstractNetworkConnection con = connections.get(target);
 		if(con == null) return false;
 		con.close();
 		return true;
@@ -179,7 +181,7 @@ public class NetworkManagerServer extends NetworkManager{
 	/**
 	 * Whether this {@link NetworkManagerServer} generally accepts new connections, without calculating whether a
 	 * new connection would exceed the connection limit. To test for this as well, see {@link #canAcceptNewConnection()}.
-	 * @return Whether this {@link NetworkConnection} accepts new connections at all
+	 * @return Whether this {@link AbstractNetworkConnection} accepts new connections at all
 	 */
 	public boolean isAcceptingConnections() {
 		return !closed;
@@ -205,7 +207,7 @@ public class NetworkManagerServer extends NetworkManager{
 	
 	/**
 	 * The amount of connections to this {@link NetworkManagerServer} that are open,
-	 * that is where {@link NetworkConnection#isConnectionOpen()} returns <code>true</code>.
+	 * that is where {@link AbstractNetworkConnection#isConnectionOpen()} returns <code>true</code>.
 	 * To determine if the amount of connections exceeds the connection limit, {@link #getConnectionCount()} is used instead.
 	 * @return The amount of open connections
 	 */
@@ -243,7 +245,7 @@ public class NetworkManagerServer extends NetworkManager{
 	 * If the remote partner closed the connection, notify that the connection should be removed
 	 */
 	@Override
-	protected void notifyConnectionClosed(NetworkConnection connection) {
+	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
 		connections.remove(connection.getRemoteTargetId());
 	}
 	
@@ -282,7 +284,7 @@ public class NetworkManagerServer extends NetworkManager{
 					//after accepting, sync on the list
 					synchronized(connections) {
 						TargetIdentifier remoteId = generateNewTargetId(newConnection);
-						NetworkConnection connection = new RemoteNetworkConnection(getSenderID(), remoteId,
+						AbstractNetworkConnection connection = new RemoteNetworkConnection(getSenderID(), remoteId,
 								this, newConnection);
 						if(canAcceptNewConnection()) {
 							connections.put(remoteId, connection);
@@ -313,7 +315,7 @@ public class NetworkManagerServer extends NetworkManager{
 	@Override
 	public void close() {
 		synchronized (connections) { //Sync on map before iterating
-			for(NetworkConnection connection : connections.values()) {
+			for(AbstractNetworkConnection connection : connections.values()) {
 				connection.close();
 			}
 		}

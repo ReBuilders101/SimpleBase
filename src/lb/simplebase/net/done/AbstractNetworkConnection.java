@@ -1,32 +1,44 @@
-package lb.simplebase.net;
+package lb.simplebase.net.done;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import lb.simplebase.net.ConnectionState;
+import lb.simplebase.net.ConnectionStateException;
+import lb.simplebase.net.LocalNetworkConnection;
+import lb.simplebase.net.NetworkManager;
+import lb.simplebase.net.NetworkManagerServer;
+import lb.simplebase.net.Packet;
+import lb.simplebase.net.PacketFactory;
+import lb.simplebase.net.RemoteNetworkConnection;
+import lb.simplebase.net.TargetIdentifier;
+import lb.simplebase.net.todo.ConnectionStateFuture;
+import lb.simplebase.net.todo.PacketSendFuture;
+
 /**
- * A {@link NetworkConnection} represents the connection between two network targets, seen from one side.<br>
+ * A {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>
  * It contains the {@link TargetIdentifier} of the connection partner and the own {@link TargetIdentifier}.
  * It provides methods to send packets to the remote partner and accepts received {@link Packet}s, which are sent
  * to a connected {@link NetworkManager} after being constructed by a {@link PacketFactory}.<p>
- * Every connection has a basic lifecycle: First the {@link NetworkConnection} object is created with all information
+ * Every connection has a basic lifecycle: First the {@link AbstractNetworkConnection} object is created with all information
  * necessary to open the connection. Then the connection is opened by calling the {@link #connect()} method.
  * Now data can be sent through the connection. The connection remains open until either the {@link #close()} method is called,
  * or the connection is closed by the remote partner. After the connection has been closed, no more data can be sent through the connection.
  */
-public abstract class NetworkConnection {
+public abstract class AbstractNetworkConnection {
 	
 	private final TargetIdentifier local; //is this even necessary?
 	private final TargetIdentifier remote;
-	//No receiver, because receivers do not depend on specific nonnections (entityupdate from any client etc)
+	//No receiver, because receivers do not depend on specific connections (entityupdate from any client etc)
 	private final NetworkManager packetHandler; //This is the Networkmanager
 	private volatile ConnectionState state; //Threadsafe for socket listener
 	private final PacketFactory factory;
 	
-	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState) {
+	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
-		this.state = initialState;
+		this.state = ConnectionState.UNCONNECTED;
 		this.factory = new PacketFactory(packetHandler, this);
 	}
 
@@ -40,7 +52,7 @@ public abstract class NetworkConnection {
 	}
 	
 	/**
-	 * The {@link TargetIdentifier} of the network target that is sending and receiving packets throgh this {@link NetworkConnection}.
+	 * The {@link TargetIdentifier} of the network target that is sending and receiving packets throgh this {@link AbstractNetworkConnection}.
 	 * It does not contain a valid {@link InetSocketAddress}, because connections to the same target that the rpogram is running on make no sense.
 	 * It is however necessary, because one program can contain more than one network target, for example a server and a local client.
 	 * @return The own {@link TargetIdentifier}
@@ -56,25 +68,28 @@ public abstract class NetworkConnection {
 	 * Equal to testing {@link #getState()}<code> == </code>{@link ConnectionState#OPEN}
 	 * @return Whether the connection is open
 	 */
-	public boolean isConnectionOpen() {
+	public synchronized boolean isConnectionOpen() {
 		return state == ConnectionState.OPEN;
 	}
 	
 	/**
-	 * Closes this {@link NetworkConnection}. After closing, no {@link Packet}s can be sent or received.
+	 * Closes this {@link AbstractNetworkConnection}. After closing, no {@link Packet}s can be sent or received.
 	 * The connected {@link NetworkManager} will be notified when a connection is closed, and
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
-	public void close() {
+	public final synchronized ConnectionStateFuture close() {
 		state = ConnectionState.CLOSED;
 		packetHandler.notifyConnectionClosed(this);
+		return closeImpl();
 	}
+	
+	protected abstract ConnectionStateFuture closeImpl();
 	
 	/**
 	 * Set the connection state
 	 */
-	protected void setConnectionState(ConnectionState state) {
+	protected synchronized void setConnectionState(ConnectionState state) {
 		this.state = state;
 	}
 	
@@ -91,8 +106,8 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionStateException When the connection could not be made
 	 * @see #connect(int)
 	 */
-	public void connect() throws ConnectionStateException {
-		connect(30000); //Default timeout 30s = 30,000 ms
+	public ConnectionStateFuture connect() {
+		return connect(30000); //Default timeout 30s = 30,000 ms
 	}
 	
 	/**
@@ -101,14 +116,14 @@ public abstract class NetworkConnection {
 	 * @param timeout The maximal timeout in milliseconds
 	 * @throws ConnectionStateException When the connection could not be made
 	 */
-	public abstract void connect(int timeout) throws ConnectionStateException;
+	public abstract ConnectionStateFuture connect(int timeout);
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
 	 * @param packet The {@link Packet} containing the data that should be sent
 	 * @throws ConnectionStateException When the {@link Packet} could not be sent
 	 */
-	public abstract void sendPacketToTarget(Packet packet) throws ConnectionStateException;
+	public abstract PacketSendFuture sendPacketToTarget(Packet packet);
 	
 	/**
 	 * A local connection is a connection between two network targets that exist within the same program.
@@ -120,11 +135,11 @@ public abstract class NetworkConnection {
 	public abstract boolean isLocalConnection();
 	
 	/**
-	 * The current {@link ConnectionState} of this {@link NetworkConnection}.
+	 * The current {@link ConnectionState} of this {@link AbstractNetworkConnection}.
 	 * Some actions can throw {@link ConnectionStateException}s if the current state does not match the required state.
-	 * @return The current {@link ConnectionState} of this {@link NetworkConnection}
+	 * @return The current {@link ConnectionState} of this {@link AbstractNetworkConnection}
 	 */
-	public ConnectionState getState() {
+	public synchronized ConnectionState getState() {
 		return state;
 	}
 
@@ -139,32 +154,11 @@ public abstract class NetworkConnection {
 	///////////////////////////////////////THE STATIC METHODS BEGIN HERE/////////////////////////////////////////////////////////////////////
 	
 	//Called from the Networkmanager
- 	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager) {
+ 	public static AbstractNetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager) {
 		if(remote.isLocalOnly()) {
 			return new LocalNetworkConnection(local, remote, manager);
 		} else {
 			return new RemoteNetworkConnection(local, remote, manager);
-		}
- 	}
- 	
- 	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager, boolean connect)
- 			throws ConnectionStateException {
-		if(remote.isLocalOnly()) {
-			return new LocalNetworkConnection(local, remote, manager, connect);
-		} else {
-			return new RemoteNetworkConnection(local, remote, manager, connect);
-		}
- 	}
- 	
- 	//Only for testing
- 	@Deprecated
-	protected static NetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager, boolean connect,
- 			@Deprecated boolean copyIfLocal)
- 			throws ConnectionStateException {
-		if(remote.isLocalOnly()) {
-			return new LocalCopyNetworkConnection(local, remote, manager, connect);
-		} else {
-			return new RemoteNetworkConnection(local, remote, manager, connect);
 		}
  	}
 }

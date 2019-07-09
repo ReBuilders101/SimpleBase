@@ -1,8 +1,8 @@
 package lb.simplebase.net.todo;
 
 import lb.simplebase.net.FailableFutureState;
-import lb.simplebase.net.NetworkConnection;
 import lb.simplebase.net.Packet;
+import lb.simplebase.net.done.AbstractNetworkConnection;
 
 public class PacketSendFuture extends FailableFutureState{
 
@@ -33,7 +33,7 @@ public class PacketSendFuture extends FailableFutureState{
 		return r;
 	}
 	
-	public static PacketSendFuture forPacket(Packet data, NetworkConnection con) {
+	public static PacketSendFuture forPacket(Packet data, AbstractNetworkConnection con) {
 		if(data == null || con == null) return new PacketSendFuture(true);
 		return new PacketSendFuture(false);
 	}

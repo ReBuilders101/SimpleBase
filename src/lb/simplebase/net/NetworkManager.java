@@ -5,16 +5,17 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import lb.simplebase.net.todo.PacketSendFuture;
+import lb.simplebase.net.done.AbstractNetworkConnection;
+import lb.simplebase.net.done.SocketNetworkManagerClient;
 
 /**
- * The {@link NetworkManager} handles all {@link NetworkConnection}s in a network for one target.
+ * The {@link NetworkManager} handles all {@link AbstractNetworkConnection}s in a network for one target.
  * In case if clients, this is only the connection to the server, but in case of a server, there
  * are multiple connections to clients.<br>
  * Because the implementation depends heavily on whether the {@link NetworkManager} represents a server or client,
- * the subclasses {@link NetworkManagerServer} and {@link NetworkManagerClient} should be used.
+ * the subclasses {@link NetworkManagerServer} and {@link SocketNetworkManagerClient} should be used.
  */
-public abstract class NetworkManager extends PacketThreadReceiver implements PacketSender, PacketIdMappingContainer {
+public abstract class NetworkManager extends PacketThreadReceiver implements PacketIdMappingContainer {
 	
 	private Set<PacketIdMapping> mappings;
 	
@@ -26,30 +27,11 @@ public abstract class NetworkManager extends PacketThreadReceiver implements Pac
 
 	private TargetIdentifier local; //every manager represents one party
 	
-	/**
-	 * Sends a packet to the specified target. Packet sending may be restricted depending on the implementation,
-	 * for example a {@link NetworkManagerClient} can only send {@link Packet}s to the connceted server.
-	 * Because this method does not allow to return a success indicator or throw a (checked) {@link Exception},
-	 * {@link Packet}s that cannot be sent are silently discarded. Both {@link NetworkManagerClient} and {@link NetworkManagerServer}
-	 * provide better methods for sending packets to a network target.
-	 * @param packet The packet that should be sent
-	 * @param id The {@link TargetIdentifier} of the target
-	 * @return 
-	 */
-	@Override
-	public abstract PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id);
-
-	@Override
-	public TargetIdentifier getSenderID() {
+	public TargetIdentifier getID() {
 		return local;
 	}
 	
-	/**
-	 * Closes all contained network connections.
-	 */
-	public abstract void close();
-	
-	protected abstract void notifyConnectionClosed(NetworkConnection connection);
+	public abstract void notifyConnectionClosed(AbstractNetworkConnection connection);
 
 	@Override
 	public Set<PacketIdMapping> getAllMappings() {

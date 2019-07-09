@@ -15,11 +15,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
-import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.Packet;
 import lb.simplebase.net.PacketIdMapping;
 import lb.simplebase.net.TargetIdentifier;
+import lb.simplebase.net.done.SocketNetworkManagerClient;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LocalNetworkTest {
@@ -28,7 +28,7 @@ class LocalNetworkTest {
 	static TargetIdentifier client;
 	
 	NetworkManagerServer serverManager;
-	NetworkManagerClient clientManager;
+	SocketNetworkManagerClient clientManager;
 	
 	CyclicBarrier barrier = new CyclicBarrier(2);
 	
@@ -43,7 +43,7 @@ class LocalNetworkTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		serverManager = new NetworkManagerServer(this::getPacket, server);
-		clientManager = new NetworkManagerClient(this::getPacket, client, server);
+		clientManager = new SocketNetworkManagerClient(this::getPacket, client, server);
 	}
 
 	@AfterEach

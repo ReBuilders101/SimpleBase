@@ -20,4 +20,5 @@ public abstract class FailableFutureState extends FutureState{
 	public Optional<String> getErrorMessage() {
 		return Optional.ofNullable(errorMessage);
 	}
+	
 }

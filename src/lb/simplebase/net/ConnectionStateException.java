@@ -1,26 +1,28 @@
 package lb.simplebase.net;
 
+import lb.simplebase.net.done.AbstractNetworkConnection;
+
 /**
- * This exception is thrown whenever the state of a {@link NetworkConnection} does not match the expected or required state.
- * @see NetworkConnection#getState()
+ * This exception is thrown whenever the state of a {@link AbstractNetworkConnection} does not match the expected or required state.
+ * @see AbstractNetworkConnection#getState()
  */
 public class ConnectionStateException extends Exception{
 	private static final long serialVersionUID = 4919427229534949332L;
 
 	private final ConnectionState currentState;
 	private final ConnectionState expectedstate;
-	private final NetworkConnection connection;
+	private final AbstractNetworkConnection connection;
 	
 	/**
-	 * Creates a new {@link ConnectionStateException} with a message, the {@link NetworkConnection} where the exception occurred,
+	 * Creates a new {@link ConnectionStateException} with a message, the {@link AbstractNetworkConnection} where the exception occurred,
 	 * and a {@link Throwable} that initially caused the exception.
 	 * @param message The error message for this {@link Exception}
 	 * @param cause The {@link Throwable} that caused this exception
-	 * @param connection The {@link NetworkConnection} for which the exception occurred
-	 * @param expectedState The {@link ConnectionState} that was required to the operation, but was not the state of the {@link NetworkConnection}
+	 * @param connection The {@link AbstractNetworkConnection} for which the exception occurred
+	 * @param expectedState The {@link ConnectionState} that was required to the operation, but was not the state of the {@link AbstractNetworkConnection}
 	 * @see Exception#Exception(String, Throwable)
 	 */
-	public ConnectionStateException(String message, Throwable cause, NetworkConnection connection, ConnectionState expectedState) {
+	public ConnectionStateException(String message, Throwable cause, AbstractNetworkConnection connection, ConnectionState expectedState) {
 		super(message, cause);
 		this.connection = connection;
 		this.currentState = connection.getState();
@@ -28,14 +30,14 @@ public class ConnectionStateException extends Exception{
 	}
 	
 	/**
-	 * Creates a new {@link ConnectionStateException} with a message, the {@link NetworkConnection} where the exception occurred,
+	 * Creates a new {@link ConnectionStateException} with a message, the {@link AbstractNetworkConnection} where the exception occurred,
 	 * without a cause.
 	 * @param message The error message for this {@link Exception}
-	 * @param connection The {@link NetworkConnection} for which the exception occurred
-	 * @param expectedState The {@link ConnectionState} that was required to the operation, but was not the state of the {@link NetworkConnection}
+	 * @param connection The {@link AbstractNetworkConnection} for which the exception occurred
+	 * @param expectedState The {@link ConnectionState} that was required to the operation, but was not the state of the {@link AbstractNetworkConnection}
 	 * @see Exception#Exception(String, Throwable)
 	 */
-	public ConnectionStateException(String message, NetworkConnection connection, ConnectionState expectedState) {
+	public ConnectionStateException(String message, AbstractNetworkConnection connection, ConnectionState expectedState) {
 		super(message);
 		this.connection = connection;
 		this.currentState = connection.getState();
@@ -43,17 +45,17 @@ public class ConnectionStateException extends Exception{
 	}
 	
 	/**
-	 * The {@link NetworkConnection} that the exception occurred on.
-	 * @return The {@link NetworkConnection} that the exception occurred on
+	 * The {@link AbstractNetworkConnection} that the exception occurred on.
+	 * @return The {@link AbstractNetworkConnection} that the exception occurred on
 	 */
-	public NetworkConnection getNetworkConnection() {
+	public AbstractNetworkConnection getNetworkConnection() {
 		return connection;
 	}
 	
 	/**
-	 * The {@link ConnectionState} that the {@link NetworkConnection} had at the time when the exception occurred
+	 * The {@link ConnectionState} that the {@link AbstractNetworkConnection} had at the time when the exception occurred
 	 * (or, more exact, at the time the {@link ConnectionStateException} object was constructed).
-	 * @return The {@link ConnectionState} that the {@link NetworkConnection} had at the time when the exception occurred
+	 * @return The {@link ConnectionState} that the {@link AbstractNetworkConnection} had at the time when the exception occurred
 	 */
 	public ConnectionState getConnectionState() {
 		return currentState;

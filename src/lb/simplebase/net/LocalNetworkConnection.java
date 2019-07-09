@@ -1,10 +1,12 @@
 package lb.simplebase.net;
 
-class LocalNetworkConnection extends NetworkConnection{
+import lb.simplebase.net.done.AbstractNetworkConnection;
+
+public class LocalNetworkConnection extends AbstractNetworkConnection{
 
 	private LocalNetworkConnection partner = null;
 	
-	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
+	public LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
 		super(source, target, packetHandler, ConnectionState.UNCONNECTED);
 	}
 	
@@ -39,7 +41,7 @@ class LocalNetworkConnection extends NetworkConnection{
 		}
 	}
 
-	protected NetworkConnection getPartner() {
+	protected AbstractNetworkConnection getPartner() {
 		return partner;
 	}
 

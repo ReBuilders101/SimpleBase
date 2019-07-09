@@ -1,4 +1,4 @@
-package lb.simplebase.net.common;
+package lb.simplebase.net.done;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +12,7 @@ import lb.simplebase.net.todo.MultiPacketSendFuture;
 import lb.simplebase.net.todo.PacketSendFuture;
 import lb.simplebase.net.todo.ServerStateFuture;
 
+@ServerSide
 public interface NetworkManagerServer {
 	
 	public PacketSendFuture sendPacketToClient(Packet packet, TargetIdentifier client);

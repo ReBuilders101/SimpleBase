@@ -4,6 +4,8 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 
+import lb.simplebase.net.done.AbstractNetworkConnection;
+
 //Instead of binding Sockets, bind connections here
 /**
  * Acts as a place to request a connection from a local server, as an analogy to a remote servers {@link ServerSocket}. 
@@ -13,17 +15,17 @@ final class LocalServerManager {
 	private static final Map<TargetIdentifier, NetworkManagerServer> servers = new HashMap<>();
 	
 	protected static void addServer(NetworkManagerServer server) {
-		servers.put(server.getSenderID(), server);
+		servers.put(server.getID(), server);
 	}
 	
 	protected static void removeServer(NetworkManagerServer server) {
-		servers.remove(server.getSenderID());
+		servers.remove(server.getID());
 	}
 	
 	/**
 	 * 
-	 * @param connection A {@link NetworkConnection} to the server that should be connected to
-	 * @return A {@link NetworkConnection} to the server, from the server's perspective
+	 * @param connection A {@link AbstractNetworkConnection} to the server that should be connected to
+	 * @return A {@link AbstractNetworkConnection} to the server, from the server's perspective
 	 * @throws ConnectionStateException When the server was not found or when the server refused the connection
 	 */
 	protected static LocalNetworkConnection getLocalConnectionServer(LocalNetworkConnection connection) throws ConnectionStateException{
