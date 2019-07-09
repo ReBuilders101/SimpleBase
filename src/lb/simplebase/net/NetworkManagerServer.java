@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
+import lb.simplebase.net.todo.PacketSendFuture;
+
 /**
  * A {@link NetworkManager} that reperesents the server side of the application. It supports multiple {@link NetworkConnection}s to clients.
  * All {@link Packet}s that are received are processed with an {@link ExecutorService}.
@@ -90,10 +92,12 @@ public class NetworkManagerServer extends NetworkManager{
 	 * {@link #sendPacketToClient(Packet, TargetIdentifier)} should be preferred over this method.
 	 * @param packet The packet that should be sent
 	 * @param id The {@link TargetIdentifier} of the target
+	 * @return 
 	 */
 	@Override
-	public void sendPacketTo(Packet packet, TargetIdentifier id) {
+	public PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id) {
 		sendPacketToClient(packet, id);
+		return null;
 	}
 	
 	/**

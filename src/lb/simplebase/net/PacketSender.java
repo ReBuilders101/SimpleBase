@@ -1,17 +1,21 @@
 package lb.simplebase.net;
 
+import lb.simplebase.net.todo.PacketSendFuture;
+
 /**
  * This interface represents an object that can send packets to other network targets (mostly {@link PacketReceiver}s)
  * and has its own {@link TargetIdentifier}.
  */
+@Deprecated
 public interface PacketSender {
 	
 	/**
 	 * Sends a packet to the specified target.
 	 * @param packet The packet that should be sent
 	 * @param id The {@link TargetIdentifier} of the target
+	 * @return 
 	 */
-	public void sendPacketTo(Packet packet, TargetIdentifier id);
+	public PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id);
 	
 	/**
 	 * Sends a packet to all specified targets.

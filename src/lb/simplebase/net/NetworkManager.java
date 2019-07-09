@@ -5,6 +5,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
+import lb.simplebase.net.todo.PacketSendFuture;
+
 /**
  * The {@link NetworkManager} handles all {@link NetworkConnection}s in a network for one target.
  * In case if clients, this is only the connection to the server, but in case of a server, there
@@ -32,9 +34,10 @@ public abstract class NetworkManager extends PacketThreadReceiver implements Pac
 	 * provide better methods for sending packets to a network target.
 	 * @param packet The packet that should be sent
 	 * @param id The {@link TargetIdentifier} of the target
+	 * @return 
 	 */
 	@Override
-	public abstract void sendPacketTo(Packet packet, TargetIdentifier id);
+	public abstract PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id);
 
 	@Override
 	public TargetIdentifier getSenderID() {

@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 /**
  * This interface represents an object that can receive packets.
  */
+@Deprecated
 public interface PacketReceiver extends BiConsumer<Packet, TargetIdentifier>{
 
 	/**

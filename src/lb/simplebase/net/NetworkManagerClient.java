@@ -32,9 +32,11 @@ public class NetworkManagerClient extends NetworkManager implements lb.simplebas
 	 * @param id The {@link TargetIdentifier} of the target
 	 */
 	@Override
-	public void sendPacketTo(Packet packet, TargetIdentifier id) {
+	public PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id) {
 		if(id.equals(serverId)) {
-			sendPacketToServer(packet);
+			return sendPacketToServer(packet);
+		} else {
+			return PacketSendFuture.quickFailed();
 		}
 	}
 	
