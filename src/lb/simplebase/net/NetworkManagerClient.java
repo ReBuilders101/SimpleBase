@@ -1,14 +1,11 @@
-package lb.simplebase.net.done;
-
-import lb.simplebase.net.ConnectionStateFuture;
-import lb.simplebase.net.PacketSendFuture;
+package lb.simplebase.net;
 
 /**
  * A client side manager for a single network session.
  * Used to send packets to a server and to handle incoming packets
  */
 @ClientSide
-public interface NetworkManagerClient {
+public interface NetworkManagerClient extends NetworkManagerCommon{
 	
 	/**
 	 * Sends a packet to a server.

@@ -2,109 +2,95 @@ package lb.simplebase.net;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
-
-import lb.simplebase.net.done.AbstractNetworkConnection;
-import lb.simplebase.net.done.ConnectionState;
-import lb.simplebase.net.done.NetworkManager;
-import lb.simplebase.net.done.Packet;
-import lb.simplebase.net.done.PacketMappingNotFoundException;
-import lb.simplebase.net.done.TargetIdentifier;
+import java.net.SocketTimeoutException;
 
 public class RemoteNetworkConnection extends AbstractNetworkConnection{
 
 	private final Socket connection;
-	private final Thread socketListenerThread;
-	private final int id;
-	
-	private static volatile int ID = 0; 
+	private final DataReceiverThread dataThread;
+	private final PacketFactory factory;
 	
 	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
 		this(source, target, packetHandler, new Socket());
 	}
-
-	protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean connect)
-			throws ConnectionStateException {
-		this(source, target, packetHandler);
-		if(connect)
-			connect();
-	}
 	
-	protected RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket) {
+	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket) {
 		super(source, target, packetHandler, ConnectionState.fromSocket(connectedSocket)); //Create the state from the socket (that might be open from a server)
 		connection = connectedSocket;
-		id = ID++; //Assign unique id
-		//setup thread
-		socketListenerThread = new Thread(this::waitForPacket);
-		socketListenerThread.setDaemon(true);
-		socketListenerThread.setName("RemoteNetworkConnection-" + id + "-SocketListener");
-		socketListenerThread.start();
+		factory = new PacketFactory(getNetworkManager(), this);
+		dataThread = new DataReceiverThread(connection, factory);
 	}
 	
 	@Override
-	public void sendPacketToTarget(Packet packet) throws ConnectionStateException {
+	public PacketSendFuture sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN) {
-			byte[] data;
-			try {
-				data = getPacketFactory().createPacketData(packet); //try to make a packet
-			} catch (PacketMappingNotFoundException e1) {
-				throw new ConnectionStateException("The packet type could not be converted into an id and the packet could not be sent", e1, this, ConnectionState.OPEN);
-			}
-			try {
-				connection.getOutputStream().write(data);
-			} catch (IOException e) {
-				throw new ConnectionStateException("An IOException occurred while trying to send a packet", e, this, ConnectionState.OPEN); //Maybe another exception type?
-			}
+			return PacketSendFuture.create((f) -> {
+				byte[] dataToSend;
+				//1. Split packet into bytes
+				try {
+					dataToSend = factory.createPacketData(packet);
+				} catch (PacketMappingNotFoundException e) {
+					f.ex = e;
+					f.errorMessage = "No mapping was found for packet type " + packet.getClass().getSimpleName();
+					return; //On error, abort here
+				}
+				//2. Try to send it through the connection
+				try {
+					connection.getOutputStream().write(dataToSend);
+				} catch (IOException e) {
+					f.ex = e;
+					f.errorMessage = "An IO error occurred while trying to write packet data to the connection";
+					return;
+				}
+				//3. Done!
+				f.wasSent = true;
+			}).run();
 		} else {
-			throw new ConnectionStateException("The NetworkConnection was not open when a Packet was supposed to be sent", this, ConnectionState.OPEN);
+			return PacketSendFuture.quickFailed("Connection was not open");
 		}
 	}
 	
 	@Override
-	public void close() {
-		super.close();
-		try {
-			connection.close();
-		} catch (IOException e) {
-			e.printStackTrace(); //can't do much if the connection does not want to close
-		}
-	}
-
-	private void waitForPacket(){
-		while(!connection.isClosed()) {
+	public ConnectionStateFuture close() {
+		ConnectionStateFuture superClose = super.close(); //Ignore result, it will always be a success
+		return ConnectionStateFuture.create(superClose.getOldState(), (f) -> {
 			try {
-				if(isConnectionOpen()) {
-					byte b = (byte) connection.getInputStream().read();
-					getPacketFactory().feed(b);
-				}
-				//Do something with the bytes
-			}catch (SocketException e) {
-				//Do nothing, socket is closed and loop will exit next iteration 
+				connection.close();
+				f.currentState = ConnectionState.CLOSED;
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (PacketMappingNotFoundException e) {
-				e.printStackTrace();
-				//probably a different error log
+				//If closing fails
+				f.ex = e;
+				f.errorMessage = "Closing the Socket failed with exception";
 			}
-		}
-		close(); //close when while exits (this means the remote partner closed the connection 
+		}).run();
 	}
 
 	@Override
-	public void connect(int timeout) throws ConnectionStateException {
+	public ConnectionStateFuture connect(int timeout) {
 		if(getState() == ConnectionState.UNCONNECTED) {
-			try {
-				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
-			} catch (IOException e) {
-				throw new ConnectionStateException("An exception occurred while opening the connection", e, this, ConnectionState.UNCONNECTED);
-			}
-			setConnectionState(ConnectionState.OPEN);
-		} else if(getState() == ConnectionState.OPEN){
-			throw new ConnectionStateException("The connection was already open", this, ConnectionState.UNCONNECTED);
-		} else if (getState() == ConnectionState.CLOSED){
-			throw new ConnectionStateException("The connection had already been closed", this, ConnectionState.UNCONNECTED);
+			return ConnectionStateFuture.create(getState(), (f) -> {
+				try {
+					if(timeout == 0) {
+						connection.connect(getRemoteTargetId().getConnectionAddress());
+					} else {
+						connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
+					}
+					//After connecting successfully, start the listener thread
+					dataThread.start();
+					//And lastly set the state
+					state = ConnectionState.OPEN;
+					f.currentState = state;
+				} catch (SocketTimeoutException e) {
+					f.ex = e;
+					f.errorMessage = "The timeout (" + timeout + "ms) expired before a connection could be made";
+				} catch (IOException e) {
+					f.ex = e;
+					f.errorMessage = "An IO error occurred while trying to connect the Socket";
+				}
+			}).run();
 		} else {
-			throw new RuntimeException("I have no idea what is going on");
+			return ConnectionStateFuture.quickFailed("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+					+ " and cannot be connected again", getState());
 		}
 	}
 

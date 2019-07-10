@@ -1,22 +1,62 @@
 package lb.simplebase.net;
 
-import java.util.function.Consumer;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import lb.simplebase.net.done.FutureState;
+public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncResult{
 
-public class MultiPacketSendFuture extends FutureState{
-
-	protected MultiPacketSendFuture(boolean failed, Consumer<FutureState> asyncTask) {
-		super(failed, asyncTask);
-		// TODO Auto-generated constructor stub
+	private List<PacketSendFuture> packetFutures;
+	
+	protected MultiPacketSendFuture(List<PacketSendFuture> list) {
+		packetFutures = list;
+	}
+	
+	public int getPacketCount() {
+		return packetFutures.size();
+	}
+	
+	public int getCurrentSuccessCount() { //All sent and no error
+		return (int) packetFutures.stream().filter((f) -> f.isDone() && !f.hasError()).count();
+	}
+	
+	public int getCurrentFailureCount() {
+		return (int) packetFutures.stream().filter((f) -> f.isDone() && f.hasError()).count();
+	}
+	
+	public boolean ensureAllPacketsSent() throws InterruptedException {
+		sync();
+		return getCurrentSuccessCount() == getPacketCount();
 	}
 	
 	public static MultiPacketSendFuture of(PacketSendFuture...futures) {
-		
+		return new MultiPacketSendFuture(Arrays.asList(futures));
 	}
 
 	public static MultiPacketSendFuture of(Iterable<PacketSendFuture> futures) {
-		
+		List<PacketSendFuture> l = new LinkedList<>();
+		for(PacketSendFuture f : futures) {
+			l.add(f);
+		}
+		return new MultiPacketSendFuture(l);
+	}
+
+	@Override
+	public boolean isQuickFailed() {
+		return false;
+	}
+
+	@Override
+	public void sync() throws InterruptedException {
+		for(PacketSendFuture f : packetFutures) {
+			f.sync();
+		}
+	}
+
+	@Override
+	public Iterator<PacketSendFuture> iterator() {
+		return packetFutures.iterator();
 	}
 
 	

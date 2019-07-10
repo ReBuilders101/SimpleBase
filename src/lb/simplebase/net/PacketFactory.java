@@ -1,4 +1,4 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
 import java.util.Arrays;
 
@@ -56,7 +56,8 @@ public class PacketFactory {
 	 * @param data The new byte that was received
 	 * @throws PacketMappingNotFoundException If a packet was completed, and the id was not found
 	 */
-	public void feed(byte data) throws PacketMappingNotFoundException { //I hate decoding bytes
+	//Sync -> everybody has to wait their turn to give a byte
+	public synchronized void feed(byte data) throws PacketMappingNotFoundException { //I hate decoding bytes
 		
 		//First save data and increase accumulation counter
 		tempData[accStep] = data; //save data in current step

@@ -1,5 +1,6 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
+import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
@@ -52,5 +53,15 @@ public enum ConnectionState {
 //		if(socket.isClosed()) return CLOSED;
 //		if(socket.isConnected()) return OPEN;
 //		return UNCONNECTED;
+	}
+
+	public static ConnectionState fromSocket(ServerSocket socket) {
+		if(!socket.isBound()) {
+			return ConnectionState.UNCONNECTED; //If never connected, then still unconnected
+		} else if(!socket.isClosed()) {
+			return ConnectionState.OPEN; //If never closed, open
+		} else {
+			return ConnectionState.CLOSED; //Else it is already closed
+		}
 	}
 }

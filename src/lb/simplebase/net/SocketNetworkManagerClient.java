@@ -1,7 +1,4 @@
-package lb.simplebase.net.done;
-
-import lb.simplebase.net.ConnectionStateFuture;
-import lb.simplebase.net.PacketSendFuture;
+package lb.simplebase.net;
 
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
@@ -12,6 +9,7 @@ public class SocketNetworkManagerClient extends NetworkManager implements Networ
 
 	AbstractNetworkConnection serverConnection;
 	TargetIdentifier serverId;
+	PacketDistributor allHandlers;
 	
 	/**
 	 * 
@@ -19,10 +17,11 @@ public class SocketNetworkManagerClient extends NetworkManager implements Networ
 	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link SocketNetworkManagerClient}
 	 * @param serverId The {@link TargetIdentifier} of the server that the client should connect to
 	 */
-	public SocketNetworkManagerClient(PacketReceiver threadReceiver, TargetIdentifier localId, TargetIdentifier serverId) {
-		super(threadReceiver, localId, true);
+	public SocketNetworkManagerClient(TargetIdentifier localId, TargetIdentifier serverId) {
+		super(localId);
 		this.serverId = serverId;
 		serverConnection = AbstractNetworkConnection.createConnection(localId, serverId, this);
+		allHandlers = new PacketDistributor();
 	}
 
 	/**
@@ -86,6 +85,21 @@ public class SocketNetworkManagerClient extends NetworkManager implements Networ
 	@Override
 	public TargetIdentifier getServerIndentifier() {
 		return serverId;
+	}
+
+	@Override
+	public void addIncomingPacketHandler(PacketReceiver handler) {
+		allHandlers.addPacketReceiver(handler);
+	}
+
+	@Override
+	public void processPacket(Packet received, TargetIdentifier source) {
+		allHandlers.processPacket(received, source);
+	}
+
+	@Override
+	protected void shutdown() {
+		closeConnectionToServer();
 	}
 
 }

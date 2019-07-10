@@ -1,4 +1,4 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
 import java.util.function.BiConsumer;
 

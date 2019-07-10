@@ -1,44 +1,48 @@
 package lb.simplebase.net;
 
-import lb.simplebase.net.done.AbstractNetworkConnection;
-import lb.simplebase.net.done.FailableFutureState;
-import lb.simplebase.net.done.Packet;
+import java.util.function.Consumer;
 
 public class PacketSendFuture extends FailableFutureState{
 
-	protected PacketSendFuture(boolean failed) {
-		super(failed, (psf) -> ((PacketSendFuture) psf).wasSent = true);
+	protected PacketSendFuture(boolean failed, Consumer<PacketSendFuture> action) {
+		super(failed, (fs) -> action.accept(((PacketSendFuture) fs)));
 		wasSent = false;
 	}
 
-	private boolean wasSent;
-	private State currentState;
+	protected volatile boolean wasSent;
 	
-	
-	public synchronized boolean wasPacketSentYet() {
+	public boolean wasPacketSentYet() {
 		return wasSent;
 	}
 	
+	public boolean ensurePacketSent() throws InterruptedException{
+		sync();
+		return wasPacketSentYet();
+	}
 	
+	@Override
+	public synchronized PacketSendFuture run() {
+		return (PacketSendFuture) super.run();
+	}
+
 	public static PacketSendFuture quickFailed(String reason) {
-		PacketSendFuture r = new PacketSendFuture(true);
+		PacketSendFuture r = new PacketSendFuture(true, null);
 		r.errorMessage = reason;
 		return r;
 	}
 	
 	public static PacketSendFuture quickFailed(Throwable reason) {
-		PacketSendFuture r = new PacketSendFuture(true);
+		PacketSendFuture r = new PacketSendFuture(true, null);
 		r.errorMessage = reason.getMessage();
 		r.ex = reason;
 		return r;
 	}
 	
-	public static PacketSendFuture forPacket(Packet data, AbstractNetworkConnection con) {
-		if(data == null || con == null) return new PacketSendFuture(true);
-		return new PacketSendFuture(false);
+	public static PacketSendFuture quickDone() {
+		return (PacketSendFuture) new PacketSendFuture(false, (f) -> f.wasSent = true).runInSync();
 	}
 	
-	public static enum State {
-		FAILED, WORKING, SUCCESS;
+	public static PacketSendFuture create(Consumer<PacketSendFuture> task) {
+		return new PacketSendFuture(false, task);
 	}
 }

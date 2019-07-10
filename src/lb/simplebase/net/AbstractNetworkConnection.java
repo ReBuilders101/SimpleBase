@@ -1,13 +1,7 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
-
-import lb.simplebase.net.ConnectionStateFuture;
-import lb.simplebase.net.LocalNetworkConnection;
-import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.PacketSendFuture;
-import lb.simplebase.net.RemoteNetworkConnection;
 
 /**
  * A {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>
@@ -25,15 +19,15 @@ public abstract class AbstractNetworkConnection {
 	private final TargetIdentifier remote;
 	//No receiver, because receivers do not depend on specific connections (entityupdate from any client etc)
 	private final NetworkManager packetHandler; //This is the Networkmanager
-	private volatile ConnectionState state; //Threadsafe for socket listener
-	private final PacketFactory factory;
+	protected volatile ConnectionState state; //Threadsafe for socket listener
+//	private final PacketFactory factory;
 	
-	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler) {
+	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
-		this.state = ConnectionState.UNCONNECTED;
-		this.factory = new PacketFactory(packetHandler, this);
+		this.state = initialState;
+//		this.factory = new PacketFactory(packetHandler, this);
 	}
 
 	/**
@@ -72,13 +66,12 @@ public abstract class AbstractNetworkConnection {
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
-	public final synchronized ConnectionStateFuture close() {
+	public synchronized ConnectionStateFuture close() {
+		ConnectionState oldState = state;
 		state = ConnectionState.CLOSED;
 		packetHandler.notifyConnectionClosed(this);
-		return closeImpl();
+		return ConnectionStateFuture.quickDone(oldState, state);
 	}
-	
-	protected abstract ConnectionStateFuture closeImpl();
 	
 	/**
 	 * Set the connection state
@@ -141,8 +134,12 @@ public abstract class AbstractNetworkConnection {
 	 * The {@link PacketFactory} that is used to create Packets from this connection.
 	 * @return The {@link PacketFactory} that is used to create Packets from this connection
 	 */
-	public PacketFactory getPacketFactory() {
-		return factory;
+//	public PacketFactory getPacketFactory() {
+//		return factory;
+//	}
+	
+	public NetworkManager getNetworkManager() {
+		return packetHandler;
 	}
 	
 	///////////////////////////////////////THE STATIC METHODS BEGIN HERE/////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;

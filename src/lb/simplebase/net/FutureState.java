@@ -1,22 +1,24 @@
-package lb.simplebase.net.done;
+package lb.simplebase.net;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Implementations represent a {@link Future}, but instead of
  * returning a value, the have members that change until the future is completed
  */
-public abstract class FutureState implements AsyncResult{
+public abstract class FutureState implements AsyncResult {
 
 	private final Future<Void> task;
-	private final Supplier<FutureState> thisSupply = () -> this;
 	private volatile State state;
+	
+	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool();
 	
 	protected FutureState(boolean failed, Consumer<FutureState> asyncTask) {
 		quickFailed = failed;
@@ -25,7 +27,7 @@ public abstract class FutureState implements AsyncResult{
 			state = State.FINISHED;
 		} else {
 			Callable<Void> newTask = () -> {
-				asyncTask.accept(thisSupply.get());
+				asyncTask.accept(this);
 				taskDoneHandler();
 				return null;
 			};
@@ -50,11 +52,17 @@ public abstract class FutureState implements AsyncResult{
 		state = State.FINISHED;
 	}
 	
-	protected synchronized void run() {
+	public synchronized FutureState runInSync() {
+		((FutureTask<Void>) task).run();
+		return this;
+	}
+	
+	public synchronized FutureState run() {
 		if(state == State.IDLE) { //It is a FutureTask
 			state = State.WORKING;
-			((FutureTask<Void>) task).run();
+			futureExecutor.execute((FutureTask<Void>) task);
 		}
+		return this;
 	}
 	
 	public boolean isDone() {
@@ -62,7 +70,9 @@ public abstract class FutureState implements AsyncResult{
 	}
 	
 	public void sync() throws InterruptedException {
+		if(state == State.FINISHED) return;
 		try {
+			run();
 			task.get();
 		} catch (ExecutionException e) {
 			//Callable is created from a consumer, so exceptions should not be possible
@@ -76,5 +86,9 @@ public abstract class FutureState implements AsyncResult{
 	
 	public static enum State {
 		IDLE, WORKING, FINISHED;
+	}
+	
+	public static void shutdownExecutor() {
+		futureExecutor.shutdown();
 	}
 }

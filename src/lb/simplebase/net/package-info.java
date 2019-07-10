@@ -2,7 +2,7 @@
  * This package contains abstract interfaces and classes that can be used for network communication
  * <h3>Basic explaination of the concepts in this package</h3><p>
  * This package contains a basic client - server model.<br>
- * In a network there are severaly network parties. One party is represented by a {@link lb.simplebase.net.done.TargetIdentifier}.
+ * In a network there are severaly network parties. One party is represented by a {@link lb.simplebase.net.TargetIdentifier}.
  * It contains a unique id for the network party (which will often be referred to as target) and optionally information
  * necessary to make a network connection to the target.
  * </p><p>
@@ -10,25 +10,25 @@
  * <ul><li>
  * The first one is a connection over the network, called remote connection or simply network connection.
  * Data is sent to the partner through a TCP stream based on the {@link java.net} package. To create a remote
- * network connection, the used {@link lb.simplebase.net.done.TargetIdentifier} must contain a valid url and port.
- * The {@link lb.simplebase.net.done.TargetIdentifier.NetworkTargetIdentifier} can be used to do this.<br>
+ * network connection, the used {@link lb.simplebase.net.TargetIdentifier} must contain a valid url and port.
+ * The {@link lb.simplebase.net.TargetIdentifier.NetworkTargetIdentifier} can be used to do this.<br>
  * In case of a remote connection, the connection parties are usually running in different programs/JVMs and
  * often on different computers / servers.
  * </li><li>
  * The second connection type is a local connection. The two connecting parties exist within the same application.
  * This is for example useful for games that support a singleplayer and multiplayer mode. This way, the same code can
  * be used for both modes. A local connection does not need network connection information, and so the
- * {@link lb.simplebase.net.done.TargetIdentifier.LocalTargetIdentifier} implementation can be used.
+ * {@link lb.simplebase.net.TargetIdentifier.LocalTargetIdentifier} implementation can be used.
  * </li></ul>
- * The class {@link lb.simplebase.net.done.AbstractNetworkConnection} represents both types of connections.
+ * The class {@link lb.simplebase.net.AbstractNetworkConnection} represents both types of connections.
  * <p>
- * A network party or target is represented by an instance of {@link lb.simplebase.net.done.NetworkManager}.
+ * A network party or target is represented by an instance of {@link lb.simplebase.net.NetworkManager}.
  * There are two different subclasses for clients an servers,
- * {@link lb.simplebase.net.done.SocketNetworkManagerClient} and {@link lb.simplebase.net.NetworkManagerServer}
+ * {@link lb.simplebase.net.SocketNetworkManagerClient} and {@link lb.simplebase.net.NetworkManagerServer}
  * This class manages connections and allows you to send data to other targets, and handles received
  * data. This class will be the main interface point between this API and the program.
  * </p><p>
- * Data is sent between targets in packets. A {@link lb.simplebase.net.done.Packet} contains all data that should
+ * Data is sent between targets in packets. A {@link lb.simplebase.net.Packet} contains all data that should
  * be sent and a way to serialize and deserialize it to/from bytes.
  * </p>
  * <h3>Example implementation (local-only)</h3>
@@ -42,13 +42,13 @@
  * </li><li>
  * Create the server network managers<br>
  * <code>public static NetworkManagerServer serverManager = new NetworkManagerServer(reciver, serverId);</code><br>
- * The <i>receiver</i> parameter is a {@link lb.simplebase.net.done.PacketReceiver} implementation (which is a functional interface).
+ * The <i>receiver</i> parameter is a {@link lb.simplebase.net.PacketReceiver} implementation (which is a functional interface).
  * The <i>serverId</i> is the previously declared TargetIdentifier.<br>
  * Note that a NetworkManagerServer that has been created with a local target identifier cannot accept remote connections.
  * </li><li>
  * Create the client network manager<br>
  * <code>public static NetworkManagerClient clientManager = new NetworkManagerClient(receiver, clientId, serverId);</code><br>
- * The <i>receiver</i> parameter is a {@link lb.simplebase.net.done.PacketReceiver} implementation (which is a functional interface).
+ * The <i>receiver</i> parameter is a {@link lb.simplebase.net.PacketReceiver} implementation (which is a functional interface).
  * The <i>clientId</i> is the previously declared TargetIdentifier.<br>
  * The <i>serverId</i> is the previously declared TargetIdentifier.<br>
  * The client needs the connection information of the server.
@@ -84,12 +84,12 @@
  * </li></ul>
  * </li></ol>
  * <h3>Packets</h3><p>
- * To send data, you need at least one {@link lb.simplebase.net.done.Packet} implementation.
+ * To send data, you need at least one {@link lb.simplebase.net.Packet} implementation.
  * A packet can have properties like any other object, and these properties have to be
  * seialized and deserialized with the <code>writeData</code> and <code>readData</code> methods.
  * </p><p>
  * To tell the network manager how to create a new packet from the byte data, and how to create the byte data from a packet,
- * it needs a {@link lb.simplebase.net.done.PacketIdMapping}. This mapping can be registered at a network manager and must be the same
+ * it needs a {@link lb.simplebase.net.PacketIdMapping}. This mapping can be registered at a network manager and must be the same
  * for all targets in the network.<br>
  * The easiest way to create a mapping is with the <code>PacketIdMapping.create(id, packetClass, instanceSupplier);</code><br>
  * The <i>id</i> is a unique integer id for this packet type.<br>

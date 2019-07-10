@@ -1,23 +1,14 @@
 package lb.simplebase.net;
 
-import lb.simplebase.net.done.AbstractNetworkConnection;
-import lb.simplebase.net.done.ConnectionState;
-import lb.simplebase.net.done.NetworkManager;
-import lb.simplebase.net.done.Packet;
-import lb.simplebase.net.done.TargetIdentifier;
+import java.util.concurrent.TimeoutException;
 
 public class LocalNetworkConnection extends AbstractNetworkConnection{
 
 	private LocalNetworkConnection partner = null;
 	
+	
 	public LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
 		super(source, target, packetHandler, ConnectionState.UNCONNECTED);
-	}
-	
-	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean connect) 
-			throws ConnectionStateException {
-		this(source, target, packetHandler);
-		if(connect) connect();
 	}
 	
 	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, LocalNetworkConnection setPartner) {
@@ -27,21 +18,39 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 	}
 	
 	@Override
-	public void sendPacketToTarget(Packet packet) throws ConnectionStateException {
-		if(getState() == ConnectionState.OPEN) {
-			partner.handleReceivedPacket(packet); //Partner handles packet
+	public PacketSendFuture sendPacketToTarget(Packet packet) {
+		if(getState() == ConnectionState.OPEN && partner != null) {
+			return PacketSendFuture.create((f) -> {
+				LocalConnectionManager.submitLocalPacketTask(() -> partner.handleReceivedPacket(packet));
+				f.wasSent = true;
+			}).run();
 		} else {
-			throw new ConnectionStateException("The NetworkConnection was not open when a Packet was supposed to be sent", this, ConnectionState.OPEN);
+			return PacketSendFuture.quickFailed("Connection is not open");
 		}
 	}
 
 	@Override
-	public void connect(int timeout) throws ConnectionStateException {
+	public ConnectionStateFuture connect(int timeout) {
 		if(getState() == ConnectionState.UNCONNECTED) {
-			partner = LocalServerManager.waitForLocalConnectionServer(this, timeout);
-			setConnectionState(ConnectionState.OPEN);
+			return ConnectionStateFuture.create(getState(), (f) -> {
+				try {
+					partner = LocalConnectionManager.waitForLocalConnectionServer(this, timeout);
+				} catch (TimeoutException e) {
+					f.ex = e;
+					f.errorMessage = "The timeout expired before a local connection could be made";
+					return;
+				} catch (InterruptedException e) {
+					f.ex = e;
+					f.errorMessage = "The thread was interrupted while waiting for the connection";
+					return;
+				}
+				setConnectionState(ConnectionState.OPEN);
+				f.currentState = getState();
+			}).run();
+			
 		} else {
-			throw new ConnectionStateException("The NetworkConnection was already connected", this, ConnectionState.UNCONNECTED);
+			return ConnectionStateFuture.quickFailed("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+					+ " and cannot be connected again", getState());
 		}
 	}
 
@@ -55,17 +64,18 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 	}
 
 	@Override
-	public void close() {
-		super.close();
+	public ConnectionStateFuture close() {
+		ConnectionStateFuture superFuture = super.close();
 		if(partner != null) //If it was even connected
 			partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
+		return ConnectionStateFuture.quickDone(superFuture.getOldState(), getState());
 	}
 	
 	/**
 	 * Close connection without notifying Partner
 	 */
 	protected void closeNoNotify() {
-		super.close();
+		super.close(); //NOT this.close() !!!
 	}
 	
 }
