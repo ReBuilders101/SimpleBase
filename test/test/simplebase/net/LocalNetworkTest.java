@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
 import lb.simplebase.net.ConnectionState;
+import lb.simplebase.net.LocalTargetIdentifier;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
@@ -40,8 +41,8 @@ class LocalNetworkTest {
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		server = new TargetIdentifier.LocalTargetIdentifier("server");
-		client = new TargetIdentifier.LocalTargetIdentifier("client");
+		server = TargetIdentifier.createLocal("server");
+		client = TargetIdentifier.createLocal("client");
 	}
 
 	@AfterAll

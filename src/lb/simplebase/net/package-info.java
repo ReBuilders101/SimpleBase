@@ -11,14 +11,14 @@
  * The first one is a connection over the network, called remote connection or simply network connection.
  * Data is sent to the partner through a TCP stream based on the {@link java.net} package. To create a remote
  * network connection, the used {@link lb.simplebase.net.TargetIdentifier} must contain a valid url and port.
- * The {@link lb.simplebase.net.TargetIdentifier.NetworkTargetIdentifier} can be used to do this.<br>
+ * The {@link lb.simplebase.net.NetworkTargetIdentifier} can be used to do this.<br>
  * In case of a remote connection, the connection parties are usually running in different programs/JVMs and
  * often on different computers / servers.
  * </li><li>
  * The second connection type is a local connection. The two connecting parties exist within the same application.
  * This is for example useful for games that support a singleplayer and multiplayer mode. This way, the same code can
  * be used for both modes. A local connection does not need network connection information, and so the
- * {@link lb.simplebase.net.TargetIdentifier.LocalTargetIdentifier} implementation can be used.
+ * {@link lb.simplebase.net.LocalTargetIdentifier} implementation can be used.
  * </li></ul>
  * The class {@link lb.simplebase.net.AbstractNetworkConnection} represents both types of connections.
  * <p>

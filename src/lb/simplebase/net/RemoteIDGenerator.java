@@ -9,7 +9,7 @@ public class RemoteIDGenerator implements Function<InetSocketAddress, TargetIden
 	private static final AtomicInteger counter = new AtomicInteger(0);
 	
 	public static TargetIdentifier generateID(InetSocketAddress address) {
-		return new TargetIdentifier.NetworkTargetIdentifier("RemoteTarget-" + counter.getAndIncrement(), address);
+		return TargetIdentifier.createNetwork("RemoteTarget-" + counter.getAndIncrement(), address);
 	}
 
 	@Override

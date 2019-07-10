@@ -26,7 +26,7 @@ class NetworkTest {
 
 	static TargetIdentifier server;
 	static TargetIdentifier clientFromClient;
-	@Deprecated static TargetIdentifier clientFromServer;
+	static TargetIdentifier clientFromServer;
 	
 	NetworkManagerServer serverManager;
 	NetworkManagerClient clientManager;
@@ -42,8 +42,8 @@ class NetworkTest {
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		server = new TargetIdentifier.NetworkTargetIdentifier("server", "localhost", 1234);
-		clientFromClient = new TargetIdentifier.NetworkTargetIdentifier("client", "localhost", 1234);
+		server = 			TargetIdentifier.createNetwork("server", "localhost", 1234);
+		clientFromClient =  TargetIdentifier.createNetwork("client", "localhost", 1234);
 	}
 
 	@BeforeEach
