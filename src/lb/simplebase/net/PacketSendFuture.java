@@ -8,6 +8,12 @@ public class PacketSendFuture extends FailableFutureState{
 		super(failed, (fs) -> action.accept(((PacketSendFuture) fs)));
 		wasSent = false;
 	}
+	
+	protected PacketSendFuture(String message) {
+		super(true, null, message, null);
+		this.errorMessage = message;
+		wasSent = false;
+	}
 
 	protected volatile boolean wasSent;
 	
@@ -26,16 +32,7 @@ public class PacketSendFuture extends FailableFutureState{
 	}
 
 	public static PacketSendFuture quickFailed(String reason) {
-		PacketSendFuture r = new PacketSendFuture(true, null);
-		r.errorMessage = reason;
-		return r;
-	}
-	
-	public static PacketSendFuture quickFailed(Throwable reason) {
-		PacketSendFuture r = new PacketSendFuture(true, null);
-		r.errorMessage = reason.getMessage();
-		r.ex = reason;
-		return r;
+		return new PacketSendFuture(reason);
 	}
 	
 	public static PacketSendFuture quickDone() {

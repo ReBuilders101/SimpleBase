@@ -13,6 +13,13 @@ public class ServerStateFuture extends FailableFutureState{
 		this.oldState = oldState;
 	}
 	
+	protected ServerStateFuture(String failMessage, ServerState oldState) {
+		super(true, null, failMessage, null);
+		this.errorMessage = failMessage;
+		this.currentState = oldState;
+		this.oldState = oldState;
+	}
+	
 	public ServerState getOldState() {
 		return oldState;
 	}
@@ -27,9 +34,7 @@ public class ServerStateFuture extends FailableFutureState{
 	}
 	
 	public static ServerStateFuture quickFailed(String message, ServerState unchangedState) {
-		ServerStateFuture ssf = new ServerStateFuture(true, unchangedState, null);
-		ssf.errorMessage = message;
-		return ssf;
+		return new ServerStateFuture(message, unchangedState);
 	}
 	
 	@Override

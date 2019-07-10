@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
+import lb.simplebase.util.NamedThreadFactory;
+
 //Instead of binding Sockets, bind connections here
 /**
  * Acts as a place to request a connection from a local server, as an analogy to a remote servers {@link ServerSocket}. 
@@ -16,7 +18,7 @@ public final class LocalConnectionManager {
 	
 	private static final int SERVER_CHECK_INTERVAL = 50;
 	
-	private static final ExecutorService localPacketOutputThread = Executors.newCachedThreadPool();
+	private static final ExecutorService localPacketOutputThread = Executors.newCachedThreadPool(new NamedThreadFactory("LocalPacketProcessing-"));
 	private static final Map<TargetIdentifier, NetworkManagerServer> servers = Collections.synchronizedMap(new HashMap<>());
 	
 	public static <T extends NetworkManagerServer & LocalConnectionServer> void addServer(T server) {

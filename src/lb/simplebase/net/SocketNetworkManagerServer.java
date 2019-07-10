@@ -26,6 +26,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 		toAllHandlers = new PacketDistributor();
 		handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
 		state = ServerState.INITIALIZED;
+		localOnly = localId.isLocalOnly();
 	}
 
 	//Sync any method with clientlist
@@ -40,6 +41,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 	private PacketDistributor toAllHandlers;
 	
 	private ServerState state;
+	private final boolean localOnly;
 	
 	@Override
 	public ServerConfiguration getConfiguration() {
@@ -48,7 +50,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 	
 	public void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		try {
-			clientListLock.writeLock().lock();
+			NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
 			if(config.canAcceptConnection(this, ConnectionInformation.create(newConnectionSocket))) {
 				TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
 				
@@ -60,7 +62,9 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 					e.printStackTrace();
 				}
 				
+				clientListLock.writeLock().lock();
 				AbstractNetworkConnection newConn = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket);
+				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
 				clientList.add(newConn);
 			}
 		}finally {
@@ -104,6 +108,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 		if(con == null) {
 			return ConnectionStateFuture.quickFailed("No client with this Id was found", ConnectionState.UNCONNECTED); //Maybe closed is better?
 		} else {
+			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + con.getRemoteTargetId() + ")");
 			return con.close();
 		}
 	}
@@ -121,18 +126,20 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 	@Override
 	public ServerStateFuture startServer() {
 		if(state == ServerState.INITIALIZED) {
+			NetworkManager.NET_LOG.info("Server Manager: Starting server...");
 			return ServerStateFuture.create(state, (f) -> {
 				LocalConnectionManager.addServer(this);
 				try {
-					serverSocket.bind(new InetSocketAddress(config.getServerPort()));
+					if(!localOnly) serverSocket.bind(getLocalID().getConnectionAddress());
 				} catch (IOException e) {
 					f.ex = e;
 					f.errorMessage = e.getMessage();
 					return;
 				}
-				acceptor.start();
+				if(!localOnly) acceptor.start();
 				state = ServerState.STARTED;
 				f.currentState = state;
+				NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
 			}).run();
 		} else {
 			return ServerStateFuture.quickFailed("Server has already been started", state);
@@ -144,8 +151,14 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 		if(state == ServerState.STOPPED) {
 			return ServerStateFuture.quickDone(ServerState.STOPPED);
 		} else {
+			NetworkManager.NET_LOG.info("Server Manager: Stopping server...");
 			return ServerStateFuture.create(getServerState(), (f) -> {
 				LocalConnectionManager.removeServer(this);
+				//Then kick everyone
+				NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
+				for(AbstractNetworkConnection con : clientList) {
+					con.close();
+				}
 				handler.shutdownExecutor();
 				try {
 					serverSocket.close();
@@ -156,6 +169,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 				}
 				state = ServerState.STOPPED;
 				f.currentState = state;
+				NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
 			}).run();
 		}
 	}
@@ -187,7 +201,15 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 
 	@Override
 	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
-		return new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
+		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
+		try {
+			clientListLock.writeLock().lock();
+			clientList.add(con);
+		} finally {
+			clientListLock.writeLock().unlock();
+		}
+		NetworkManager.NET_LOG.info("Server Manager: Accepted local connection (" + connection.getLocalTargetId() +")");
+		return con;
 	}
 
 }

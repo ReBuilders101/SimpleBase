@@ -55,6 +55,7 @@ public class SocketNetworkManagerClient extends NetworkManager implements Networ
 	 * @return Whether the connection was opened successfully
 	 */
 	public ConnectionStateFuture openConnectionToServer() {
+		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.getConnectionAddress() +")...");
 		return serverConnection.connect();
 	}
 	
@@ -79,6 +80,8 @@ public class SocketNetworkManagerClient extends NetworkManager implements Networ
 
 	@Override
 	public ConnectionStateFuture closeConnectionToServer() {
+		if(serverConnection.state == ConnectionState.CLOSED) return ConnectionStateFuture.quickDone(ConnectionState.CLOSED, ConnectionState.CLOSED);
+		NetworkManager.NET_LOG.info("Client Manager: Closing server connection...");
 		return serverConnection.close();
 	}
 

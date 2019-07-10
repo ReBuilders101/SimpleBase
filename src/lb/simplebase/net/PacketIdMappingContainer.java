@@ -1,15 +1,22 @@
 package lb.simplebase.net;
 
+import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
  * A container for {@link PacketIdMapping}s. The mappings are available through the {@link #getAllMappings()} method.
  * Additionally, this interface provides methods to find mappings by class or id.
  */
-public interface PacketIdMappingContainer {
+public interface PacketIdMappingContainer extends Iterable<PacketIdMapping>{
 	
+	@Override
+	public default Iterator<PacketIdMapping> iterator() {
+		return getAllMappings().iterator();
+	}
+
 	/**
-	 * Returns all {@link PacketIdMapping}s in this container.
+	 * Returns all {@link PacketIdMapping}s in this container. Set is immutable
 	 * @return All {@link PacketIdMapping}s
 	 */
 	public Set<PacketIdMapping> getAllMappings();
@@ -69,5 +76,20 @@ public interface PacketIdMappingContainer {
 	public default boolean hasMappingFor(int id) {
 		return getAllMappings().stream().anyMatch(PacketIdMapping.idMatcher(id));
 	}
+	
+	public default <T extends Enum<T> & PacketIdMapping> void addMappings(Class<T> e) {
+		EnumSet<T> es = EnumSet.allOf(e);
+		for(PacketIdMapping map : es) {
+			addMapping(map);
+		}
+	}
+	
+	public default void addAllMappings(PacketIdMappingContainer con) {
+		for(PacketIdMapping map : con) {
+			addMapping(map);
+		}
+	}
+	
+	public void addMapping(PacketIdMapping mapping);
 	
 }

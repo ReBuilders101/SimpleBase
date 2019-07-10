@@ -1,6 +1,7 @@
 package lb.simplebase.net;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import lb.simplebase.io.ByteArrayBuffer;
 
@@ -47,6 +48,8 @@ public class PacketFactory {
 	 * @param finishedPacketReceiver The {@link AbstractNetworkConnection} that will receive finished {@link Packet}s
 	 */
 	public PacketFactory(PacketIdMappingContainer mapCon, AbstractNetworkConnection finishedPacketReceiver) {
+		Objects.requireNonNull(mapCon);
+		Objects.requireNonNull(finishedPacketReceiver);
 		this.mapCon = mapCon;
 		this.finishedPacketReceiver = finishedPacketReceiver;
 	}

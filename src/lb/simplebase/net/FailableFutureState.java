@@ -11,7 +11,7 @@ public abstract class FailableFutureState extends FutureState{
 		errorMessage = null;
 		
 		if(failed) {
-			NetworkManager.NET_LOG.warn("FutureState(" + getClass().getSimpleName() + ") failed quickly.");
+			NetworkManager.NET_LOG.error("FutureState(" + getClass().getSimpleName() + ") failed quickly (No Reason).");
 		}
 	}
 	
@@ -21,7 +21,7 @@ public abstract class FailableFutureState extends FutureState{
 		errorMessage = errmsg;
 		
 		if(failed) {
-			NetworkManager.NET_LOG.warn("FutureState(" + getClass().getSimpleName() + ") failed quickly:");
+			NetworkManager.NET_LOG.error("FutureState(" + getClass().getSimpleName() + ") failed quickly:");
 			if(ex != null) {
 				NetworkManager.NET_LOG.error(errorMessage == null ? ex.getMessage() : errorMessage, ex);
 			} else if(errorMessage != null) {
@@ -49,11 +49,14 @@ public abstract class FailableFutureState extends FutureState{
 	@Override
 	protected void taskDoneHandler() {
 		super.taskDoneHandler();
-		NetworkManager.NET_LOG.warn("FutureState(" + getClass().getSimpleName() + ") failed while executing:");
-		if(ex != null) {
-			NetworkManager.NET_LOG.error(errorMessage == null ? ex.getMessage() : errorMessage, ex);
-		} else if(errorMessage != null) {
-			NetworkManager.NET_LOG.error(errorMessage);
+		
+		if(ex != null || errorMessage != null) {
+			NetworkManager.NET_LOG.error("FutureState(" + getClass().getSimpleName() + ") failed while executing:");
+			if(ex == null) {
+				NetworkManager.NET_LOG.error(errorMessage);
+			} else {
+				NetworkManager.NET_LOG.error(errorMessage == null ? ex.getMessage() : errorMessage, ex);
+			}
 		}
 	}
 	

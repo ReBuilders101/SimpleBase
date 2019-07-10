@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
 
+import lb.simplebase.util.NamedThreadFactory;
+
 /**
  * Implementations represent a {@link Future}, but instead of
  * returning a value, the have members that change until the future is completed
@@ -18,7 +20,7 @@ public abstract class FutureState implements AsyncResult {
 	private final Future<Void> task;
 	private volatile State state;
 	
-	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool();
+	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
 	
 	protected FutureState(boolean failed, Consumer<FutureState> asyncTask) {
 		quickFailed = failed;

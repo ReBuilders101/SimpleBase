@@ -42,7 +42,7 @@ public interface LogMessageFormat {
 			
 			private StringBuilder loggerName(String loggerName, String level, int addCapacity) {
 				final StringBuilder out = new StringBuilder(loggerName.length() + 7 + level.length() + (addCapacity > 0 ? addCapacity : 0));
-				out.append('[').append(loggerName).append("] [").append(level).append("]: ");
+				out.append('[').append(loggerName).append("] [").append(level).append("] ");
 				return out;
 			}
 		};

@@ -19,6 +19,7 @@ public class RemoteNetworkConnection extends AbstractNetworkConnection{
 		connection = connectedSocket;
 		factory = new PacketFactory(getNetworkManager(), this);
 		dataThread = new DataReceiverThread(connection, factory);
+		if(connectedSocket.isConnected()) dataThread.start(); //Begin when a live socket is used
 	}
 	
 	@Override

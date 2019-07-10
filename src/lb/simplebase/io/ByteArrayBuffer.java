@@ -145,8 +145,8 @@ public class ByteArrayBuffer implements WritableByteData, ReadableByteData{
 
 	@Override
 	public byte[] getAsReadOnlyArray() {
-		// TODO Auto-generated method stub
-		return null;
+		updateRead();
+		return readData;
 	}
 	
 }

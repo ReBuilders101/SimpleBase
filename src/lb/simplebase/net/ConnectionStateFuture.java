@@ -10,6 +10,13 @@ public class ConnectionStateFuture extends FailableFutureState {
 		this.currentState = oldState;
 	}
 	
+	protected ConnectionStateFuture(String failMessage, ConnectionState oldState) {
+		super(true, null, failMessage, null);
+		errorMessage = failMessage;
+		this.oldState = oldState;
+		this.currentState = oldState;
+	}
+	
 	protected volatile ConnectionState currentState;
 	protected final ConnectionState oldState;
 	
@@ -32,16 +39,7 @@ public class ConnectionStateFuture extends FailableFutureState {
 	}
 	
 	public static ConnectionStateFuture quickFailed(String message, ConnectionState unchangedState) {
-		ConnectionStateFuture csf = new ConnectionStateFuture(true, null, unchangedState);
-		csf.errorMessage = message;
-		return csf;
-	}
-	
-	public static ConnectionStateFuture quickFailed(Throwable message, ConnectionState unchangedState) {
-		ConnectionStateFuture csf = new ConnectionStateFuture(true, null, unchangedState);
-		csf.errorMessage = message.getMessage();
-		csf.ex = message;
-		return csf;
+		return new ConnectionStateFuture(message, unchangedState);
 	}
 	
 	public static ConnectionStateFuture create(ConnectionState state, Consumer<ConnectionStateFuture> task) {

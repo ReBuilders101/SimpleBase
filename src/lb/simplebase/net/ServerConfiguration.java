@@ -10,7 +10,6 @@ public class ServerConfiguration {
 		keepAlive = false;
 		acceptor = (a,b) -> true;
 		handlerThreads = 0; //Default thread pool
-		port = 0;
 	}
 	
 	private int timeout;
@@ -20,14 +19,9 @@ public class ServerConfiguration {
 	private BiPredicate<NetworkManagerServer, ConnectionInformation> acceptor;
 	
 	private int handlerThreads;
-	private int port;
 	
 	public int getTimeout() {
 		return timeout;
-	}
-	
-	public int getServerPort() {
-		return port;
 	}
 	
 	//Amount of threads that will process inbound packets
@@ -57,12 +51,7 @@ public class ServerConfiguration {
 		this.keepAlive = keepAlive;
 		return this;
 	}
-	
-	public ServerConfiguration setPort(int port) {
-		this.port = port;
-		return this;
-	}
-	
+
 	public ServerConfiguration setHandlerThreadCount(int count) {
 		this.handlerThreads = count;
 		return this;
@@ -84,7 +73,6 @@ public class ServerConfiguration {
 				.setHandlerThreadCount(handlerThreads)
 				.setKeepAlive(keepAlive)
 				.setNoDelay(noDelay)
-				.setPort(port)
 				.setTimeout(timeout);
 	}
 	

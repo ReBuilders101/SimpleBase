@@ -21,19 +21,23 @@ public class DataReceiverThread extends Thread {
 	
 	@Override
 	public void run() {
+		NetworkManager.NET_LOG.info("Started Data Receiver");
 		while(ConnectionState.fromSocket(socket).canSendData()) {
 			if(Thread.interrupted()) {
 				Thread.currentThread().interrupt();
-				break;
+				NetworkManager.NET_LOG.info("Data Receiver: Closing: Thread was interrupted");
+				return;
 			}
 			try {
 				byte b = (byte) socket.getInputStream().read();
 				factory.feed(b);
 			} catch (SocketException e) {
+				NetworkManager.NET_LOG.info("Data Receiver: Closing: Socket was closed");
 				return; //Socket closed
 			} catch (PacketMappingNotFoundException e) {
-				e.printStackTrace(); //TODO Log
+				NetworkManager.NET_LOG.warn("Data Receiver: Packet mapping not found for received packet", e);
 			} catch (IOException e) {
+				NetworkManager.NET_LOG.error("Data Receiver: Closing: Socket IO Exception", e);
 				e.printStackTrace(); //Closed with error
 				return; //Closed externally
 			}
