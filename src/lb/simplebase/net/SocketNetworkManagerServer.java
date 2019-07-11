@@ -51,6 +51,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 	public void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		try {
 			NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
+			clientListLock.writeLock().lock();
 			if(config.canAcceptConnection(this, ConnectionInformation.create(newConnectionSocket))) {
 				TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
 				
@@ -61,8 +62,6 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 				} catch (SocketException e) {
 					e.printStackTrace();
 				}
-				
-				clientListLock.writeLock().lock();
 				AbstractNetworkConnection newConn = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket);
 				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
 				clientList.add(newConn);
