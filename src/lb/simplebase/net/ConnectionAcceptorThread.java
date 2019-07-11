@@ -27,7 +27,7 @@ public class ConnectionAcceptorThread extends Thread{
 			if(Thread.interrupted()) {
 				Thread.currentThread().interrupt();
 				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: Thread was interrupted");
-				return;
+				break;
 			}
 			if(!socket.isBound()) { //Just wait a bit
 				try {
@@ -35,7 +35,7 @@ public class ConnectionAcceptorThread extends Thread{
 				} catch (InterruptedException e) { //Except when we should not wait
 					Thread.currentThread().interrupt();
 					NetworkManager.NET_LOG.info("Connection Acceptor: Closing: Thread was interrupted (wait for binding)");
-					return;
+					break;
 				}
 				continue;
 			}
@@ -45,13 +45,14 @@ public class ConnectionAcceptorThread extends Thread{
 			} catch (SocketException e) {
 //				e.printStackTrace();
 				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: ServerSocket was closed");
-				return; //When another thread calls close
+				break; //When another thread calls close
 			} catch (IOException e) {
 				e.printStackTrace();
 				NetworkManager.NET_LOG.error("Connection Acceptor: Closing: ServerSocket IO error", e);
-				return;
+				break;
 			}
 		}
+		server.stopServer();
 	}
 	
 }

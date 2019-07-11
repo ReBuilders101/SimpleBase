@@ -48,7 +48,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 		return config;
 	}
 	
-	public void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
+	protected void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		try {
 			NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
 			clientListLock.writeLock().lock();
@@ -179,7 +179,7 @@ public class SocketNetworkManagerServer extends NetworkManager implements Networ
 	}
 
 	@Override
-	public void notifyConnectionClosed(AbstractNetworkConnection connection) {
+	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
 		clientList.remove(connection);
 	}
 

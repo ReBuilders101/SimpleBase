@@ -39,7 +39,7 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		return local;
 	}
 	
-	public abstract void notifyConnectionClosed(AbstractNetworkConnection connection);
+	protected abstract void notifyConnectionClosed(AbstractNetworkConnection connection);
 
 	protected abstract void shutdown();
 	

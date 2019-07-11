@@ -18,7 +18,7 @@ public class RemoteNetworkConnection extends AbstractNetworkConnection{
 		super(source, target, packetHandler, ConnectionState.fromSocket(connectedSocket)); //Create the state from the socket (that might be open from a server)
 		connection = connectedSocket;
 		factory = new PacketFactory(getNetworkManager(), this);
-		dataThread = new DataReceiverThread(connection, factory);
+		dataThread = new DataReceiverThread(connection, factory, this);
 		if(connectedSocket.isConnected()) dataThread.start(); //Begin when a live socket is used
 	}
 	
@@ -54,10 +54,12 @@ public class RemoteNetworkConnection extends AbstractNetworkConnection{
 	@Override
 	public ConnectionStateFuture close() {
 		ConnectionStateFuture superClose = super.close(); //Ignore result, it will always be a success
+		if(getState() == ConnectionState.CLOSED) return superClose;
 		return ConnectionStateFuture.create(superClose.getOldState(), (f) -> {
 			try {
 				connection.close();
 				f.currentState = ConnectionState.CLOSED;
+				NetworkManager.NET_LOG.info("Closing Network connection to " + getRemoteTargetId());
 			} catch (IOException e) {
 				//If closing fails
 				f.ex = e;

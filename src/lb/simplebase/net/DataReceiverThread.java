@@ -7,13 +7,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DataReceiverThread extends Thread {
 
-	private Socket socket;
-	private PacketFactory factory;
+	private final Socket socket;
+	private final AbstractNetworkConnection connection;
+	private final PacketFactory factory;
 	
 	private static final AtomicInteger threadId = new AtomicInteger(0);
 	
-	public DataReceiverThread(Socket socket, PacketFactory factory) {
+	public DataReceiverThread(Socket socket, PacketFactory factory, AbstractNetworkConnection connection) {
 		this.socket = socket;
+		this.connection = connection;
 		this.factory = factory;
 		setDaemon(true);
 		setName("Socket-DataReceiverThread-" + threadId.getAndIncrement());
@@ -26,22 +28,23 @@ public class DataReceiverThread extends Thread {
 			if(Thread.interrupted()) {
 				Thread.currentThread().interrupt();
 				NetworkManager.NET_LOG.info("Data Receiver: Closing: Thread was interrupted");
-				return;
+				break;
 			}
 			try {
 				byte b = (byte) socket.getInputStream().read();
 				factory.feed(b);
 			} catch (SocketException e) {
 				NetworkManager.NET_LOG.info("Data Receiver: Closing: Socket was closed");
-				return; //Socket closed
+				break; //Socket closed
 			} catch (PacketMappingNotFoundException e) {
 				NetworkManager.NET_LOG.warn("Data Receiver: Packet mapping not found for received packet", e);
 			} catch (IOException e) {
 				NetworkManager.NET_LOG.error("Data Receiver: Closing: Socket IO Exception", e);
 				e.printStackTrace(); //Closed with error
-				return; //Closed externally
+				break; //Closed externally
 			}
 		}
+		connection.close();//Close when socket is closed
 		return;
 	}
 
