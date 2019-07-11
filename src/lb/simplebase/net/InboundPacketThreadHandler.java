@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class InboundPacketThreadHandler implements PacketReceiver{
+class InboundPacketThreadHandler implements PacketReceiver{
 
 	private static final AtomicInteger ibhID = new AtomicInteger(0);
 	

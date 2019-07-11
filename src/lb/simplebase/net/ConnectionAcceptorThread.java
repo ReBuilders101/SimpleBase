@@ -6,12 +6,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConnectionAcceptorThread extends Thread{
+class ConnectionAcceptorThread extends Thread{
 
 	private static final AtomicInteger threadIds = new AtomicInteger(0);
 	
-	private ServerSocket socket;
-	private SocketNetworkManagerServer server;
+	private final ServerSocket socket;
+	private final SocketNetworkManagerServer server;
 	
 	public ConnectionAcceptorThread(ServerSocket socket, SocketNetworkManagerServer server) {
 		super("SocketAcceptor-"+threadIds.getAndIncrement());

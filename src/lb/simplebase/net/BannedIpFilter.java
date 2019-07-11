@@ -8,7 +8,7 @@ import java.util.function.BiPredicate;
 
 public class BannedIpFilter implements BiPredicate<NetworkManagerServer, ConnectionInformation>, Iterable<InetAddress>{
 
-	private Set<InetAddress> bannedIps;
+	private final Set<InetAddress> bannedIps;
 	
 	public BannedIpFilter(Iterable<InetAddress> bannedIps) {
 		this.bannedIps = new HashSet<>();

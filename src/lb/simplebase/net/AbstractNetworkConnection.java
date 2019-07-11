@@ -13,7 +13,7 @@ import java.net.Socket;
  * Now data can be sent through the connection. The connection remains open until either the {@link #close()} method is called,
  * or the connection is closed by the remote partner. After the connection has been closed, no more data can be sent through the connection.
  */
-public abstract class AbstractNetworkConnection {
+abstract class AbstractNetworkConnection {
 	
 	private final TargetIdentifier local; //is this even necessary?
 	private final TargetIdentifier remote;

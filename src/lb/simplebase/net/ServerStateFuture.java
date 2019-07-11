@@ -33,20 +33,20 @@ public class ServerStateFuture extends FailableFutureState{
 		return currentState == state;
 	}
 	
-	public static ServerStateFuture quickFailed(String message, ServerState unchangedState) {
+	protected static ServerStateFuture quickFailed(String message, ServerState unchangedState) {
 		return new ServerStateFuture(message, unchangedState);
 	}
 	
 	@Override
-	public synchronized ServerStateFuture run() {
+	protected synchronized ServerStateFuture run() {
 		return (ServerStateFuture) super.run();
 	}
 
-	public static ServerStateFuture quickDone(ServerState unchangedState) {
+	protected static ServerStateFuture quickDone(ServerState unchangedState) {
 		return (ServerStateFuture) new ServerStateFuture(false, unchangedState, (s) -> s.currentState = unchangedState).runInSync();
 	}
 	
-	public static ServerStateFuture create(ServerState oldState, Consumer<ServerStateFuture> task) {
+	protected static ServerStateFuture create(ServerState oldState, Consumer<ServerStateFuture> task) {
 		return new ServerStateFuture(false, oldState, task);
 	}
 }

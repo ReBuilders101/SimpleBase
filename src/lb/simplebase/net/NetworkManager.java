@@ -22,9 +22,9 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 	
 	public static final Logger NET_LOG = LogHelper.create("SimpleBase-NetAPI", LogLevel.DEBUG, new CurrentThreadNameFormat());
 	
-	private static List<Runnable> cleanupTasks = new ArrayList<>();
+	private static final List<Runnable> cleanupTasks = new ArrayList<>();
 	
-	private Set<PacketIdMapping> mappings;
+	private final Set<PacketIdMapping> mappings;
 	
 	protected NetworkManager(TargetIdentifier localId) {
 		NetworkManager.createNetworkParty();
@@ -33,7 +33,7 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		mappings = new HashSet<>();
 	}
 
-	private TargetIdentifier local; //every manager represents one party
+	private final TargetIdentifier local; //every manager represents one party
 	
 	public TargetIdentifier getLocalID() {
 		return local;

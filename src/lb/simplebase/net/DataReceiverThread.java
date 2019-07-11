@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DataReceiverThread extends Thread {
+class DataReceiverThread extends Thread {
 
 	private final Socket socket;
 	private final AbstractNetworkConnection connection;
@@ -44,6 +44,7 @@ public class DataReceiverThread extends Thread {
 				break; //Closed externally
 			}
 		}
+		NetworkManager.NET_LOG.info("Data Receiver: Stopped listening for data, closing connection");
 		connection.close();//Close when socket is closed
 		return;
 	}

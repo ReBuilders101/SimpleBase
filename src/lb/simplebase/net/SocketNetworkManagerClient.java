@@ -5,7 +5,7 @@ package lb.simplebase.net;
  * supports one connectiont to the server.
  */
 @ClientSide
-public class SocketNetworkManagerClient extends NetworkManager implements NetworkManagerClient{
+class SocketNetworkManagerClient extends NetworkManager implements NetworkManagerClient{
 
 	AbstractNetworkConnection serverConnection;
 	TargetIdentifier serverId;

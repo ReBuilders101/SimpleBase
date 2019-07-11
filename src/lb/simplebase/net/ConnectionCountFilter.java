@@ -14,5 +14,13 @@ public class ConnectionCountFilter implements BiPredicate<NetworkManagerServer, 
 	public boolean test(NetworkManagerServer var1, ConnectionInformation var2) {
 		return var1.getCurrentClientCount() < connectionLimit;
 	}
+	
+	public void setConnectionLimit(int newLimit) {
+		connectionLimit = newLimit;
+	}
+	
+	public int getConnectionLimit() {
+		return connectionLimit;
+	}
 
 }

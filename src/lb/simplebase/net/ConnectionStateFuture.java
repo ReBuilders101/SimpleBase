@@ -25,7 +25,7 @@ public class ConnectionStateFuture extends FailableFutureState {
 	}
 	
 	@Override
-	public synchronized ConnectionStateFuture run() {
+	protected synchronized ConnectionStateFuture run() {
 		return (ConnectionStateFuture) super.run();
 	}
 
@@ -38,16 +38,16 @@ public class ConnectionStateFuture extends FailableFutureState {
 		return getCurrentState() == state;
 	}
 	
-	public static ConnectionStateFuture quickFailed(String message, ConnectionState unchangedState) {
+	protected static ConnectionStateFuture quickFailed(String message, ConnectionState unchangedState) {
 		return new ConnectionStateFuture(message, unchangedState);
 	}
 	
-	public static ConnectionStateFuture create(ConnectionState state, Consumer<ConnectionStateFuture> task) {
+	protected static ConnectionStateFuture create(ConnectionState state, Consumer<ConnectionStateFuture> task) {
 		return new ConnectionStateFuture(false, task, state);
 	}
 	
 	//If the connection succeeded, but no async action was necessary (local connections)
-	public static ConnectionStateFuture quickDone(ConnectionState oldState, ConnectionState newState) {
+	protected static ConnectionStateFuture quickDone(ConnectionState oldState, ConnectionState newState) {
 		ConnectionStateFuture csf = new ConnectionStateFuture(false, (c) -> c.currentState = newState, oldState);
 		return (ConnectionStateFuture) csf.runInSync();
 	}

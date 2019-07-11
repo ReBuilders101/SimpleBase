@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncResult{
 
-	private List<PacketSendFuture> packetFutures;
+	private final List<PacketSendFuture> packetFutures;
 	
 	protected MultiPacketSendFuture(List<PacketSendFuture> list) {
 		packetFutures = list;
@@ -30,11 +30,11 @@ public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncR
 		return getCurrentSuccessCount() == getPacketCount();
 	}
 	
-	public static MultiPacketSendFuture of(PacketSendFuture...futures) {
+	protected static MultiPacketSendFuture of(PacketSendFuture...futures) {
 		return new MultiPacketSendFuture(Arrays.asList(futures));
 	}
 
-	public static MultiPacketSendFuture of(Iterable<PacketSendFuture> futures) {
+	protected static MultiPacketSendFuture of(Iterable<PacketSendFuture> futures) {
 		List<PacketSendFuture> l = new LinkedList<>();
 		for(PacketSendFuture f : futures) {
 			l.add(f);

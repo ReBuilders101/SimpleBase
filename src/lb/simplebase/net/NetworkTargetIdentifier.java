@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
  * A {@link TargetIdentifier} that can be used for Network communication. It contais a valid
  * {@link InetSocketAddress} that con be used to open {@link Socket}-based connections. 
  */
-public class NetworkTargetIdentifier implements TargetIdentifier{
+class NetworkTargetIdentifier implements TargetIdentifier{
 
 	private final String id;
 	private final InetSocketAddress address;

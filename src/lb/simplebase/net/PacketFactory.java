@@ -16,7 +16,7 @@ import lb.simplebase.io.ByteArrayBuffer;
  * <li>packet data: custom length</li>
  * </ul>
  */
-public class PacketFactory {
+class PacketFactory {
 	
 	private static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
 	
@@ -32,6 +32,7 @@ public class PacketFactory {
 	 * <b>These values must not be changed!</b><br>
 	 * Changes to these values will have no effect on packet encoding, but may cause errors with other classes depending on these values.
 	 */
+	@Deprecated
 	public static final byte[] PACKET_HEADER = Arrays.copyOf(PACKET_HEADER_PRIV, PACKET_HEADER_PRIV.length);
 	
 	private final PacketIdMappingContainer mapCon;

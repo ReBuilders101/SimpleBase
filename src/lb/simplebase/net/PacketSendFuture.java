@@ -27,19 +27,19 @@ public class PacketSendFuture extends FailableFutureState{
 	}
 	
 	@Override
-	public synchronized PacketSendFuture run() {
+	protected synchronized PacketSendFuture run() {
 		return (PacketSendFuture) super.run();
 	}
 
-	public static PacketSendFuture quickFailed(String reason) {
+	protected static PacketSendFuture quickFailed(String reason) {
 		return new PacketSendFuture(reason);
 	}
 	
-	public static PacketSendFuture quickDone() {
+	protected static PacketSendFuture quickDone() {
 		return (PacketSendFuture) new PacketSendFuture(false, (f) -> f.wasSent = true).runInSync();
 	}
 	
-	public static PacketSendFuture create(Consumer<PacketSendFuture> task) {
+	protected static PacketSendFuture create(Consumer<PacketSendFuture> task) {
 		return new PacketSendFuture(false, task);
 	}
 }

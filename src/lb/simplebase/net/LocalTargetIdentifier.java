@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
  * A {@link TargetIdentifier} that can <b>not</b> be used for Network communication. It does not store a
  * {@link InetSocketAddress} and can only be used to identify a simulated network target inside the program.
  */
-public class LocalTargetIdentifier implements TargetIdentifier{
+class LocalTargetIdentifier implements TargetIdentifier{
 	
 	private final String localId;
 	

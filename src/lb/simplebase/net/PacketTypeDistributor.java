@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class PacketTypeDistributor implements PacketReceiver{
 
-	private Map<Class<? extends Packet>, PacketReceiver> map;
+	private final Map<Class<? extends Packet>, PacketReceiver> map;
 	
 	/**
 	 * Creates a new instance of a {@link PacketTypeDistributor}. No handlers are registered for this newly created {@link PacketTypeDistributor},

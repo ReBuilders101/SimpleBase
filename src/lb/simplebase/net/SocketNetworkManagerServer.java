@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public class SocketNetworkManagerServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer{
+class SocketNetworkManagerServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer{
 
 	
 	protected SocketNetworkManagerServer(ServerConfiguration config, TargetIdentifier localId) throws IOException {

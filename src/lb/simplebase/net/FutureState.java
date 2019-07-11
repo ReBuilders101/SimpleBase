@@ -59,7 +59,7 @@ public abstract class FutureState implements AsyncResult {
 		return this;
 	}
 	
-	public synchronized FutureState run() {
+	protected synchronized FutureState run() {
 		if(state == State.IDLE) { //It is a FutureTask
 			state = State.WORKING;
 			futureExecutor.execute((FutureTask<Void>) task);
