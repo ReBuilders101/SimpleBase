@@ -84,7 +84,7 @@ public abstract class AbstractNetworkConnection {
 	 * packet from the socket listener thread
 	 */
 	protected void handleReceivedPacket(Packet received) {
-		packetHandler.accept(received, local);
+		packetHandler.accept(received, remote);
 	}
 	
 	/**
