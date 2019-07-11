@@ -31,20 +31,18 @@ class RemoteNetworkConnection extends AbstractNetworkConnection{
 				try {
 					dataToSend = factory.createPacketData(packet);
 				} catch (PacketMappingNotFoundException e) {
-					f.ex = e;
-					f.errorMessage = "No mapping was found for packet type " + packet.getClass().getSimpleName();
+					f.setErrorAndMessage(e, "No mapping was found for packet type " + packet.getClass().getSimpleName());
 					return; //On error, abort here
 				}
 				//2. Try to send it through the connection
 				try {
 					connection.getOutputStream().write(dataToSend);
 				} catch (IOException e) {
-					f.ex = e;
-					f.errorMessage = "An IO error occurred while trying to write packet data to the connection";
+					f.setErrorAndMessage(e, "An IO error occurred while trying to write packet data to the connection");
 					return;
 				}
 				//3. Done!
-				f.wasSent = true;
+				f.setPacketSent(true);
 			}).run();
 		} else {
 			return PacketSendFuture.quickFailed("Connection was not open");
@@ -58,12 +56,11 @@ class RemoteNetworkConnection extends AbstractNetworkConnection{
 		return ConnectionStateFuture.create(superClose.getOldState(), (f) -> {
 			try {
 				connection.close();
-				f.currentState = ConnectionState.CLOSED;
+				f.setCurrentState(ConnectionState.CLOSED);
 				NetworkManager.NET_LOG.info("Closing Network connection to " + getRemoteTargetId());
 			} catch (IOException e) {
 				//If closing fails
-				f.ex = e;
-				f.errorMessage = "Closing the Socket failed with exception";
+				f.setErrorAndMessage(e, "Closing the Socket failed with exception");
 			}
 		}).run();
 	}
@@ -82,13 +79,11 @@ class RemoteNetworkConnection extends AbstractNetworkConnection{
 					dataThread.start();
 					//And lastly set the state
 					state = ConnectionState.OPEN;
-					f.currentState = state;
+					f.setCurrentState(state);
 				} catch (SocketTimeoutException e) {
-					f.ex = e;
-					f.errorMessage = "The timeout (" + timeout + "ms) expired before a connection could be made";
+					f.setErrorAndMessage(e, "The timeout (" + timeout + "ms) expired before a connection could be made");
 				} catch (IOException e) {
-					f.ex = e;
-					f.errorMessage = "An IO error occurred while trying to connect the Socket";
+					f.setErrorAndMessage(e, "An IO error occurred while trying to connect the Socket");
 				}
 			}).run();
 		} else {

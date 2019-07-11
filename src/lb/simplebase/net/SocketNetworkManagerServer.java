@@ -131,13 +131,12 @@ class SocketNetworkManagerServer extends NetworkManager implements NetworkManage
 				try {
 					if(!localOnly) serverSocket.bind(getLocalID().getConnectionAddress());
 				} catch (IOException e) {
-					f.ex = e;
-					f.errorMessage = e.getMessage();
+					f.setErrorAndMessage(e);
 					return;
 				}
 				if(!localOnly) acceptor.start();
 				state = ServerState.STARTED;
-				f.currentState = state;
+				f.setServerState(state);
 				NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
 			}).run();
 		} else {
@@ -162,12 +161,11 @@ class SocketNetworkManagerServer extends NetworkManager implements NetworkManage
 				try {
 					serverSocket.close();
 				} catch (IOException e) {
-					f.ex = e;
-					f.errorMessage = e.getMessage();
+					f.setErrorAndMessage(e);
 					return;
 				}
 				state = ServerState.STOPPED;
-				f.currentState = state;
+				f.setServerState(state);
 				NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
 			}).run();
 		}

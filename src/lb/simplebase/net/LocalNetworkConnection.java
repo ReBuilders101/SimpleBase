@@ -22,7 +22,7 @@ class LocalNetworkConnection extends AbstractNetworkConnection{
 		if(getState() == ConnectionState.OPEN && partner != null) {
 			return PacketSendFuture.create((f) -> {
 				LocalConnectionManager.submitLocalPacketTask(() -> partner.handleReceivedPacket(packet));
-				f.wasSent = true;
+				f.setPacketSent(true);
 			}).run();
 		} else {
 			return PacketSendFuture.quickFailed("Connection is not open");
@@ -36,16 +36,14 @@ class LocalNetworkConnection extends AbstractNetworkConnection{
 				try {
 					partner = LocalConnectionManager.waitForLocalConnectionServer(this, timeout);
 				} catch (TimeoutException e) {
-					f.ex = e;
-					f.errorMessage = "The timeout expired before a local connection could be made";
+					f.setErrorAndMessage(e, "The timeout expired before a local connection could be made");
 					return;
 				} catch (InterruptedException e) {
-					f.ex = e;
-					f.errorMessage = "The thread was interrupted while waiting for the connection";
+					f.setErrorAndMessage(e, "The thread was interrupted while waiting for the connection");
 					return;
 				}
 				setConnectionState(ConnectionState.OPEN);
-				f.currentState = getState();
+				f.setCurrentState(getState());
 			}).run();
 			
 		} else {

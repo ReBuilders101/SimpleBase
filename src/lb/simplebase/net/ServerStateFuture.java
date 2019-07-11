@@ -4,16 +4,16 @@ import java.util.function.Consumer;
 
 public class ServerStateFuture extends FailableFutureState{
 
-	protected volatile ServerState currentState;
-	protected final ServerState oldState;
+	private volatile ServerState currentState;
+	private final ServerState oldState;
 	
-	protected ServerStateFuture(boolean failed, ServerState oldState, Consumer<ServerStateFuture> task) {
-		super(failed, (f) -> task.accept((ServerStateFuture) f));
+	private ServerStateFuture(boolean failed, ServerState oldState, Consumer<Accessor> task) {
+		super(failed, (f) -> task.accept((Accessor) f));
 		this.currentState = oldState;
 		this.oldState = oldState;
 	}
 	
-	protected ServerStateFuture(String failMessage, ServerState oldState) {
+	private ServerStateFuture(String failMessage, ServerState oldState) {
 		super(true, null, failMessage, null);
 		this.errorMessage = failMessage;
 		this.currentState = oldState;
@@ -43,10 +43,23 @@ public class ServerStateFuture extends FailableFutureState{
 	}
 
 	protected static ServerStateFuture quickDone(ServerState unchangedState) {
-		return (ServerStateFuture) new ServerStateFuture(false, unchangedState, (s) -> s.currentState = unchangedState).runInSync();
+		return (ServerStateFuture) new ServerStateFuture(false, unchangedState, (s) -> s.setServerState(unchangedState)).runInSync();
 	}
 	
-	protected static ServerStateFuture create(ServerState oldState, Consumer<ServerStateFuture> task) {
+	protected static ServerStateFuture create(ServerState oldState, Consumer<Accessor> task) {
 		return new ServerStateFuture(false, oldState, task);
+	}
+
+	public class Accessor extends FailableAccessor {
+		
+		public void setServerState(ServerState newState) {
+			currentState = newState;
+		}
+		
+	}
+	
+	@Override
+	protected Object getAccessor() {
+		return new Accessor();
 	}
 }

@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 public abstract class FailableFutureState extends FutureState {
 	
-	protected FailableFutureState(boolean failed, Consumer<FutureState> asyncTask) {
+	protected FailableFutureState(boolean failed, Consumer<Object> asyncTask) {
 		super(failed, asyncTask);
 		ex = null;
 		errorMessage = null;
@@ -15,7 +15,7 @@ public abstract class FailableFutureState extends FutureState {
 		}
 	}
 	
-	protected FailableFutureState(boolean failed, Consumer<FutureState> asyncTask, String errmsg, Throwable exc) {
+	protected FailableFutureState(boolean failed, Consumer<Object> asyncTask, String errmsg, Throwable exc) {
 		super(failed, asyncTask);
 		ex = exc;
 		errorMessage = errmsg;
@@ -58,6 +58,27 @@ public abstract class FailableFutureState extends FutureState {
 				NetworkManager.NET_LOG.error(errorMessage == null ? ex.getMessage() : errorMessage, ex);
 			}
 		}
+	}
+	
+	public class FailableAccessor {
+		
+		public void setErrorMessage(String message) {
+			errorMessage = message;
+		}
+		
+		public void setError(Throwable error) {
+			ex = error;
+		}
+
+		public void setErrorAndMessage(Throwable error, String message) {
+			ex = error;
+			errorMessage = message;
+		}
+
+		public void setErrorAndMessage(Throwable error) {
+			setErrorAndMessage(error, error.getMessage());
+		}
+		
 	}
 	
 }

@@ -4,18 +4,18 @@ import java.util.function.Consumer;
 
 public class PacketSendFuture extends FailableFutureState{
 
-	protected PacketSendFuture(boolean failed, Consumer<PacketSendFuture> action) {
-		super(failed, (fs) -> action.accept(((PacketSendFuture) fs)));
+	private PacketSendFuture(boolean failed, Consumer<Accessor> action) {
+		super(failed, (fs) -> action.accept(((Accessor) fs)));
 		wasSent = false;
 	}
 	
-	protected PacketSendFuture(String message) {
+	private PacketSendFuture(String message) {
 		super(true, null, message, null);
 		this.errorMessage = message;
 		wasSent = false;
 	}
 
-	protected volatile boolean wasSent;
+	private volatile boolean wasSent;
 	
 	public boolean wasPacketSentYet() {
 		return wasSent;
@@ -36,10 +36,23 @@ public class PacketSendFuture extends FailableFutureState{
 	}
 	
 	protected static PacketSendFuture quickDone() {
-		return (PacketSendFuture) new PacketSendFuture(false, (f) -> f.wasSent = true).runInSync();
+		return (PacketSendFuture) new PacketSendFuture(false, (f) -> f.setPacketSent(true)).runInSync();
 	}
 	
-	protected static PacketSendFuture create(Consumer<PacketSendFuture> task) {
+	protected static PacketSendFuture create(Consumer<Accessor> task) {
 		return new PacketSendFuture(false, task);
+	}
+
+	public class Accessor extends FailableAccessor {
+		
+		public void setPacketSent(boolean sent) {
+			wasSent = sent;
+		}
+		
+	}
+	
+	@Override
+	protected Object getAccessor() {
+		return new Accessor();
 	}
 }

@@ -4,21 +4,21 @@ import java.util.function.Consumer;
 
 public class ConnectionStateFuture extends FailableFutureState {
 
-	protected ConnectionStateFuture(boolean failed, Consumer<ConnectionStateFuture> asyncTask, ConnectionState oldState) {
-		super(failed, (fs) -> asyncTask.accept((ConnectionStateFuture) fs));
+	private ConnectionStateFuture(boolean failed, Consumer<Accessor> asyncTask, ConnectionState oldState) {
+		super(failed, (fs) -> asyncTask.accept((Accessor) fs));
 		this.oldState = oldState;
 		this.currentState = oldState;
 	}
 	
-	protected ConnectionStateFuture(String failMessage, ConnectionState oldState) {
+	private ConnectionStateFuture(String failMessage, ConnectionState oldState) {
 		super(true, null, failMessage, null);
 		errorMessage = failMessage;
 		this.oldState = oldState;
 		this.currentState = oldState;
 	}
 	
-	protected volatile ConnectionState currentState;
-	protected final ConnectionState oldState;
+	private volatile ConnectionState currentState;
+	private final ConnectionState oldState;
 	
 	public ConnectionState getOldState() {
 		return oldState;
@@ -42,13 +42,26 @@ public class ConnectionStateFuture extends FailableFutureState {
 		return new ConnectionStateFuture(message, unchangedState);
 	}
 	
-	protected static ConnectionStateFuture create(ConnectionState state, Consumer<ConnectionStateFuture> task) {
+	protected static ConnectionStateFuture create(ConnectionState state, Consumer<Accessor> task) {
 		return new ConnectionStateFuture(false, task, state);
 	}
 	
 	//If the connection succeeded, but no async action was necessary (local connections)
 	protected static ConnectionStateFuture quickDone(ConnectionState oldState, ConnectionState newState) {
-		ConnectionStateFuture csf = new ConnectionStateFuture(false, (c) -> c.currentState = newState, oldState);
+		ConnectionStateFuture csf = new ConnectionStateFuture(false, (c) -> c.setCurrentState(newState), oldState);
 		return (ConnectionStateFuture) csf.runInSync();
+	}
+	
+	public class Accessor extends FailableAccessor{
+		
+		public void setCurrentState(ConnectionState state) {
+			currentState = state;
+		}
+		
+	}
+
+	@Override
+	protected Object getAccessor() {
+		return new Accessor();
 	}
 }

@@ -22,14 +22,14 @@ public abstract class FutureState implements AsyncResult {
 	
 	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
 	
-	protected FutureState(boolean failed, Consumer<FutureState> asyncTask) {
+	protected FutureState(boolean failed, Consumer<Object> asyncTask) {
 		quickFailed = failed;
 		if(failed) {
 			this.task = CompletableFuture.completedFuture(null);
 			state = State.FINISHED;
 		} else {
 			Callable<Void> newTask = () -> {
-				asyncTask.accept(this);
+				asyncTask.accept(getAccessor());
 				taskDoneHandler();
 				return null;
 			};
@@ -93,4 +93,6 @@ public abstract class FutureState implements AsyncResult {
 	public static void shutdownExecutor() {
 		futureExecutor.shutdown();
 	}
+	
+	protected abstract Object getAccessor();
 }
