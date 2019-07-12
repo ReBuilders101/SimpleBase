@@ -62,4 +62,9 @@ public class ServerStateFuture extends FailableFutureState{
 	protected Object getAccessor() {
 		return new Accessor();
 	}
+
+	@Override
+	public boolean isSuccess() {
+		return !isFailed();
+	}
 }
