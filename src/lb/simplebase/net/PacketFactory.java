@@ -1,6 +1,7 @@
 package lb.simplebase.net;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import lb.simplebase.io.ByteArrayBuffer;
 
@@ -17,10 +18,10 @@ import lb.simplebase.io.ByteArrayBuffer;
  */
 public class PacketFactory {
 	
-	protected static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
+	public static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
 	
 	private final PacketIdMappingContainer mapCon;
-	private final AbstractNetworkConnection finishedPacketReceiver;
+	private final Consumer<Packet> finishedPacketReceiver;
 	
 	protected Mode mode = Mode.SEARCH_HEADER; 
 	protected int accStep = 0;
@@ -32,7 +33,7 @@ public class PacketFactory {
 	 * @param mapCon The {@link PacketIdMappingContainer} that contains all packet &lt;-&gt; id mappings
 	 * @param finishedPacketReceiver The {@link AbstractNetworkConnection} that will receive finished {@link Packet}s
 	 */
-	public PacketFactory(PacketIdMappingContainer mapCon, AbstractNetworkConnection finishedPacketReceiver) {
+	public PacketFactory(PacketIdMappingContainer mapCon, Consumer<Packet> finishedPacketReceiver) {
 		Objects.requireNonNull(mapCon);
 		Objects.requireNonNull(finishedPacketReceiver);
 		this.mapCon = mapCon;
@@ -110,7 +111,7 @@ public class PacketFactory {
 			throw new PacketMappingNotFoundException("mapping not found for id while constructing packet", packetId);
 		Packet newPacket = mapping.getNewInstance(); //make a packet
 		newPacket.readData(packetData); //read the packet data
-		finishedPacketReceiver.handleReceivedPacket(newPacket); //send the packet to the connection
+		finishedPacketReceiver.accept(newPacket); //send the packet to the connection
 	}
 	
 	/**
@@ -149,7 +150,8 @@ public class PacketFactory {
 		//Nothing really
 	}
 	
-	private static int parseInt(byte[] bytes) {
+	public static int parseInt(byte[] bytes) {
+		if(bytes.length != 4) throw new ArrayIndexOutOfBoundsException("Array must have legth 4");
 		//Code copied from ReadableByteData
 		//No enclosing typecast needed, result is already int
 		return 	(( (int) bytes[3]) << 24) | //MSB has most left shift
