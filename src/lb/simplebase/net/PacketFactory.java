@@ -1,6 +1,5 @@
 package lb.simplebase.net;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 import lb.simplebase.io.ByteArrayBuffer;
@@ -16,24 +15,9 @@ import lb.simplebase.io.ByteArrayBuffer;
  * <li>packet data: custom length</li>
  * </ul>
  */
-class PacketFactory {
+public class PacketFactory {
 	
-	private static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
-	
-	/**
-	 * The 4 byte header at the start of a packet:<br>
-	 * <code>
-	 * 0xFF,
-	 * 0xF0,
-	 * 0x0F,
-	 * 0x00
-	 * </code>
-	 * <br>
-	 * <b>These values must not be changed!</b><br>
-	 * Changes to these values will have no effect on packet encoding, but may cause errors with other classes depending on these values.
-	 */
-	@Deprecated
-	public static final byte[] PACKET_HEADER = Arrays.copyOf(PACKET_HEADER_PRIV, PACKET_HEADER_PRIV.length);
+	protected static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
 	
 	private final PacketIdMappingContainer mapCon;
 	private final AbstractNetworkConnection finishedPacketReceiver;
