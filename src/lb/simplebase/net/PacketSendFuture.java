@@ -15,7 +15,7 @@ public class PacketSendFuture extends FailableFutureState{
 		wasSent = false;
 	}
 
-	protected volatile boolean wasSent;
+	private volatile boolean wasSent;
 	
 	public boolean wasPacketSentYet() {
 		return wasSent;
@@ -52,7 +52,7 @@ public class PacketSendFuture extends FailableFutureState{
 	}
 	
 	@Override
-	protected Object getAccessor() {
+	protected Accessor getAccessor() {
 		return new Accessor();
 	}
 
