@@ -18,11 +18,15 @@ public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncR
 	}
 	
 	public int getCurrentSuccessCount() { //All sent and no error
-		return (int) packetFutures.stream().filter((f) -> f.isDone() && !f.hasError()).count();
+		return (int) packetFutures.stream().filter((f) -> f.isDone() && !f.isFailed()).count();
+	}
+	
+	public int getDonePacketCount() {
+		return (int) packetFutures.stream().filter((f) -> f.isDone()).count();
 	}
 	
 	public int getCurrentFailureCount() {
-		return (int) packetFutures.stream().filter((f) -> f.isDone() && f.hasError()).count();
+		return (int) packetFutures.stream().filter((f) -> f.isDone() && f.isFailed()).count();
 	}
 	
 	public boolean ensureAllPacketsSent() throws InterruptedException {
@@ -57,6 +61,21 @@ public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncR
 	@Override
 	public Iterator<PacketSendFuture> iterator() {
 		return packetFutures.iterator();
+	}
+
+	@Override
+	public boolean isFailed() {
+		return getCurrentSuccessCount() == 0;
+	}
+
+	@Override
+	public boolean isSuccess() {
+		return getCurrentFailureCount() == 0;
+	}
+
+	@Override
+	public boolean isDone() {
+		return getDonePacketCount() == getPacketCount();
 	}
 
 	

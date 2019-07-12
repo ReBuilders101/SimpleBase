@@ -42,7 +42,7 @@ public abstract class FailableFutureState extends FutureState {
 		return Optional.ofNullable(errorMessage);
 	}
 
-	public boolean hasError() {
+	public boolean isFailed() {
 		return ex != null || errorMessage != null || isQuickFailed();
 	}
 	

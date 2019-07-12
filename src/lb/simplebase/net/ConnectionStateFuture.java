@@ -64,4 +64,12 @@ public class ConnectionStateFuture extends FailableFutureState {
 	protected Object getAccessor() {
 		return new Accessor();
 	}
+
+	/**
+	 * If not failed. To check for desired state, use {@link #ensureState(ConnectionState)}
+	 */
+	@Override
+	public boolean isSuccess() {
+		return !isFailed();
+	}
 }

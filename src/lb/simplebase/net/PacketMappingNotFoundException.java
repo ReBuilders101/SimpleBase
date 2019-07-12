@@ -3,7 +3,7 @@ package lb.simplebase.net;
 /**
  * This {@link Exception} is thrown when the {@link PacketIdMapping} for a packet id or packet could not be found.
  */
-class PacketMappingNotFoundException extends Exception{
+public class PacketMappingNotFoundException extends Exception{
 	
 	private static final long serialVersionUID = 1737199470976685720L;
 	

@@ -12,4 +12,6 @@ public interface AsyncResult extends Result{
 		}
 	}
 	
+	public boolean isDone();
+	
 }

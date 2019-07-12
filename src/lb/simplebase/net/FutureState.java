@@ -54,9 +54,13 @@ public abstract class FutureState implements AsyncResult {
 		state = State.FINISHED;
 	}
 	
-	public synchronized FutureState runInSync() {
+	protected synchronized FutureState runInSync() {
 		((FutureTask<Void>) task).run();
 		return this;
+	}
+	
+	protected synchronized void setState(State state) {
+		this.state = state;
 	}
 	
 	protected synchronized FutureState run() {

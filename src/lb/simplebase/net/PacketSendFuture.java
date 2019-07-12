@@ -4,18 +4,18 @@ import java.util.function.Consumer;
 
 public class PacketSendFuture extends FailableFutureState{
 
-	private PacketSendFuture(boolean failed, Consumer<Accessor> action) {
+	protected PacketSendFuture(boolean failed, Consumer<Accessor> action) {
 		super(failed, (fs) -> action.accept(((Accessor) fs)));
 		wasSent = false;
 	}
 	
-	private PacketSendFuture(String message) {
+	protected PacketSendFuture(String message) {
 		super(true, null, message, null);
 		this.errorMessage = message;
 		wasSent = false;
 	}
 
-	private volatile boolean wasSent;
+	protected volatile boolean wasSent;
 	
 	public boolean wasPacketSentYet() {
 		return wasSent;
@@ -54,5 +54,15 @@ public class PacketSendFuture extends FailableFutureState{
 	@Override
 	protected Object getAccessor() {
 		return new Accessor();
+	}
+
+	@Override
+	public boolean isSuccess() {
+		return wasSent;
+	}
+
+	@Override
+	public boolean isFailed() {
+		return super.isFailed() || !wasSent;
 	}
 }

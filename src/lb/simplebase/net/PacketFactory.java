@@ -22,9 +22,9 @@ public class PacketFactory {
 	private final PacketIdMappingContainer mapCon;
 	private final AbstractNetworkConnection finishedPacketReceiver;
 	
-	private Mode mode = Mode.SEARCH_HEADER; 
-	private int accStep = 0;
-	private byte[] tempData = new byte[4];
+	protected Mode mode = Mode.SEARCH_HEADER; 
+	protected int accStep = 0;
+	protected byte[] tempData = new byte[4];
 	private int packetId = 0;
 	
 	/**
@@ -59,6 +59,14 @@ public class PacketFactory {
 			accStep++; 
 		}
 		
+		updateState();
+	}
+	
+	protected int getRemainingBytes() {
+		return mode.getAccumulateLimit() - accStep;
+	}
+	
+	protected void updateState() throws PacketMappingNotFoundException {
 		if(accStep >= mode.getAccumulateLimit()) { //If this step is done
 			//The next step depends on the current mode
 			switch (mode) {
