@@ -95,16 +95,6 @@ class SocketNetworkManagerServer extends CommonServer {
 	}
 
 	@Override
-	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
-		try {
-			clientListLock.writeLock().lock();
-			clientList.remove(connection);
-		} finally {
-			clientListLock.writeLock().unlock();
-		}
-	}
-
-	@Override
 	protected void shutdown() {
 		stopServer();
 	}

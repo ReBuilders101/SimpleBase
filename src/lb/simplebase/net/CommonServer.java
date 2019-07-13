@@ -33,6 +33,15 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		this.handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
 	}
 	
+	@Override
+	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
+		try {
+			clientListLock.writeLock().lock();
+			clientList.remove(connection);
+		} finally {
+			clientListLock.writeLock().unlock();
+		}
+	}
 	
 	@Override
 	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
