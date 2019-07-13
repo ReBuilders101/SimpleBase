@@ -7,13 +7,13 @@ public class ServerStateFuture extends FailableFutureState{
 	private volatile ServerState currentState;
 	private final ServerState oldState;
 	
-	private ServerStateFuture(boolean failed, ServerState oldState, Consumer<Accessor> task) {
+	protected ServerStateFuture(boolean failed, ServerState oldState, Consumer<Accessor> task) {
 		super(failed, (f) -> task.accept((Accessor) f));
 		this.currentState = oldState;
 		this.oldState = oldState;
 	}
 	
-	private ServerStateFuture(String failMessage, ServerState oldState) {
+	protected ServerStateFuture(String failMessage, ServerState oldState) {
 		super(true, null, failMessage, null);
 		this.errorMessage = failMessage;
 		this.currentState = oldState;

@@ -16,7 +16,7 @@ import lb.simplebase.log.Logger;
  * In case if clients, this is only the connection to the server, but in case of a server, there
  * are multiple connections to clients.<br>
  * Because the implementation depends heavily on whether the {@link NetworkManager} represents a server or client,
- * the subclasses {@link NetworkManagerServer} and {@link SocketNetworkManagerClient} should be used.
+ * the subclasses {@link NetworkManagerServer} and {@link NetworkManagerClient} should be used.
  */
 public abstract class NetworkManager implements PacketIdMappingContainer, PacketReceiver {
 	

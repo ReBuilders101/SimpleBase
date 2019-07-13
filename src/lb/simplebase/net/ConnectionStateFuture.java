@@ -4,13 +4,13 @@ import java.util.function.Consumer;
 
 public class ConnectionStateFuture extends FailableFutureState {
 
-	private ConnectionStateFuture(boolean failed, Consumer<Accessor> asyncTask, ConnectionState oldState) {
+	protected ConnectionStateFuture(boolean failed, Consumer<Accessor> asyncTask, ConnectionState oldState) {
 		super(failed, (fs) -> asyncTask.accept((Accessor) fs));
 		this.oldState = oldState;
 		this.currentState = oldState;
 	}
 	
-	private ConnectionStateFuture(String failMessage, ConnectionState oldState) {
+	protected ConnectionStateFuture(String failMessage, ConnectionState oldState) {
 		super(true, null, failMessage, null);
 		errorMessage = failMessage;
 		this.oldState = oldState;
@@ -61,7 +61,7 @@ public class ConnectionStateFuture extends FailableFutureState {
 	}
 
 	@Override
-	protected Object getAccessor() {
+	protected Accessor getAccessor() {
 		return new Accessor();
 	}
 
