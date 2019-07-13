@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public abstract class CommonServer extends NetworkManager implements NetworkManagerServer {
+public abstract class CommonServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer {
 
 	protected final ServerConfiguration config;
 	
@@ -31,6 +31,20 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		
 		this.toAllHandlers = new PacketDistributor();
 		this.handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
+	}
+	
+	
+	@Override
+	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
+		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
+		try {
+			clientListLock.writeLock().lock();
+			clientList.add(con);
+		} finally {
+			clientListLock.writeLock().unlock();
+		}
+		NetworkManager.NET_LOG.info("Server Manager: Accepted local connection (" + connection.getLocalTargetId() +")");
+		return con;
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 package lb.simplebase.net;
 
-public class LocalNetworkManagerServer extends CommonServer implements LocalConnectionServer{
+public class LocalNetworkManagerServer extends CommonServer {
 
 	public LocalNetworkManagerServer(TargetIdentifier localId, ServerConfiguration config) {
 		super(localId, config);
@@ -30,19 +30,6 @@ public class LocalNetworkManagerServer extends CommonServer implements LocalConn
 				NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
 			}).runInSync(); //Not in a new thread
 		}
-	}
-
-	@Override
-	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
-		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
-		try {
-			clientListLock.writeLock().lock();
-			clientList.add(con);
-		} finally {
-			clientListLock.writeLock().unlock();
-		}
-		NetworkManager.NET_LOG.info("Server Manager: Accepted local connection (" + connection.getLocalTargetId() +")");
-		return con;
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-class SocketNetworkManagerServer extends CommonServer implements LocalConnectionServer{
+class SocketNetworkManagerServer extends CommonServer {
 
 	
 	protected SocketNetworkManagerServer(ServerConfiguration config, TargetIdentifier localId) throws IOException {
@@ -36,6 +36,8 @@ class SocketNetworkManagerServer extends CommonServer implements LocalConnection
 				AbstractNetworkConnection newConn = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket);
 				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
 				clientList.add(newConn);
+			} else {
+				NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");
 			}
 		}finally {
 			clientListLock.writeLock().unlock();
@@ -105,19 +107,6 @@ class SocketNetworkManagerServer extends CommonServer implements LocalConnection
 	@Override
 	protected void shutdown() {
 		stopServer();
-	}
-
-	@Override
-	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
-		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
-		try {
-			clientListLock.writeLock().lock();
-			clientList.add(con);
-		} finally {
-			clientListLock.writeLock().unlock();
-		}
-		NetworkManager.NET_LOG.info("Server Manager: Accepted local connection (" + connection.getLocalTargetId() +")");
-		return con;
 	}
 
 }

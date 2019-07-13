@@ -63,7 +63,7 @@ public class ServerConfiguration {
 	}
 	
 	
-	protected boolean canAcceptConnection(NetworkManagerServer nms, ConnectionInformation ca) {
+	public boolean canAcceptConnection(NetworkManagerServer nms, ConnectionInformation ca) {
 		return acceptor.test(nms, ca);
 	}
 	
