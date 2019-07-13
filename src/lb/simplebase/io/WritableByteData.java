@@ -1,5 +1,6 @@
 package lb.simplebase.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -172,4 +173,37 @@ public interface WritableByteData extends ByteData{
 		}; 
 	}
 	
+	/**
+	 * Wraps a {@link WritableByteData} around a Java OutputStream.
+	 * It only partially implements {@link ByteData}: The {@link #getAsArray()} and {@link #getAsReadOnlyArray()} methods
+	 * will return null except when the stream is a {@link ByteArrayOutputStream}.
+	 * @param out The {@link OutputStream}
+	 * @return The wrapped object
+	 */
+	public static WritableByteData wrap(final OutputStream out) {
+		return new WritableByteData() {
+			
+			@Override
+			public byte[] getAsReadOnlyArray() {
+				if(out instanceof ByteArrayOutputStream) {
+					return ((ByteArrayOutputStream) out).toByteArray(); //Can't get the backing array
+				}
+				return null;
+			}
+			
+			@Override
+			public byte[] getAsArray() {
+				return getAsReadOnlyArray();
+			}
+			
+			@Override
+			public void writeByte(byte b) {
+				try {
+					out.write(b & 0xFF);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+	}
 }
