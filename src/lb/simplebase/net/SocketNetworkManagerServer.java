@@ -5,48 +5,19 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
-class SocketNetworkManagerServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer{
+class SocketNetworkManagerServer extends CommonServer implements LocalConnectionServer{
 
 	
 	protected SocketNetworkManagerServer(ServerConfiguration config, TargetIdentifier localId) throws IOException {
-		super(localId);
-		clientList = new HashSet<>();
-		this.config = config;
-		clientListLock = new ReentrantReadWriteLock(true);
+		super(localId, config);
 		
 		serverSocket = new ServerSocket();
 		acceptor = new ConnectionAcceptorThread(serverSocket, this);
-		toAllHandlers = new PacketDistributor();
-		handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
-		state = ServerState.INITIALIZED;
-		localOnly = localId.isLocalOnly();
 	}
-
-	//Sync any method with clientlist
-	private Set<AbstractNetworkConnection> clientList;
-	private ServerConfiguration config;
-	private ReadWriteLock clientListLock;
 	
 	private ServerSocket serverSocket;
 	private ConnectionAcceptorThread acceptor;
-	
-	private InboundPacketThreadHandler handler;
-	private PacketDistributor toAllHandlers;
-	
-	private ServerState state;
-	private final boolean localOnly;
-	
-	@Override
-	public ServerConfiguration getConfiguration() {
-		return config;
-	}
 	
 	protected void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		try {
@@ -71,56 +42,6 @@ class SocketNetworkManagerServer extends NetworkManager implements NetworkManage
 		}
 	}
 	
-	@Override
-	public synchronized PacketSendFuture sendPacketToClient(Packet packet, TargetIdentifier client) {
-		AbstractNetworkConnection con = getCurrentClient(client);
-		if(con == null) return PacketSendFuture.quickFailed("Target ID is not a client on this server");
-		if(!con.isConnectionOpen()) return PacketSendFuture.quickFailed("Connection to client is not open");
-		return con.sendPacketToTarget(packet);
-	}
-
-	@Override
-	public Set<TargetIdentifier> getCurrentClients() {
-		return Collections.unmodifiableSet(clientList.stream().map((anc) -> anc.getRemoteTargetId()).collect(Collectors.toSet()));
-	}
-
-	protected AbstractNetworkConnection getCurrentClient(TargetIdentifier client) {
-		try {
-			clientListLock.readLock().lock();
-			for(AbstractNetworkConnection con : clientList) {
-				if(con.getRemoteTargetId().equals(client)) return con;
-			}
-			return null;
-		} finally {
-			clientListLock.readLock().unlock();
-		}
-	}
-	
-	@Override
-	public boolean isCurrentClient(TargetIdentifier client) {
-		return getCurrentClient(client) != null;
-	}
-
-	@Override
-	public ConnectionStateFuture disconnectClient(TargetIdentifier client) {
-		AbstractNetworkConnection con = getCurrentClient(client);
-		if(con == null) {
-			return ConnectionStateFuture.quickFailed("No client with this Id was found", ConnectionState.UNCONNECTED); //Maybe closed is better?
-		} else {
-			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + con.getRemoteTargetId() + ")");
-			return con.close();
-		}
-	}
-
-	@Override
-	public int getCurrentClientCount() {
-		try {
-			clientListLock.readLock().lock();
-			return clientList.size();
-		}finally {
-			clientListLock.readLock().unlock();
-		}
-	}
 
 	@Override
 	public ServerStateFuture startServer() {
@@ -129,12 +50,12 @@ class SocketNetworkManagerServer extends NetworkManager implements NetworkManage
 			return ServerStateFuture.create(state, (f) -> {
 				LocalConnectionManager.addServer(this);
 				try {
-					if(!localOnly) serverSocket.bind(getLocalID().getConnectionAddress());
+					serverSocket.bind(getLocalID().getConnectionAddress());
 				} catch (IOException e) {
 					f.setErrorAndMessage(e);
 					return;
 				}
-				if(!localOnly) acceptor.start();
+				acceptor.start();
 				state = ServerState.STARTED;
 				f.setServerState(state);
 				NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
@@ -172,23 +93,13 @@ class SocketNetworkManagerServer extends NetworkManager implements NetworkManage
 	}
 
 	@Override
-	public ServerState getServerState() {
-		return state;
-	}
-
-	@Override
 	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
-		clientList.remove(connection);
-	}
-
-	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
-		handler.accept(received, source);
-	}
-
-	@Override
-	public void addIncomingPacketHandler(PacketReceiver handler) {
-		toAllHandlers.addPacketReceiver(handler);
+		try {
+			clientListLock.writeLock().lock();
+			clientList.remove(connection);
+		} finally {
+			clientListLock.writeLock().unlock();
+		}
 	}
 
 	@Override

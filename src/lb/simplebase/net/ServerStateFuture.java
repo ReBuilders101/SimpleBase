@@ -59,7 +59,7 @@ public class ServerStateFuture extends FailableFutureState{
 	}
 	
 	@Override
-	protected Object getAccessor() {
+	protected Accessor getAccessor() {
 		return new Accessor();
 	}
 

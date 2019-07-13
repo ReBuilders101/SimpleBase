@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,7 +73,7 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		cleanupTasks.add(task);
 	}
 	
-	public static void createNetworkParty() {
+	protected static void createNetworkParty() {
 		if(currentState == Lifecycle.INIT) {
 			currentState = Lifecycle.RUNNING;
 			return;
@@ -84,11 +85,15 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 	}
 	
 	public static NetworkManagerServer createServer(ServerConfiguration config, TargetIdentifier localId) {
-		try {
-			return new SocketNetworkManagerServer(config.copy(), localId);
-		} catch (IOException e) {
-			NET_LOG.error("Could not create SocketNetworkManagerServer", e);
-			return null;
+		if(localId.isLocalOnly()) {
+			return new LocalNetworkManagerServer(localId, config.copy());
+		} else {
+			try {
+				return new SocketNetworkManagerServer(config.copy(), localId);
+			} catch (IOException e) {
+				NET_LOG.error("Could not create SocketNetworkManagerServer", e);
+				return null;
+			}
 		}
 	}
 	
@@ -96,9 +101,23 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		return new SocketNetworkManagerClient(localId, serverId);
 	}
 	
+	public static Set<TargetIdentifier> getLocalServerIds() {
+		return Collections.unmodifiableSet(LocalConnectionManager.getServers().keySet());
+	}
+	
+	
 	private static Lifecycle currentState = Lifecycle.INIT;
 	
 	private static enum Lifecycle {
 		INIT, RUNNING, STOPPED;
+	}
+	
+	static {
+		Runtime.getRuntime().addShutdownHook(new Thread(() ->  {
+			if(currentState != Lifecycle.STOPPED) {
+				NetworkManager.NET_LOG.warn("Clean Up tasks will be run by a shutdown hook. It is recommended to manually call NetworkManager.cleanUp() before the program exits.");
+				NetworkManager.cleanUp();
+			}
+		}));
 	}
 }

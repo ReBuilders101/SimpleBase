@@ -37,6 +37,10 @@ final class LocalConnectionManager {
 		localPacketOutputThread.shutdown();
 	}
 	
+	protected static Map<TargetIdentifier, NetworkManagerServer> getServers() {
+		return servers;
+	}
+	
 	/**
 	 * 
 	 * @param connection A {@link AbstractNetworkConnection} to the server that should be connected to

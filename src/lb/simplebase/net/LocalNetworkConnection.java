@@ -2,7 +2,7 @@ package lb.simplebase.net;
 
 import java.util.concurrent.TimeoutException;
 
-class LocalNetworkConnection extends AbstractNetworkConnection{
+public class LocalNetworkConnection extends AbstractNetworkConnection{
 
 	private LocalNetworkConnection partner = null;
 	
