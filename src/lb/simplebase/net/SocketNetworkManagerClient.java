@@ -7,9 +7,11 @@ package lb.simplebase.net;
 @ClientSide
 class SocketNetworkManagerClient extends NetworkManager implements NetworkManagerClient{
 
-	AbstractNetworkConnection serverConnection;
-	TargetIdentifier serverId;
-	PacketDistributor allHandlers;
+	private final AbstractNetworkConnection serverConnection;
+	private final TargetIdentifier serverId;
+	
+	private final PacketDistributor allHandlers;
+	private final InboundPacketThreadHandler handler;
 	
 	/**
 	 * 
@@ -22,21 +24,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 		this.serverId = serverId;
 		serverConnection = AbstractNetworkConnection.createConnection(localId, serverId, this);
 		allHandlers = new PacketDistributor();
-	}
-
-	/**
-	 * Sends a packet to the specified target. The {@link Packet} will not be sent when the {@link TargetIdentifier} does
-	 * not equal the {@link TargetIdentifier} of the server, which is available through {@link #getSenderID()}.
-	 * @param packet The packet that should be sent
-	 * @param id The {@link TargetIdentifier} of the target
-	 */
-	@Override
-	public PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier id) {
-		if(id.equals(serverId)) {
-			return sendPacketToServer(packet);
-		} else {
-			return PacketSendFuture.quickFailed("Target id does not match server id");
-		}
+		handler = new InboundPacketThreadHandler(allHandlers, 0);
 	}
 	
 	/**
@@ -67,11 +55,10 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 		return serverConnection;
 	}
 
-	/**
-	 * do nothing 
-	 */
 	@Override
-	public void notifyConnectionClosed(AbstractNetworkConnection connection) {}
+	public void notifyConnectionClosed(AbstractNetworkConnection connection) {
+		if(onClose != null) onClose.run();
+	}
 
 	@Override
 	public ConnectionState getConnectionState() {
@@ -97,12 +84,20 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 
 	@Override
 	public void processPacket(Packet received, TargetIdentifier source) {
-		allHandlers.processPacket(received, source);
+		handler.processPacket(received, source);
 	}
 
 	@Override
 	protected void shutdown() {
 		closeConnectionToServer();
+		handler.shutdownExecutor();
+	}
+
+	private Runnable onClose;
+	
+	@Override
+	public void onConnectionClosed(Runnable task) {
+		onClose = task;
 	}
 
 }

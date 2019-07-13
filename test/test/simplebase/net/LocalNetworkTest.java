@@ -51,7 +51,7 @@ class LocalNetworkTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		serverManager = NetworkManager.createServer(ServerConfiguration.create(), server);
+		serverManager = NetworkManager.createServer(server, ServerConfiguration.create());
 		serverManager.addIncomingPacketHandler(this::getPacket);
 		clientManager = NetworkManager.createClient(client, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);

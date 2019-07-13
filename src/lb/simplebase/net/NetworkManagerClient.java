@@ -13,7 +13,13 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 * @param target The target server. Normally, a client can only send data to a single server in one session, which must match the target parameter
 	 * @return Information about the sending process, which is updated asynchounously.
 	 */
-	public PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier target);
+	public default PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier target) {
+		if(target.equals(getServerIndentifier())) {
+			return sendPacketToServer(packet);
+		} else {
+			return PacketSendFuture.quickFailed("Target id does not match server id");
+		}
+	}
 	
 	/**
 	 * Sends a packet to a server. Uses the default server for this session.
@@ -39,6 +45,7 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 */
 	public ConnectionStateFuture closeConnectionToServer();
 	
+	public void onConnectionClosed(Runnable task);
 	
 	/**
 	 * @return The {@link TargetIdentifier} for the server that this client connects to

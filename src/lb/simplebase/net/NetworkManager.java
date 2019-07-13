@@ -84,7 +84,7 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		}
 	}
 	
-	public static NetworkManagerServer createServer(ServerConfiguration config, TargetIdentifier localId) {
+	public static NetworkManagerServer createServer(TargetIdentifier localId, ServerConfiguration config) {
 		if(localId.isLocalOnly()) {
 			return new LocalNetworkManagerServer(localId, config.copy());
 		} else {
