@@ -1,5 +1,8 @@
 package lb.simplebase.io;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * This interface provides additional methods for writing primitives and strings. All methods
  * depend on the {@link #writeByte(byte)} method, which is defined by the implementation. by default,
@@ -153,6 +156,20 @@ public interface WritableByteData extends ByteData{
 		} else {
 			writeString(cs);
 		}
+	}
+	
+	/**
+	 * An {@link OutputStream} that delegates all write() calls to this {@link WritableByteData}
+	 * @return An {@link OutputStream} for this object
+	 */
+	public default OutputStream getOutStream() {
+		return new OutputStream() {
+			
+			@Override
+			public void write(int var1) throws IOException {
+				write( (byte) (var1 & 0xFF) );
+			}
+		}; 
 	}
 	
 }

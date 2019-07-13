@@ -1,5 +1,8 @@
 package lb.simplebase.io;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * This interface provides additional methods for reading primitives and strings directly. All methods
  * depend on the {@link #readByte()} method, which is defined by the implementation. by default,
@@ -180,5 +183,16 @@ public interface ReadableByteData extends ByteData{
 	 * @return Whether another byte can be read
 	 */
 	public boolean canRead();
+	
+	public default InputStream getInStream() {
+		return new InputStream() {
+			
+			@Override
+			public int read() throws IOException {
+				if(!canRead()) return -1;
+				return readByte() & 0xFF;
+			}
+		};
+	}
 	
 }
