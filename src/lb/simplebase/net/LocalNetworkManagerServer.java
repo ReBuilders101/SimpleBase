@@ -2,7 +2,7 @@ package lb.simplebase.net;
 
 public class LocalNetworkManagerServer extends CommonServer implements LocalConnectionServer{
 
-	protected LocalNetworkManagerServer(TargetIdentifier localId, ServerConfiguration config) {
+	public LocalNetworkManagerServer(TargetIdentifier localId, ServerConfiguration config) {
 		super(localId, config);
 	}
 
