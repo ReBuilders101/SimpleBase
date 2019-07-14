@@ -1,6 +1,7 @@
 package lb.simplebase.net.simple;
 
 import java.net.UnknownHostException;
+import java.util.function.Consumer;
 
 import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
@@ -57,5 +58,14 @@ public abstract class Client {
 	}
 	
 	public abstract void receive(String message);
+	
+	public static Client create(final String remoteAddress, final int port, final Consumer<String> handler) {
+		return new Client(remoteAddress, port) {
+			@Override
+			public void receive(String message) {
+				handler.accept(message);
+			}
+		};
+	}
 	
 }
