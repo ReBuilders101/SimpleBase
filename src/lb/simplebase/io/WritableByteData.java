@@ -168,7 +168,7 @@ public interface WritableByteData extends ByteData{
 			
 			@Override
 			public void write(int var1) throws IOException {
-				write( (byte) (var1 & 0xFF) );
+				writeByte( (byte) (var1 & 0xFF) );
 			}
 		}; 
 	}
