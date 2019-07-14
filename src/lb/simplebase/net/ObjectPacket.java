@@ -26,13 +26,13 @@ public class ObjectPacket implements Packet{
 			out = new ObjectOutputStream(data.getOutStream());
 			out.writeObject(object);
 		} catch (IOException e) {
-			e.printStackTrace();
+			NetworkManager.NET_LOG.error("ObjectPacket: Error while writing serializable data", e);
 		} finally {
 			if(out != null) {
 				try {
 					out.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					NetworkManager.NET_LOG.warn("ObjectPacket: ObjectOutputStream could not be closed", e);
 				}
 			}
 		}
@@ -45,13 +45,13 @@ public class ObjectPacket implements Packet{
 			in = new ObjectInputStream(data.getInStream());
 			object = in.readObject();
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			NetworkManager.NET_LOG.error("ObjectPacket: Error while reading serializable data", e);
 		} finally {
 			if(in != null) {
 				try {
 					in.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					NetworkManager.NET_LOG.warn("ObjectPacket: ObjectInputStream could not be closed", e);
 				}
 			}
 		}
