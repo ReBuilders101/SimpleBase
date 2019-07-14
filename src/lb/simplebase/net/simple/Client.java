@@ -16,7 +16,7 @@ public abstract class Client {
 	
 	public Client(String remoteAddress, int port) {
 		try {
-			client = NetworkManager.createClient(TargetIdentifier.createNetwork("client", "localhost", port),
+			client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
 					TargetIdentifier.createNetwork("server", remoteAddress, port));
 			client.addMapping(ObjectPacket.getMapping(1));
 			client.addIncomingPacketHandler(this::receive0);
