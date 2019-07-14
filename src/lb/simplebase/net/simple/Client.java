@@ -31,6 +31,7 @@ public abstract class Client {
 	public void send(String message) {
 		if(client.getConnectionState() == ConnectionState.UNCONNECTED) {
 			client.openConnectionToServer().trySync();
+			client.sendPacketToServer(new ObjectPacket(message)).trySync();
 		} else if(client.getConnectionState() == ConnectionState.CLOSED) {
 			throw new RuntimeException("Connection to server is closed");
 		} else {

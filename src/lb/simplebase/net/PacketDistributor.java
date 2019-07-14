@@ -11,8 +11,12 @@ import java.util.List;
  */
 public class PacketDistributor implements PacketReceiver{
 	
-	private List<PacketReceiver> receivers;
+	private final List<PacketReceiver> receivers;
 
+//	public PacketDistributor() {
+//		receivers = new ArrayList<>();
+//	}
+	
 	/**
 	 * Creates a new {@link PacketDistributor} with multiple {@link PacketReceiver}s.
 	 * @param receivers All {@link PacketReceiver}s that should get {@link Packet}s from this {@link PacketDistributor}
