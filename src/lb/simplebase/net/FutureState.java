@@ -75,8 +75,8 @@ public abstract class FutureState implements AsyncResult {
 		return task.isDone();
 	}
 	
-	public void sync() throws InterruptedException {
-		if(state == State.FINISHED) return;
+	public FutureState sync() throws InterruptedException {
+		if(state == State.FINISHED) return this;
 		try {
 			run();
 			task.get();
@@ -84,6 +84,7 @@ public abstract class FutureState implements AsyncResult {
 			//Callable is created from a consumer, so exceptions should not be possible
 			throw new RuntimeException(e);
 		}
+		return this;
 	}
 	
 	public State getState() {

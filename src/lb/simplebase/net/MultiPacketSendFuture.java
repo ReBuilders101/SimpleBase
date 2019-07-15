@@ -52,10 +52,11 @@ public class MultiPacketSendFuture implements Iterable<PacketSendFuture>, AsyncR
 	}
 
 	@Override
-	public void sync() throws InterruptedException {
+	public MultiPacketSendFuture sync() throws InterruptedException {
 		for(PacketSendFuture f : packetFutures) {
 			f.sync();
 		}
+		return this;
 	}
 
 	@Override

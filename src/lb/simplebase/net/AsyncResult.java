@@ -2,13 +2,13 @@ package lb.simplebase.net;
 
 public interface AsyncResult extends Result{
 
-	public void sync() throws InterruptedException;
+	public AsyncResult sync() throws InterruptedException;
 	
-	public default void trySync() {
+	public default AsyncResult trySync() {
 		try {
-			sync();
+			return sync();
 		} catch (InterruptedException e) {
-			return; //ignore
+			return this; //ignore
 		}
 	}
 	
