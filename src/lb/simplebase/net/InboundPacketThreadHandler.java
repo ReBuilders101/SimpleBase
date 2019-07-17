@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +26,11 @@ public class InboundPacketThreadHandler implements PacketReceiver{
 	
 	@Override
 	public void processPacket(Packet received, TargetIdentifier source) {
-		threadExecutor.execute(() -> delegateThreadReceiver.processPacket(received, source));
+		try {
+			threadExecutor.execute(() -> delegateThreadReceiver.processPacket(received, source));
+		} catch (RejectedExecutionException e) {
+			NetworkManager.NET_LOG.warn("Rejected Packet handler execution: Service might be shut down already - Packet dropped", e);
+		}
 	}
 	
 	public static class ThreadNameFactory implements ThreadFactory{

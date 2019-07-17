@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 import lb.simplebase.util.NamedThreadFactory;
@@ -66,7 +67,11 @@ public abstract class FutureState implements AsyncResult {
 	protected synchronized FutureState run() {
 		if(state == State.IDLE) { //It is a FutureTask
 			state = State.WORKING;
-			futureExecutor.execute((FutureTask<Void>) task);
+			try {
+				futureExecutor.execute((FutureTask<Void>) task);
+			} catch (RejectedExecutionException e) {
+				NetworkManager.NET_LOG.warn("Rejected FutureState execution, Service might be shut down already - Task not executed", e);
+			}
 		}
 		return this;
 	}
