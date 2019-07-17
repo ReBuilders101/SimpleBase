@@ -13,11 +13,8 @@ import lb.simplebase.log.LogLevel;
 import lb.simplebase.log.Logger;
 
 /**
- * The {@link NetworkManager} handles all {@link AbstractNetworkConnection}s in a network for one target.
- * In case if clients, this is only the connection to the server, but in case of a server, there
- * are multiple connections to clients.<br>
- * Because the implementation depends heavily on whether the {@link NetworkManager} represents a server or client,
- * the subclasses {@link NetworkManagerServer} and {@link NetworkManagerClient} should be used.
+ * The {@link NetworkManager} provides static methods to create servers and clients <br>
+ * The {@link #cleanUp()} method should be called before the program exits
  */
 public abstract class NetworkManager implements PacketIdMappingContainer, PacketReceiver {
 	
@@ -67,6 +64,11 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		FutureState.shutdownExecutor();
 		LocalConnectionManager.shutdownExecutor();
 		currentState = Lifecycle.STOPPED;
+	}
+	
+	public static synchronized void cleanUpAndExit() {
+		cleanUp();
+		System.exit(0);
 	}
 	
 	public static void addCleanupTask(Runnable task) {
