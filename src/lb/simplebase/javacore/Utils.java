@@ -197,13 +197,13 @@ public final class Utils {
 	}
 	
 	public static double scale(double value, double minOut, double maxOut, double minIn, double maxIn) {
-		value = clamp(value, minIn, maxIn);
+		final double clampedValue = clamp(value, minIn, maxIn);
 //		final double size = maxIn - minIn;
 //		final double shiftVal = value - minIn;
 //		final double unitVal = shiftVal / size;
 //		final double outSize = maxOut - minOut;
 //		final double outShiftVal = unitVal * outSize;
 //		return outShiftVal + minOut;
-		return (((value - minIn) / (maxIn - minIn)) * (maxOut - minOut) ) + minOut;
+		return (((clampedValue - minIn) / (maxIn - minIn)) * (maxOut - minOut) ) + minOut;
 	}
 }

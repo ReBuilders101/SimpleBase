@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.ObjectPacket;
 import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.TargetIdentifier;
 
@@ -16,7 +15,7 @@ public abstract class Server extends ReceiveSide {
 	public Server(int port) {
 		try {
 			server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port), ServerConfiguration.create());
-			server.addMapping(ObjectPacket.getMapping(1));
+			server.addMapping(StringMessagePacket.getMapping(1));
 			server.addIncomingPacketHandler(this::receive0);
 			server.startServer().trySync();
 		} catch (UnknownHostException e) {

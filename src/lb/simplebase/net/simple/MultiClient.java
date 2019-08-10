@@ -13,6 +13,7 @@ public abstract class MultiClient extends ReceiveSide{
 
 	public MultiClient() {
 		session = NetworkManager.createMultiClient(TargetIdentifier.createLocal("multiClient"));
+		session.addMapping(StringMessagePacket.getMapping(1));
 	}
 	
 	public final void sendToAll(String message) {

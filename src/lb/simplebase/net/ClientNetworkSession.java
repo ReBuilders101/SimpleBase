@@ -8,11 +8,12 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class ClientNetworkSession {
+public class ClientNetworkSession implements PacketIdMappingContainer{
 
 	private final TargetIdentifier localId;
 	private final Map<TargetIdentifier, NetworkManagerClient> clients;
 	private final Function<TargetIdentifier, NetworkManagerClient> newClient;
+	private final Set<PacketIdMapping> mappings;
 	
 	public ClientNetworkSession(final TargetIdentifier localId) {
 		this(localId, NetworkManager::createClient);
@@ -20,6 +21,7 @@ public class ClientNetworkSession {
 	
 	public ClientNetworkSession(final TargetIdentifier localId, final BiFunction<TargetIdentifier, TargetIdentifier, NetworkManagerClient> createClient) {
 		this.localId = localId;
+		this.mappings = new HashSet<>();
 		this.clients = Collections.synchronizedMap(new HashMap<>());
 		this.newClient = (t) -> createClient.apply(localId, t);
 	}
@@ -30,6 +32,7 @@ public class ClientNetworkSession {
 			return clients.get(remoteId);
 		} else {
 			final NetworkManagerClient con = newClient.apply(remoteId);
+			con.addAllMappings(this); //Add all the mappings
 			clients.put(remoteId, con);
 			return con;
 		}
@@ -57,6 +60,16 @@ public class ClientNetworkSession {
 	
 	public TargetIdentifier getLocalId() {
 		return localId;
+	}
+
+	@Override
+	public Set<PacketIdMapping> getAllMappings() {
+		return Collections.unmodifiableSet(mappings);
+	}
+
+	@Override
+	public void addMapping(PacketIdMapping mapping) {
+		mappings.add(mapping);
 	}
 	
 }

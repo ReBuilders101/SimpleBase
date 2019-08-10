@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
-import lb.simplebase.net.ObjectPacket;
 import lb.simplebase.net.TargetIdentifier;
 
 public abstract class Client extends ReceiveSide {
@@ -17,7 +16,7 @@ public abstract class Client extends ReceiveSide {
 		try {
 			client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
 					TargetIdentifier.createNetwork("server", remoteAddress, port));
-			client.addMapping(ObjectPacket.getMapping(1));
+			client.addMapping(StringMessagePacket.getMapping(1));
 			client.addIncomingPacketHandler(this::receive0);
 		} catch (UnknownHostException e) {
 			throw new RuntimeException("Remote Address not found", e);
