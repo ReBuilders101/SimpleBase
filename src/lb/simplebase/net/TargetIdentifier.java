@@ -37,6 +37,10 @@ public interface TargetIdentifier {
 	 */
 	public boolean isLocalOnly();
 	
+	public boolean matches(String address, int port);
+	public boolean matches(InetAddress address, int port);
+	public boolean matches(InetSocketAddress address);
+	
 	public static TargetIdentifier createLocal(String name) {
 		return new LocalTargetIdentifier(name);
 	}

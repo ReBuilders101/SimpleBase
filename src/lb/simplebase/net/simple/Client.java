@@ -7,10 +7,9 @@ import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.ObjectPacket;
-import lb.simplebase.net.Packet;
 import lb.simplebase.net.TargetIdentifier;
 
-public abstract class Client {
+public abstract class Client extends ReceiveSide {
 	
 	private final NetworkManagerClient client;
 	
@@ -32,11 +31,11 @@ public abstract class Client {
 	public void send(String message) {
 		if(client.getConnectionState() == ConnectionState.UNCONNECTED) {
 			client.openConnectionToServer().trySync();
-			client.sendPacketToServer(new ObjectPacket(message)).trySync();
+			client.sendPacketToServer(new StringMessagePacket(message)).trySync();
 		} else if(client.getConnectionState() == ConnectionState.CLOSED) {
 			throw new RuntimeException("Connection to server is closed");
 		} else {
-			client.sendPacketToServer(new ObjectPacket(message)).trySync();
+			client.sendPacketToServer(new StringMessagePacket(message)).trySync();
 		}
 	}
 	
@@ -51,13 +50,6 @@ public abstract class Client {
 	public boolean isOpen() {
 		return client.getConnectionState() == ConnectionState.OPEN;
 	}
-	
-	private void receive0(Packet packet, TargetIdentifier source) {
-		final ObjectPacket p = (ObjectPacket) packet;
-		receive(p.getObject(String.class));
-	}
-	
-	public abstract void receive(String message);
 	
 	public static Client create(final String remoteAddress, final int port, final Consumer<String> handler) {
 		return new Client(remoteAddress, port) {

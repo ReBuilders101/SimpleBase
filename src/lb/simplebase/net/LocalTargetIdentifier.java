@@ -1,5 +1,6 @@
 package lb.simplebase.net;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
@@ -76,5 +77,22 @@ class LocalTargetIdentifier implements TargetIdentifier{
 		} else if (!localId.equals(other.localId))
 			return false;
 		return true;
+	}
+
+	//Local implementation never matches network code
+	
+	@Override
+	public boolean matches(String address, int port) {
+		return false;
+	}
+
+	@Override
+	public boolean matches(InetAddress address, int port) {
+		return false;
+	}
+
+	@Override
+	public boolean matches(InetSocketAddress address) {
+		return false;
 	}
 }

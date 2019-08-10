@@ -102,4 +102,23 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 			return false;
 		return true;
 	}
+
+	@Override
+	public boolean matches(String hostname, int port) {
+		if(hostname == null) return false;
+		InetSocketAddress testAddress = new InetSocketAddress(hostname, port);
+		return testAddress.equals(address);
+	}
+
+	@Override
+	public boolean matches(InetAddress address2, int port) {
+		if(address2 == null) return false;
+		InetSocketAddress testAddress = new InetSocketAddress(address2, port);
+		return testAddress.equals(address);
+	}
+
+	@Override
+	public boolean matches(InetSocketAddress address2) {
+		return address.equals(address2);
+	}
 }

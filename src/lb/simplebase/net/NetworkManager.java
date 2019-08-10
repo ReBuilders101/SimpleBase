@@ -99,6 +99,10 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		}
 	}
 	
+	public static ClientNetworkSession createMultiClient(TargetIdentifier localId) {
+		return new ClientNetworkSession(localId);
+	}
+	
 	public static NetworkManagerClient createClient(TargetIdentifier localId, TargetIdentifier serverId) {
 		return new SocketNetworkManagerClient(localId, serverId);
 	}

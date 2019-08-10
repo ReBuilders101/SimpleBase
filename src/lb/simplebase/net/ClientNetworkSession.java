@@ -43,6 +43,10 @@ public class ClientNetworkSession {
 		return Collections.unmodifiableSet(new HashSet<>(clients.values()));
 	}
 	
+	public synchronized Set<TargetIdentifier> getClientConnectionIds() {
+		return Collections.unmodifiableSet(new HashSet<>(clients.keySet()));
+	}
+	
 	public synchronized void closeAllConnections() {
 			clients.forEach((t, c) -> c.closeConnectionToServer());
 	}

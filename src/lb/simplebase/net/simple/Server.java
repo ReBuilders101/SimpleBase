@@ -6,11 +6,10 @@ import java.util.function.Consumer;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.ObjectPacket;
-import lb.simplebase.net.Packet;
 import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.TargetIdentifier;
 
-public abstract class Server {
+public abstract class Server extends ReceiveSide {
 
 	private final NetworkManagerServer server;
 
@@ -25,35 +24,28 @@ public abstract class Server {
 		}
 	}
 	
-	public NetworkManagerServer getServerManager() {
+	public final NetworkManagerServer getServerManager() {
 		return server;
 	}
 	
-	public void sendToAll(String message) {
-		server.sendPacketToAllClients(new ObjectPacket(message)).trySync();
+	public final void sendToAll(String message) {
+		server.sendPacketToAllClients(new StringMessagePacket(message)).trySync();
 	}
 	
-	public void sendTo(String address, int port, String message) {
+	public final void sendTo(String address, int port, String message) {
 		for(TargetIdentifier client : server.getCurrentClients()) {
-			if(client.getConnectionAddress().getHostString().equals(address) &&
-					client.getConnectionAddress().getPort() == port) {
-				server.sendPacketToClient(new ObjectPacket(message), client).trySync();
+			if(client.matches(address, port)) {
+				server.sendPacketToClient(new StringMessagePacket(message), client).trySync();
 				return;
 			}
 		}
 		System.err.println("Client not found");
 	}
 	
-	public void close() {
+	public final void close() {
 		server.stopServer().trySync();
 	}
 	
-	private void receive0(Packet packet, TargetIdentifier source) {
-		final ObjectPacket p = (ObjectPacket) packet;
-		receive(p.getObject(String.class));
-	}
-	
-	public abstract void receive(String message);
 	
 	public static Server create(final int port, final Consumer<String> handler) {
 		return new Server(port) {
