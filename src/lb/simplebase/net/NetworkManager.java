@@ -11,6 +11,7 @@ import lb.simplebase.log.CurrentThreadNameFormat;
 import lb.simplebase.log.LogHelper;
 import lb.simplebase.log.LogLevel;
 import lb.simplebase.log.Logger;
+import lb.simplebase.reflect.ReflectionUtils;
 
 /**
  * The {@link NetworkManager} provides static methods to create servers and clients <br>
@@ -97,6 +98,14 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 				return null;
 			}
 		}
+	}
+	
+	public static void fixLogLevel(LogLevel level) {
+		ReflectionUtils.setDeclaredField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, LogLevel.WARN);
+	}
+	
+	public static void fixLogLevel() {
+		fixLogLevel(LogLevel.WARN);
 	}
 	
 	public static ClientNetworkSession createMultiClient(TargetIdentifier localId) {
