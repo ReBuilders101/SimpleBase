@@ -38,6 +38,7 @@ public abstract class MultiClient extends ReceiveSide{
 				throw new RuntimeException(e);
 			}
 			foundClient = session.getOrCreateConnection(newId);
+			foundClient.addIncomingPacketHandler(this::receive0);
 		}
 		
 		foundClient.sendPacketToServer(new StringMessagePacket(message)).trySync();
