@@ -16,4 +16,13 @@ public final class SimpleUtils {
 		NetworkManager.cleanUpAndExit();
 	}
 	
+	public static void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			System.err.println("Waiting interrupted");
+			return;
+		}
+	}
+	
 }
