@@ -31,7 +31,12 @@ class DataReceiverThread extends Thread {
 				break;
 			}
 			try {
-				byte b = (byte) socket.getInputStream().read();
+				int i = socket.getInputStream().read();
+				if(i == -1) {
+					NetworkManager.NET_LOG.info("Data Receiver: Socket was closed remotely");
+					break;
+				}
+				byte b = (byte) i;
 				factory.feed(b);
 			} catch (SocketException e) {
 				NetworkManager.NET_LOG.info("Data Receiver: Closing: Socket was closed");

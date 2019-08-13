@@ -18,7 +18,7 @@ public abstract class Server extends ReceiveSide {
 			server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port), ServerConfiguration.create());
 			server.addMapping(StringMessagePacket.getMapping(1));
 			server.addIncomingPacketHandler(this::receive0);
-			
+			server.addNewConnectionHandler((t) -> this.newConnection(t.getConnectionAddress().getHostString(), t.getConnectionAddress().getPort()));
 			server.startServer().trySync();
 		} catch (UnknownHostException e) {
 			throw new RuntimeException("Server Address not found", e);

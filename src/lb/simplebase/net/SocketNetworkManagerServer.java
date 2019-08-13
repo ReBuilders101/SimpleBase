@@ -79,7 +79,8 @@ class SocketNetworkManagerServer extends CommonServer {
 				//Then kick everyone
 				NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
 				for(AbstractNetworkConnection con : clientList) {
-					con.close();
+					NetworkManager.NET_LOG.debug("Closing client connection: " + con.getRemoteTargetId());
+					con.close().trySync();
 				}
 				handler.shutdownExecutor();
 				try {

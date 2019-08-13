@@ -52,9 +52,11 @@ class RemoteNetworkConnection extends AbstractNetworkConnection{
 	@Override
 	public ConnectionStateFuture close() {
 		ConnectionStateFuture superClose = super.close(); //Ignore result, it will always be a success
-		if(getState() == ConnectionState.CLOSED) return superClose;
+		NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
+		if(superClose.getOldState() == ConnectionState.CLOSED) return superClose;
 		return ConnectionStateFuture.create(superClose.getOldState(), (f) -> {
 			try {
+				connection.shutdownOutput();
 				connection.close();
 				f.setCurrentState(ConnectionState.CLOSED);
 				NetworkManager.NET_LOG.info("Closing Network connection to " + getRemoteTargetId());
