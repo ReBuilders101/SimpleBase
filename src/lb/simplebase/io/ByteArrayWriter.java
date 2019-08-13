@@ -21,7 +21,7 @@ public class ByteArrayWriter implements WritableByteData{
 	}
 
 	@Override
-	public byte[] getAsReadOnlyArray() {
+	public byte[] getAsArrayFast() {
 		return baos.toByteArray(); //BAOS internal buf variable is not accessible
 	}
 

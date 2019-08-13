@@ -51,7 +51,7 @@ class BufferTest {
 		final byte[] data = new byte[] { 2, 34, (byte) 255, 96};
 		buffer.write(data);
 		
-		byte[] newData = buffer.getAsReadOnlyArray();
+		byte[] newData = buffer.getAsArrayFast();
 		assertArrayEquals(data, newData, "Arrays not equal");
 	}
 	

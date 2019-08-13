@@ -175,7 +175,7 @@ public interface WritableByteData extends ByteData{
 	
 	/**
 	 * Wraps a {@link WritableByteData} around a Java OutputStream.
-	 * It only partially implements {@link ByteData}: The {@link #getAsArray()} and {@link #getAsReadOnlyArray()} methods
+	 * It only partially implements {@link ByteData}: The {@link #getAsArray()} and {@link #getAsArrayFast()} methods
 	 * will return null except when the stream is a {@link ByteArrayOutputStream}.
 	 * @param out The {@link OutputStream}
 	 * @return The wrapped object
@@ -184,7 +184,7 @@ public interface WritableByteData extends ByteData{
 		return new WritableByteData() {
 			
 			@Override
-			public byte[] getAsReadOnlyArray() {
+			public byte[] getAsArrayFast() {
 				if(out instanceof ByteArrayOutputStream) {
 					return ((ByteArrayOutputStream) out).toByteArray(); //Can't get the backing array
 				}
@@ -193,7 +193,7 @@ public interface WritableByteData extends ByteData{
 			
 			@Override
 			public byte[] getAsArray() {
-				return getAsReadOnlyArray();
+				return getAsArrayFast();
 			}
 			
 			@Override

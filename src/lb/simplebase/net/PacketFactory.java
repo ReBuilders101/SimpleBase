@@ -143,7 +143,7 @@ public class PacketFactory {
 		allData.writeInt(packetDataLength);
 		allData.write(packetData);
 		//create array
-		return allData.getAsReadOnlyArray();
+		return allData.getAsArrayFast();
 	}
 	
 	protected void notifyConnectionClosed() {

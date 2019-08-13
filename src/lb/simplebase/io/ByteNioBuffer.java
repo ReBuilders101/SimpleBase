@@ -37,7 +37,7 @@ public class ByteNioBuffer implements ReadableByteData, WritableByteData{
 	}
 
 	@Override
-	public byte[] getAsReadOnlyArray() {
+	public byte[] getAsArrayFast() {
 		if(buf.hasArray()) return buf.array();
 		return directBufferData();
 	}

@@ -134,7 +134,7 @@ public class ByteArrayBuffer implements WritableByteData, ReadableByteData{
 	 * @param buf The {@link ByteArrayBuffer} containing the data
 	 */
 	public void write(ByteData buf) {
-		final byte[] data = buf.getAsReadOnlyArray();
+		final byte[] data = buf.getAsArrayFast();
 		write(data);
 	}
 
@@ -144,7 +144,7 @@ public class ByteArrayBuffer implements WritableByteData, ReadableByteData{
 	}
 
 	@Override
-	public byte[] getAsReadOnlyArray() {
+	public byte[] getAsArrayFast() {
 		updateRead();
 		return readData;
 	}

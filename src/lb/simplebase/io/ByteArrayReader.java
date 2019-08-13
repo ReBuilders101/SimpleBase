@@ -44,7 +44,7 @@ public class ByteArrayReader implements ReadableByteData{
 	}
 
 	@Override
-	public byte[] getAsReadOnlyArray() {
+	public byte[] getAsArrayFast() {
 		return data;
 	}
 

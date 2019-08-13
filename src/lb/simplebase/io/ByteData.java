@@ -14,7 +14,7 @@ public interface ByteData {
 	
 	/**
 	 * Gets all (relevant) data of the object as a byte array.<br>
-	 * <b>If only read access is required, use {@link #getAsReadOnlyArray()} instead.</b><br>
+	 * <b>If only read access is required, use {@link #getAsArrayFast()} instead.</b><br>
 	 * The created array may change form call to call, depending on the state of the object,
 	 * however the returned array should never change, so it must be copied before returning it.
 	 * In case of nested arrays, a deep copy is not necessary.<br>
@@ -31,7 +31,7 @@ public interface ByteData {
 	 * <b>Changes to this array may affect this ByteData object, but this behavior is not guaranteed.</b>
 	 * @return The byte array
 	 */
-	public byte[] getAsReadOnlyArray();
+	public byte[] getAsArrayFast();
 	
 	/**
 	 * Creates a new {@link ByteArrayInputStream} backed by the byte array returned by {@link #getAsArray()} at the time this
@@ -52,7 +52,7 @@ public interface ByteData {
 	public default ByteArrayOutputStream getAsWriteableIOStream(){
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			baos.write(getAsReadOnlyArray()); //Data is copied in BAOS
+			baos.write(getAsArrayFast()); //Data is copied in BAOS
 		} catch (IOException e) {
 			e.printStackTrace(); //This cannot happen. Really. I promise (see VVV). Added a log call anyways.
 			//Not happening because:
@@ -69,7 +69,7 @@ public interface ByteData {
 	 * @return The length of the byte data
 	 */
 	public default int getLength() {
-		return getAsReadOnlyArray().length;
+		return getAsArrayFast().length;
 	}
 	
 //	
