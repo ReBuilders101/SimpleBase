@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class CommonServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer {
@@ -12,6 +13,7 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	protected final ServerConfiguration config;
 	
 	protected final Set<AbstractNetworkConnection> clientList;
+	protected final Set<Consumer<TargetIdentifier>> newCon;
 	protected final ReadWriteLock clientListLock;
 	
 	protected final InboundPacketThreadHandler handler;
@@ -27,10 +29,20 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		this.state = ServerState.INITIALIZED;
 		
 		this.clientList = new HashSet<>();
+		this.newCon = new HashSet<>();
 		this.clientListLock = new ReentrantReadWriteLock(true);
 		
 		this.toAllHandlers = new PacketDistributor();
 		this.handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
+	}
+	
+	@Override
+	public void addNewConnectionHandler(Consumer<TargetIdentifier> newConnection) {
+		newCon.add(newConnection);
+	}
+	
+	protected void onNewConnection(TargetIdentifier target) {
+		newCon.forEach((c) -> c.accept(target)); 
 	}
 	
 	@Override

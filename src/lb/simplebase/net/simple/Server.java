@@ -1,6 +1,7 @@
 package lb.simplebase.net.simple;
 
 import java.net.UnknownHostException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import lb.simplebase.net.NetworkManager;
@@ -17,6 +18,7 @@ public abstract class Server extends ReceiveSide {
 			server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port), ServerConfiguration.create());
 			server.addMapping(StringMessagePacket.getMapping(1));
 			server.addIncomingPacketHandler(this::receive0);
+			
 			server.startServer().trySync();
 		} catch (UnknownHostException e) {
 			throw new RuntimeException("Server Address not found", e);
@@ -26,6 +28,8 @@ public abstract class Server extends ReceiveSide {
 	public final NetworkManagerServer getServerManager() {
 		return server;
 	}
+	
+	protected abstract void newConnection(String hostname, int port);
 	
 	public final void sendToAll(String message) {
 		server.sendPacketToAllClients(new StringMessagePacket(message)).trySync();
@@ -46,11 +50,16 @@ public abstract class Server extends ReceiveSide {
 	}
 	
 	
-	public static Server create(final int port, final Consumer<String> handler) {
+	public static Server create(final int port, final Consumer<String> handler, final BiConsumer<String, Integer> conHandler) {
 		return new Server(port) {
 			@Override
 			public void receive(String message) {
-				handler.accept(message);;
+				handler.accept(message);
+			}
+
+			@Override
+			protected void newConnection(String hostname, int port) {
+				conHandler.accept(hostname, port);
 			}
 		};
 	}

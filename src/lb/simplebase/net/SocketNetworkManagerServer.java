@@ -35,6 +35,7 @@ class SocketNetworkManagerServer extends CommonServer {
 				}
 				AbstractNetworkConnection newConn = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket);
 				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
+				onNewConnection(remote);
 				clientList.add(newConn);
 			} else {
 				NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");

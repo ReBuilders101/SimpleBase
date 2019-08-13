@@ -3,6 +3,7 @@ package lb.simplebase.net;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @ServerSide
@@ -61,4 +62,6 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	public ServerStateFuture startServer();
 	public ServerStateFuture stopServer();
 	public ServerState getServerState();
+	
+	public void addNewConnectionHandler(Consumer<TargetIdentifier> newConnection);
 }
