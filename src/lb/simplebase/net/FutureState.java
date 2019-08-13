@@ -23,6 +23,12 @@ public abstract class FutureState implements AsyncResult {
 	
 	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
 	
+	/**
+	 * If <code>true</code>, tasks will run in another thread.
+	 * If <code>false</code>, tasks will run in the thread that call {@link #run()} and will be done when the method returns.
+	 */
+	public static volatile boolean RUN_ASYNC = true;
+	
 	protected FutureState(boolean failed, Consumer<Object> asyncTask) {
 		quickFailed = failed;
 		if(failed) {
@@ -56,7 +62,9 @@ public abstract class FutureState implements AsyncResult {
 	}
 	
 	protected synchronized FutureState runInSync() {
-		((FutureTask<Void>) task).run();
+		if(state == State.IDLE) {
+			((FutureTask<Void>) task).run();
+		}
 		return this;
 	}
 	
@@ -65,15 +73,19 @@ public abstract class FutureState implements AsyncResult {
 	}
 	
 	protected synchronized FutureState run() {
-		if(state == State.IDLE) { //It is a FutureTask
-			state = State.WORKING;
-			try {
-				futureExecutor.execute((FutureTask<Void>) task);
-			} catch (RejectedExecutionException e) {
-				NetworkManager.NET_LOG.warn("Rejected FutureState execution, Service might be shut down already - Task not executed", e);
+		if(RUN_ASYNC) {
+			if(state == State.IDLE) { //It is a FutureTask
+				state = State.WORKING;
+				try {
+					futureExecutor.execute((FutureTask<Void>) task);
+				} catch (RejectedExecutionException e) {
+					NetworkManager.NET_LOG.warn("Rejected FutureState execution, Service might be shut down already - Task not executed", e);
+				}
 			}
+			return this;
+		} else {
+			return runInSync();
 		}
-		return this;
 	}
 	
 	public boolean isDone() {
