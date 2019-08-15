@@ -1,5 +1,10 @@
 package lb.simplebase.util;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.reflect.UnsafeUtils;
 
@@ -44,4 +49,16 @@ public interface ReflectedMethod {
 		};
 	}
 	
+	public default ReflectedMethodNE wrapLambda() {
+		final MethodType interfaceType = MethodType.methodType(ReflectedMethodNE.class);
+		final MethodType methodType = MethodType.methodType(Object.class, Object[].class);
+		
+		try {
+			final CallSite factory = LambdaMetafactory.metafactory(MethodHandles.lookup(), "getOrExecute",
+					interfaceType, methodType, MethodHandles.lookup().bind(this, "getOrExecute", methodType), methodType);
+			return (ReflectedMethodNE) factory.getTarget().invokeExact();
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

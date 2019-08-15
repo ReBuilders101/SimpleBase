@@ -240,7 +240,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return The return value of the method call
 	 */
-	public static <C> Object executeMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
+	public static <C> Object executeMethod(Class<C> clazz, String methodName, C instance, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
@@ -269,7 +269,7 @@ public final class ReflectionUtils {
 	 * @return The return value of the method call
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T, C> T executeMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature<?>...sig) {
+	public static <T, C> T executeMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature...sig) {
 		return (T) executeMethod(clazz, methodName, instance, sig);
 	}
 	
@@ -288,7 +288,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return The return value of the method call
 	 */
-	public static <C> Object executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
+	public static <C> Object executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
@@ -316,7 +316,7 @@ public final class ReflectionUtils {
 	 * @return The return value of the method call
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T, C> T executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature<?>...sig) {
+	public static <T, C> T executeDeclaredMethod(Class<C> clazz, String methodName, C instance, Class<T> returnType, Signature...sig) {
 		return (T) executeDeclaredMethod(clazz, methodName, instance, sig);
 	}	
 	
@@ -332,7 +332,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return The return value of the method call
 	 */
-	public static Object executeStaticMethod(Class<?> clazz, String methodName, Signature<?>...sig) {
+	public static Object executeStaticMethod(Class<?> clazz, String methodName, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
@@ -357,7 +357,7 @@ public final class ReflectionUtils {
 	 * @return The return value of the method call
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T executeStaticMethod(Class<?> clazz, String methodName, Class<T> returnType, Signature<?>...sig) {
+	public static <T> T executeStaticMethod(Class<?> clazz, String methodName, Class<T> returnType, Signature...sig) {
 		return (T) executeStaticMethod(clazz, methodName, sig);
 	}
 	
@@ -375,7 +375,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return Whether the method execution was successful
 	 */
-	public static <C> boolean executeVoidMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
+	public static <C> boolean executeVoidMethod(Class<C> clazz, String methodName, C instance, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
@@ -400,7 +400,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return Whether the method execution was successful
 	 */
-	public static <C> boolean executeDeclaredVoidMethod(Class<C> clazz, String methodName, C instance, Signature<?>...sig) {
+	public static <C> boolean executeDeclaredVoidMethod(Class<C> clazz, String methodName, C instance, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);
@@ -422,7 +422,7 @@ public final class ReflectionUtils {
 	 * @param sig The {@link Signature} of the method (the types of parameters and the values)
 	 * @return Whether the method execution was successful
 	 */
-	public static boolean executeStaticVoidMethod(Class<?> clazz, String methodName, Signature<?>...sig) {
+	public static boolean executeStaticVoidMethod(Class<?> clazz, String methodName, Signature...sig) {
 		try {
 			Class<?>[] types = Signature.createTypeArray(sig);
 			Object[] values = Signature.createValueArray(sig);

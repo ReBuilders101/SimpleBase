@@ -47,7 +47,7 @@ public final class UnsafeUtils {
 	/**
 	 * Re-throws a {@link Throwable} that normally would be a checked exception, without wrapping it in a {@link RuntimeException}.
 	 * Methods using this may have to add a dummy return statement after this method call, because the compiler will not recoginze this
-	 * methodlike a <code>throw</code> statement. However, this method will always throw the exception in the parameter.
+	 * method like a <code>throw</code> statement. However, this method will always throw the exception in the parameter.
 	 * @param ex The {@link Throwable} to throw
 	 */
 	public static void throwExceptionUnchecked(Throwable ex) {

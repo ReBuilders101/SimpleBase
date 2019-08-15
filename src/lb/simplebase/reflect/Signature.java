@@ -6,11 +6,10 @@ package lb.simplebase.reflect;
  * <p>
  * If an array of signatures is required, most of the time one of the static helper
  * methods can be used instead of creating a new array.
- * @param <T> The type of this signature element
  */
-public class Signature<T> {
+public class Signature {
 
-	private T value;
+	private Object value;
 	private Class<?> clazz;
 	
 	/**
@@ -19,14 +18,17 @@ public class Signature<T> {
 	 * different from the type of the implementation of <code>value</code>.
 	 * @param value The value associated with this parameter
 	 */
-	public Signature(T value) {
+	public Signature(Object value) {
 		this.value = value;
 		this.clazz = value.getClass();
 	}
 	
 	/**
 	 * Creates a new {@link Signature}. The type of the signature is a explicitly specified supertype
-	 * of the type of the value, in case The method signature / parameter type does not match the type of the value
+	 * of the type of the value, in case The method signature / parameter type does not match the type of the value exactly.
+	 * <p>
+	 * Can also be used to enforce primitive types, e.g. <code>Signature(23)</code> will be of type <code>Integer.class</code>,
+	 * while <code>Signature(23, int.class)</code> will be of type <code>int.class</code>.
 	 * <p>
 	 * Example:<br>
 	 * <code>value</code> is of type {@link Integer}, the method accepts {@link Number} in its signature. The type
@@ -36,7 +38,7 @@ public class Signature<T> {
 	 * @param value The value associated with this parameter
 	 * @param forcedType A supertype of the type of the value, that is in the method's signature
 	 */
-	public Signature(T value, Class<? super T> forcedType) {
+	public <T> Signature(T value, Class<? super T> forcedType) {
 		this.value = value;
 		this.clazz = forcedType;
 	}
@@ -48,7 +50,7 @@ public class Signature<T> {
 	 * {@link #createValueArray(Signature...)} utility method.
 	 * @return The value of this signature element
 	 */
-	public T getValue() {
+	public Object getValue() {
 		return value;
 	}
 	
@@ -69,7 +71,7 @@ public class Signature<T> {
 	 * @param signatures The signatures that contain the values
 	 * @return The values in the same order
 	 */
-	public static Object[] createValueArray(Signature<?>...signatures) {
+	public static Object[] createValueArray(Signature...signatures) {
 		final int length = signatures.length;
 		Object[] ret = new Object[length];
 		for(int i = 0; i < length; i++) {
@@ -84,7 +86,7 @@ public class Signature<T> {
 	 * @param signatures The signatures that contain the types
 	 * @return The types in the same order
 	 */
-	public static Class<?>[] createTypeArray(Signature<?>...signatures) {
+	public static Class<?>[] createTypeArray(Signature...signatures) {
 		final int length = signatures.length;
 		Class<?>[] ret = new Class<?>[length];
 		for(int i = 0; i < length; i++) {
@@ -112,8 +114,8 @@ public class Signature<T> {
 	 * @see #of(Class, Object, Class, Object)
 	 * @see #of(Class, Object, Class, Object, Class, Object)
 	 */
-	public static <T, U, V, W> Signature<?>[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2, Class<? super V> type3, V value3, Class<? super W> type4, W value4) {
-		return new Signature<?>[] {new Signature<>(value1, type1), new Signature<>(value2, type2), new Signature<>(value3, type3), new Signature<>(value4, type4)};
+	public static <T, U, V, W> Signature[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2, Class<? super V> type3, V value3, Class<? super W> type4, W value4) {
+		return new Signature[] {new Signature(value1, type1), new Signature(value2, type2), new Signature(value3, type3), new Signature(value4, type4)};
 	}
 	
 	/**
@@ -132,8 +134,8 @@ public class Signature<T> {
 	 * @see #of(Class, Object, Class, Object)
 	 * @see #of(Class, Object, Class, Object, Class, Object, Class, Object)
 	 */
-	public static <T, U, V> Signature<?>[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2, Class<? super V> type3, V value3) {
-		return new Signature<?>[] {new Signature<>(value1, type1), new Signature<>(value2, type2), new Signature<>(value3, type3)};
+	public static <T, U, V> Signature[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2, Class<? super V> type3, V value3) {
+		return new Signature[] {new Signature(value1, type1), new Signature(value2, type2), new Signature(value3, type3)};
 	}
 	
 	/**
@@ -149,8 +151,8 @@ public class Signature<T> {
 	 * @see #of(Class, Object, Class, Object, Class, Object)
 	 * @see #of(Class, Object, Class, Object, Class, Object, Class, Object)
 	 */
-	public static <T, U> Signature<?>[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2) {
-		return new Signature<?>[] {new Signature<>(value1, type1), new Signature<>(value2, type2)};
+	public static <T, U> Signature[] of(Class<? super T> type1, T value1, Class<? super U> type2, U value2) {
+		return new Signature[] {new Signature(value1, type1), new Signature(value2, type2)};
 	}
 	
 	/**
@@ -161,11 +163,11 @@ public class Signature<T> {
 	 * @return The method signature
 	 */
 	@SafeVarargs
-	public static <T> Signature<?>[] allOf(Class<? super T> type, T...values) {
+	public static <T> Signature[] allOf(Class<? super T> type, T...values) {
 		final int length = values.length;
-		Signature<?>[] ret = new Signature<?>[length];
+		Signature[] ret = new Signature[length];
 		for(int i = 0; i < length; i++) {
-			ret[i] = new Signature<T>(values[i], type);
+			ret[i] = new Signature(values[i], type);
 		}
 		return ret;
 	}
@@ -180,8 +182,8 @@ public class Signature<T> {
 	 * @see #of(Class, Object, Class, Object, Class, Object)
 	 * @see #of(Class, Object, Class, Object, Class, Object, Class, Object)
 	 */
-	public static <T> Signature<?>[] of(Class<? super T> type1, T value1) {
-		return new Signature<?>[] {new Signature<>(value1, type1)};
+	public static <T> Signature[] of(Class<? super T> type1, T value1) {
+		return new Signature[] {new Signature(value1, type1)};
 	}
 	
 	/**
@@ -190,23 +192,23 @@ public class Signature<T> {
 	 * @param values The values of different types
 	 * @return The method signature
 	 */
-	public static Signature<?>[] of(Object...values) {
+	public static Signature[] of(Object...values) {
 		final int length = values.length;
-		Signature<?>[] ret = new Signature<?>[length];
+		Signature[] ret = new Signature[length];
 		for(int i = 0; i < length; i++) {
-			ret[i] = new Signature<>(values[i]);
+			ret[i] = new Signature(values[i]);
 		}
 		return ret;
 	}
 	
-	private static final Signature<?>[] EMPTY = new Signature<?>[0];
+	private static final Signature[] EMPTY = new Signature[0];
 	
 	/**
 	 * Returns an empty {@link Signature} array, for methods that take no parameters.
 	 * The returned array is always the same one to save memory. 
 	 * @return The method signature
 	 */
-	public static Signature<?>[] empty() {
+	public static Signature[] empty() {
 		return EMPTY;
 	}
 }
