@@ -1,5 +1,9 @@
 package lb.simplebase.reflect;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,6 +16,11 @@ import lb.simplebase.util.ReflectedMethod;
  * Contains static utility methods for reflection. 
  */
 public final class ReflectionUtils {
+	
+	/**
+	 * Empty method parameter list
+	 */
+	public static final Class<?>[] EMPTY = new Class<?>[]{};
 
 	private ReflectionUtils() {}
 	
@@ -480,6 +489,88 @@ public final class ReflectionUtils {
 	 */
 	public static ReflectedMethod getStaticMethodExecutor(Class<?> clazz, String methodName, Class<?>...sig) {
 		return getDeclaredMethodExecutor(clazz, methodName, null, sig);
+	}
+	
+	/////////////////////////////////METHOD HANDLES//////////////////////////////////////////////////
+	
+	/**
+	 * Returns a {@link ReflectedMethod}, which is a {@link FunctionalInterface}, that will execute this
+	 * method with its {@link ReflectedMethod#getOrExecute(Object...)} method.
+	 * The method can be declared in the class of the <code>classAndInstance</code> parameter, or in a superclass.
+	 * If an exception occurs while creating the functional interface from the method, <code>null</code> is returned.<p>  
+	 * Uses {@link MethodHandle}s instead of reflection. 
+	 * @param methodName The name of the method
+	 * @param classAndInstance The instance for which the method should be called
+	 * @param returnType The type that is returned by this method. If the method doesn't return anything, use <code>void.class</code> or {@link #getVoidMethodHandleExecutor(Class, String, Object, Class...)}
+	 * @param sig The signature of the method (Types of parameters). can be <code>null</code> if the method has no parameters
+	 * @return A {@link ReflectedMethod} that contains the method
+	 * @see #getMethodExecutor(Class, String, Object, Class...)
+	 */
+	public static ReflectedMethod getMethodHandleExecutor(String methodName, Object classAndInstance, Class<?> returnType, Class<?>...sig) {
+		if(returnType == null) return null;
+		
+		final MethodType type;
+		if(sig == null || sig.length == 0) {
+			type = MethodType.methodType(returnType);
+		} else {
+			type = MethodType.methodType(returnType, sig);
+		}
+		
+		final Lookup lookup = MethodHandles.lookup();
+		try {
+			final MethodHandle handle = lookup.bind(classAndInstance, methodName, type);
+			return handle::invoke;
+		} catch (NoSuchMethodException | IllegalAccessException e) {
+			return null;
+		} 
+	}
+	
+	/**
+	 * Returns a {@link ReflectedMethod}, which is a {@link FunctionalInterface}, that will execute this
+	 * method with its {@link ReflectedMethod#getOrExecute(Object...)} method.
+	 * The method can be declared in the class of the <code>classAndInstance</code> parameter, or in a superclass.
+	 * If an exception occurs while creating the functional interface from the method, <code>null</code> is returned.<p>  
+	 * Uses {@link MethodHandle}s instead of reflection. 
+	 * @param methodName The name of the method
+	 * @param classAndInstance The instance for which the method should be called
+	 * @param sig The signature of the method (Types of parameters). can be <code>null</code> if the method has no parameters
+	 * @return A {@link ReflectedMethod} that contains the method
+	 * @see #getMethodHandleExecutor(String, Object, Class, Class...)
+	 */
+	public static ReflectedMethod getVoidMethodHandleExecutor(String methodName, Object classAndInstance, Class<?>...sig) {
+		return getMethodHandleExecutor(methodName, classAndInstance, void.class, sig);
+	}
+	
+	
+	/**
+	 * Returns a {@link ReflectedMethod}, which is a {@link FunctionalInterface}, that will execute this
+	 * method with its {@link ReflectedMethod#getOrExecute(Object...)} method.
+	 * If an exception occurs while creating the functional interface from the method, <code>null</code> is returned.<p>  
+	 * Uses {@link MethodHandle}s instead of reflection.
+	 * @param clazz The class that contains the static method
+	 * @param methodName The name of the method
+	 * @param returnType The type that is returned by this method. If the method doesn't return anything, use <code>void.class</code>
+	 * @param sig The signature of the method (Types of parameters). can be <code>null</code> if the method has no parameters
+	 * @return A {@link ReflectedMethod} that contains the method
+	 * @see #getMethodExecutor(Class, String, Object, Class...)
+	 */
+	public static ReflectedMethod getStaticMethodHandleExecutor(Class<?> clazz, String methodName, Class<?> returnType, Class<?>...sig) {
+		if(returnType == null) return null;
+		
+		final MethodType type;
+		if(sig == null || sig.length == 0) {
+			type = MethodType.methodType(returnType);
+		} else {
+			type = MethodType.methodType(returnType, sig);
+		}
+		
+		final Lookup lookup = MethodHandles.lookup();
+		try {
+			final MethodHandle handle = lookup.findStatic(clazz, methodName, type);
+			return handle::invoke;
+		} catch (NoSuchMethodException | IllegalAccessException e) {
+			return null;
+		} 
 	}
 	
 	/////////////////////////////////SET FIELDS///////////////////////////////////////////////////

@@ -6,13 +6,13 @@ import lb.simplebase.reflect.UnsafeUtils;
 @FunctionalInterface
 public interface ReflectedMethod {
 
-	public Object getOrExecute(Object...params) throws Exception;
+	public Object getOrExecute(Object...params) throws Throwable;
 	
 	public default ReflectedMethodNE wrap(final Object exceptionReturnValue) {
 		return (o) -> {
 			try {
 				return getOrExecute(o);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				return exceptionReturnValue;
 			}
 		};
@@ -26,7 +26,7 @@ public interface ReflectedMethod {
 		return (o) -> {
 			try {
 				return getOrExecute(o);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
 		};
@@ -37,7 +37,7 @@ public interface ReflectedMethod {
 		return (o) -> {
 			try {
 				return getOrExecute(o);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				UnsafeUtils.throwExceptionUnchecked(e);
 				return null;
 			}
