@@ -81,7 +81,11 @@ public abstract class AbstractNetworkConnection {
 	}
 	
 	/**
-	 * packet from the socket listener thread
+	 * Called by the packet factory when a packet is completed. The packet will be
+	 * processed by the {@link NetworkManager} that was used in the constructor
+	 * and is available with {@link #getNetworkManager()}.<br>
+	 * Normally not called by application code, but can be used to simulate a received packet.
+	 * @param received The packet that was received by this connection
 	 */
 	public void handleReceivedPacket(Packet received) {
 		packetHandler.accept(received, remote);
@@ -131,13 +135,10 @@ public abstract class AbstractNetworkConnection {
 	}
 
 	/**
-	 * The {@link PacketFactory} that is used to create Packets from this connection.
-	 * @return The {@link PacketFactory} that is used to create Packets from this connection
+	 * The {@link NetworkManager} that this connection belongs to. This manager will receive incoming packets
+	 * from this connection and will be used to look up {@link PacketIdMapping}s.
+	 * @return The {@link NetworkManager} for this connection
 	 */
-//	public PacketFactory getPacketFactory() {
-//		return factory;
-//	}
-	
 	public NetworkManager getNetworkManager() {
 		return packetHandler;
 	}
@@ -145,11 +146,18 @@ public abstract class AbstractNetworkConnection {
 	///////////////////////////////////////THE STATIC METHODS BEGIN HERE/////////////////////////////////////////////////////////////////////
 	
 	//Called from the Networkmanager
- 	public static AbstractNetworkConnection createConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager manager) {
+	/**
+	 * Creates a connection and chooses the implementation depending on the {@link TargetIdentifier} type.<br>
+	 * Normally not called by application code.
+	 * @param remote The {@link TargetIdentifier} holding information about the remote partner of this connection
+	 * @param manager The {@link NetworkManager} that represents the local side of the connection
+	 * @return A {@link AbstractNetworkConnection} implementation
+	 */
+ 	public static AbstractNetworkConnection createConnection(TargetIdentifier remote, NetworkManager manager) {
 		if(remote.isLocalOnly()) {
-			return new LocalNetworkConnection(local, remote, manager);
+			return new LocalNetworkConnection(manager.getLocalID(), remote, manager);
 		} else {
-			return new RemoteNetworkConnection(local, remote, manager);
+			return new RemoteNetworkConnection(manager.getLocalID(), remote, manager);
 		}
  	}
 }

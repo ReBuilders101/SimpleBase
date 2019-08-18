@@ -36,8 +36,11 @@ public abstract class FutureState implements AsyncResult {
 			state = State.FINISHED;
 		} else {
 			Callable<Void> newTask = () -> {
-				asyncTask.accept(getAccessor());
-				taskDoneHandler();
+				try {
+					asyncTask.accept(getAccessor());
+				} finally { //Make sure that taskDoneHandler is called when an uncaught exception is thrown
+					taskDoneHandler();
+				}
 				return null;
 			};
 			state = State.IDLE;

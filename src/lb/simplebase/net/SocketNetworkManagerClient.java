@@ -22,7 +22,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	public SocketNetworkManagerClient(TargetIdentifier localId, TargetIdentifier serverId) {
 		super(localId);
 		this.serverId = serverId;
-		serverConnection = AbstractNetworkConnection.createConnection(localId, serverId, this);
+		serverConnection = AbstractNetworkConnection.createConnection(serverId, this);
 		allHandlers = new PacketDistributor();
 		handler = new InboundPacketThreadHandler(allHandlers, 0);
 	}

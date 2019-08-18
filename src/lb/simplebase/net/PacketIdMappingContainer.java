@@ -77,6 +77,10 @@ public interface PacketIdMappingContainer extends Iterable<PacketIdMapping>{
 		return getAllMappings().stream().anyMatch(PacketIdMapping.idMatcher(id));
 	}
 	
+	/**
+	 * Adds all mappings listed in an <code>enum</code> that also implements {@link PacketIdMapping}.
+	 * @param e The <code>enum</code> class
+	 */
 	public default <T extends Enum<T> & PacketIdMapping> void addMappings(Class<T> e) {
 		EnumSet<T> es = EnumSet.allOf(e);
 		for(PacketIdMapping map : es) {
@@ -84,12 +88,20 @@ public interface PacketIdMappingContainer extends Iterable<PacketIdMapping>{
 		}
 	}
 	
+	/**
+	 * Adds all mappings from another {@link PacketIdMappingContainer}.
+	 * @param con The other container
+	 */
 	public default void addAllMappings(PacketIdMappingContainer con) {
 		for(PacketIdMapping map : con) {
 			addMapping(map);
 		}
 	}
 	
+	/**
+	 * Adds a single {@link PacketIdMapping} to this container.
+	 * @param mapping The new {@link PacketIdMapping}
+	 */
 	public void addMapping(PacketIdMapping mapping);
 	
 }

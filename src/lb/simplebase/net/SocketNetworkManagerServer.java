@@ -80,7 +80,7 @@ class SocketNetworkManagerServer extends CommonServer {
 				NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
 				for(AbstractNetworkConnection con : clientList) {
 					NetworkManager.NET_LOG.debug("Closing client connection: " + con.getRemoteTargetId());
-					con.close().trySync();
+					con.close().runInSync();
 				}
 				handler.shutdownExecutor();
 				try {

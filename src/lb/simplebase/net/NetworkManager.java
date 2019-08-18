@@ -29,7 +29,7 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		NetworkManager.createNetworkParty();
 		NetworkManager.addCleanupTask(this::shutdown);
 		local = localId;
-		mappings = new HashSet<>();
+		mappings = Collections.synchronizedSet(new HashSet<>());
 	}
 
 	private final TargetIdentifier local; //every manager represents one party

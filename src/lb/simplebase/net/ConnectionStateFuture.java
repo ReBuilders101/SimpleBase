@@ -52,7 +52,7 @@ public class ConnectionStateFuture extends FailableFutureState {
 		return (ConnectionStateFuture) csf.runInSync();
 	}
 	
-	public class Accessor extends FailableAccessor{
+	public class Accessor extends FailableAccessor {
 		
 		public void setCurrentState(ConnectionState state) {
 			currentState = state;
