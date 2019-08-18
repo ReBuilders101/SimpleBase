@@ -5,7 +5,8 @@ import java.util.function.BiConsumer;
 /**
  * This interface represents an object that can receive packets.
  */
-public interface PacketReceiver extends BiConsumer<Packet, TargetIdentifier>{
+@FunctionalInterface
+public interface PacketReceiver extends BiConsumer<Packet, PacketContext>{
 
 	/**
 	 * Default implementation of the {@link BiConsumer#accept(Object, Object)} method, 
@@ -14,7 +15,7 @@ public interface PacketReceiver extends BiConsumer<Packet, TargetIdentifier>{
 	 * @param source The source that sent the packet
 	 */
 	@Override
-	public default void accept(Packet received, TargetIdentifier source) {
+	public default void accept(Packet received, PacketContext source) {
 		processPacket(received, source);
 	}
 
@@ -23,7 +24,7 @@ public interface PacketReceiver extends BiConsumer<Packet, TargetIdentifier>{
 	 * @param received The packet that should be processed by this {@link PacketReceiver}
 	 * @param source The source that sent the packet
 	 */
-	public void processPacket(Packet received, TargetIdentifier source);
+	public void processPacket(Packet received, PacketContext source);
 	
 	/**
 	 * Creates a {@link PacketReceiver} that does nothing when receiving a packet.

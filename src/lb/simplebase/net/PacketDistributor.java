@@ -73,7 +73,7 @@ public class PacketDistributor implements PacketReceiver{
 	 * @param source The source that sent the packet
 	 */
 	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
+	public void processPacket(Packet received, PacketContext source) {
 		receivers.forEach((r) -> r.processPacket(received, source));
 	}
 
@@ -103,7 +103,7 @@ public class PacketDistributor implements PacketReceiver{
 		 * @param source The source that sent the packet
 		 */
 		@Override
-		public void processPacket(Packet received, TargetIdentifier source) {
+		public void processPacket(Packet received, PacketContext source) {
 			r1.accept(received, source);
 			r2.accept(received, source);
 		}

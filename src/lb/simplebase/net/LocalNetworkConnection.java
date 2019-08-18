@@ -7,12 +7,12 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 	private LocalNetworkConnection partner = null;
 	
 	
-	public LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler) {
-		super(source, target, packetHandler, ConnectionState.UNCONNECTED);
+	public LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean isServer, Object payload) {
+		super(source, target, packetHandler, ConnectionState.UNCONNECTED, isServer, payload);
 	}
 	
-	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, LocalNetworkConnection setPartner) {
-		this(source, target, packetHandler);
+	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, LocalNetworkConnection setPartner, boolean isServer, Object payload) {
+		this(source, target, packetHandler, isServer, payload);
 		partner = setPartner;
 		setConnectionState(ConnectionState.OPEN); //The connection is open when the partner exists
 	}

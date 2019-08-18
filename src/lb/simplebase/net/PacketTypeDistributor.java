@@ -61,7 +61,7 @@ public class PacketTypeDistributor implements PacketReceiver{
 	 * @see #getDefaultReceiver()
 	 */
 	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
+	public void processPacket(Packet received, PacketContext source) {
 		PacketReceiver receiver = map.get(received.getClass()); //class of the packet implementation, not necessarily IPacket.class
 		if(receiver == null) {
 			getDefaultReceiver().processPacket(received, source); //default if no mapping is found

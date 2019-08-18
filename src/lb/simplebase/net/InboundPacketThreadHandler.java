@@ -25,7 +25,7 @@ public class InboundPacketThreadHandler implements PacketReceiver{
 	}
 	
 	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
+	public void processPacket(Packet received, PacketContext source) {
 		try {
 			threadExecutor.execute(() -> delegateThreadReceiver.processPacket(received, source));
 		} catch (RejectedExecutionException e) {

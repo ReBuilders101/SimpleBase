@@ -17,7 +17,7 @@ import lb.simplebase.reflect.ReflectionUtils;
  * The {@link NetworkManager} provides static methods to create servers and clients <br>
  * The {@link #cleanUp()} method should be called before the program exits
  */
-public abstract class NetworkManager implements PacketIdMappingContainer, PacketReceiver {
+public abstract class NetworkManager implements PacketIdMappingContainer, PacketReceiver, NetworkManagerCommon {
 	
 	public static final Logger NET_LOG = LogHelper.create("SimpleBase-NetAPI", LogLevel.DEBUG, new CurrentThreadNameFormat());
 	

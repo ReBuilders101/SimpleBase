@@ -21,6 +21,7 @@ import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.Packet;
+import lb.simplebase.net.PacketContext;
 import lb.simplebase.net.PacketIdMapping;
 import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.TargetIdentifier;
@@ -99,7 +100,7 @@ class LocalNetworkTest {
 		assertEquals(test2, assertionPacket);
 	}
 
-	void getPacket(Packet packet, TargetIdentifier source) {
+	void getPacket(Packet packet, PacketContext source) {
 //		assertEquals(assertionPacket, packet);
 		assertionPacket = packet;
 		System.out.println(source + " | " + packet);

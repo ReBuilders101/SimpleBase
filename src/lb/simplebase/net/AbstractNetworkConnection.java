@@ -22,11 +22,15 @@ public abstract class AbstractNetworkConnection {
 	protected volatile ConnectionState state; //Threadsafe for socket listener
 //	private final PacketFactory factory;
 	
-	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState) {
+	private final PacketContext context;
+	
+	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
 		this.state = initialState;
+		
+		this.context = new GenericPacketContext<>(isServer, packetHandler, this, payload);
 //		this.factory = new PacketFactory(packetHandler, this);
 	}
 
@@ -88,7 +92,7 @@ public abstract class AbstractNetworkConnection {
 	 * @param received The packet that was received by this connection
 	 */
 	public void handleReceivedPacket(Packet received) {
-		packetHandler.accept(received, remote);
+		packetHandler.accept(received, context);
 	}
 	
 	/**
@@ -153,11 +157,11 @@ public abstract class AbstractNetworkConnection {
 	 * @param manager The {@link NetworkManager} that represents the local side of the connection
 	 * @return A {@link AbstractNetworkConnection} implementation
 	 */
- 	public static AbstractNetworkConnection createConnection(TargetIdentifier remote, NetworkManager manager) {
+ 	public static AbstractNetworkConnection createConnection(TargetIdentifier remote, NetworkManager manager, boolean serverSide, Object customData) {
 		if(remote.isLocalOnly()) {
-			return new LocalNetworkConnection(manager.getLocalID(), remote, manager);
+			return new LocalNetworkConnection(manager.getLocalID(), remote, manager, serverSide, customData);
 		} else {
-			return new RemoteNetworkConnection(manager.getLocalID(), remote, manager);
+			return new RemoteNetworkConnection(manager.getLocalID(), remote, manager, serverSide, customData);
 		}
  	}
 }

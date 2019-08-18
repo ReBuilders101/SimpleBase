@@ -83,7 +83,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	}
 
 	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
+	public void processPacket(Packet received, PacketContext source) {
 		handler.processPacket(received, source);
 	}
 

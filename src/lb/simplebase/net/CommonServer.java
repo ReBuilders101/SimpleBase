@@ -190,7 +190,7 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 * @param source The remote {@link TargetIdentifier} of the connection that received the packet
 	 */
 	@Override
-	public void processPacket(Packet received, TargetIdentifier source) {
+	public void processPacket(Packet received, PacketContext source) {
 		handler.accept(received, source);
 	}
 
