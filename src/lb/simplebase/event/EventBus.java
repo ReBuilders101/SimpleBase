@@ -106,7 +106,7 @@ public class EventBus {
 	 * @param priority An {@link EventPriority} that determines when this handler will be called
 	 * @return Whether the handler was registered successfully
 	 */
-	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final AbstractEventPriority priority) {
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final EventPriority priority) {
 		return register(handler, eventType, priority, false);
 	}
 	
@@ -118,7 +118,7 @@ public class EventBus {
 	 * @param receiveCanceled Whether the handler should be called for events that have been canceled
 	 * @return Whether the handler was registered successfully
 	 */
-	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final AbstractEventPriority priority, final boolean receiveCanceled) {
+	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final EventPriority priority, final boolean receiveCanceled) {
 		if(handler == null) return false;	//Handler can't be null (obv)
 		if(isHandlerThread()) return false; //If handlers can register new handlers, this would lead to a concurrent modification exception (this is the same thread, so synchronized doesn't prevent that
 		final EventHandlerImpl eventHandler = EventHandlerFunctional.create(handler, eventType, priority, receiveCanceled);

@@ -13,10 +13,10 @@ import java.util.function.Consumer;
 abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
 	private final WeakReference<Class<? extends Event>> checkType;
-	private final AbstractEventPriority priority;
+	private final EventPriority priority;
 	private final boolean receiveCanceled;
 	
-	protected EventHandlerImpl(final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCanceled) {
+	protected EventHandlerImpl(final Class<? extends Event> checkType, final EventPriority priority, final boolean receiveCanceled) {
 		this.checkType = new WeakReference<>(checkType);
 		this.priority = priority;
 		this.receiveCanceled = receiveCanceled;
@@ -38,7 +38,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		return receiveCanceled;
 	}
 	
-	public AbstractEventPriority getPriority() {
+	public EventPriority getPriority() {
 		return priority;
 	}
 	
@@ -84,7 +84,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
 		private Method toCall;
 		
-		private EventHandlerReflection(final Method toCall, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+		private EventHandlerReflection(final Method toCall, final Class<? extends Event> checkType, final EventPriority priority, final boolean receiveCancelled) {
 			super(checkType, priority, receiveCancelled);
 			this.toCall = toCall;
 		}
@@ -98,7 +98,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 			}
 		}
 		
-		protected static EventHandlerReflection create(final Method toCall, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+		protected static EventHandlerReflection create(final Method toCall, final Class<? extends Event> checkType, final EventPriority priority, final boolean receiveCancelled) {
 			if(checkType == null || toCall == null) return null;	//Objects must not be null
 			if(priority == null) return null;
 			return new EventHandlerReflection(toCall, checkType, priority, receiveCancelled);
@@ -142,7 +142,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 
 		private Consumer<T> handler;
 		
-		private EventHandlerFunctional(final Consumer<T> handler, final Class<? extends Event> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+		private EventHandlerFunctional(final Consumer<T> handler, final Class<? extends Event> checkType, final EventPriority priority, final boolean receiveCancelled) {
 			super(checkType, priority, receiveCancelled);
 			this.handler = handler;
 		}
@@ -157,7 +157,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 			}
 		}
 		
-		public static <T extends Event> EventHandlerFunctional<T> create(final Consumer<T> toCall, final Class<T> checkType, final AbstractEventPriority priority, final boolean receiveCancelled) {
+		public static <T extends Event> EventHandlerFunctional<T> create(final Consumer<T> toCall, final Class<T> checkType, final EventPriority priority, final boolean receiveCancelled) {
 			if(checkType == null || toCall == null) return null;	//Objects must not be null
 			if(priority == null) return null;
 			return new EventHandlerFunctional<>(toCall, checkType, priority, receiveCancelled);
@@ -200,7 +200,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		private CyclicBarrier waiter;
 		private volatile boolean broken = false;
 		
-		protected EventHandlerAwaitable(Class<? extends Event> checkType, AbstractEventPriority priority) {
+		protected EventHandlerAwaitable(Class<? extends Event> checkType, EventPriority priority) {
 			super(checkType, priority, true);
 		}
 

@@ -32,7 +32,7 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return handlers.isEmpty();
 	}
 	
-	public HandlerListAwaitable awaitable(Class<? extends Event> checkType, AbstractEventPriority priority) {
+	public HandlerListAwaitable awaitable(Class<? extends Event> checkType, EventPriority priority) {
 		return new HandlerListAwaitable(new EventHandlerAwaitable(checkType, priority), this);
 	}
 	

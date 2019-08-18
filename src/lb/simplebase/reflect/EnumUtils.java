@@ -47,4 +47,12 @@ public final class EnumUtils {
 		
 		return getInstanceAlt(clazz, fullSig);
 	}
+	
+	public static <T extends Enum<T>> T getInstanceOrNull(Class<T> clazz, String name, int ordinal, Signature[] params) {
+		try {
+			return getInstance(clazz, name, ordinal, params);
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalArgumentException| InvocationTargetException e) {
+			return null;
+		}
+	}
 }
