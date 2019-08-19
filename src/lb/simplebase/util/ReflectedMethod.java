@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.reflect.UnsafeUtils;
@@ -65,6 +66,14 @@ public interface ReflectedMethod {
 			return task.call();
 		} catch(Exception e) {
 			return value;
+		}
+	}
+	
+	public static <T> T wrapException(Callable<T> task, Supplier<T> value) {
+		try {
+			return task.call();
+		} catch(Exception e) {
+			return value.get();
 		}
 	}
 	
