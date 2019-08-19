@@ -7,6 +7,7 @@ import java.net.Socket;
  * Holds information about an attempted connection while the 
  * {@link TargetIdentifier} and {@link AbstractNetworkConnection} have not been created yet.
  */
+@Deprecated
 public interface ConnectionInformation {
 
 	/**

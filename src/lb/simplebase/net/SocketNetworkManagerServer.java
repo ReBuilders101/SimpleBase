@@ -16,8 +16,8 @@ class SocketNetworkManagerServer extends CommonServer {
 		acceptor = new ConnectionAcceptorThread(serverSocket, this);
 	}
 	
-	private ServerSocket serverSocket;
-	private ConnectionAcceptorThread acceptor;
+	private final ServerSocket serverSocket;
+	private final ConnectionAcceptorThread acceptor;
 	
 	protected void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		try {

@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.util.function.BiPredicate;
 
+@Deprecated
 public class ServerConfiguration {
 
 	private ServerConfiguration()  {
