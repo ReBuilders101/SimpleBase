@@ -1,5 +1,6 @@
 package lb.simplebase.event;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ConcurrentModificationException;
@@ -9,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import lb.simplebase.event.EventHandlerImpl.EventHandlerFunctional;
-import lb.simplebase.event.EventHandlerImpl.EventHandlerReflection;
+import lb.simplebase.event.EventHandlerImpl.EventHandlerInvoke;
 
 /**
  * An EventBus is an object where events can be posted by the application, and all listeners registered
@@ -18,7 +19,7 @@ import lb.simplebase.event.EventHandlerImpl.EventHandlerReflection;
  * This basic implementation invokes all registered handlers on the same thread that the event was posted on.
  * For a concurrent implementation, see {@link AsyncEventBus}.
  */
-public class EventBus {
+public class EventBus implements EventBusRegistry{
 	
 	//TODO: A WeakHashMap could be used, but that could lead to ConcurrentModificationExceptions
 //	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
@@ -173,10 +174,15 @@ public class EventBus {
 		//Now read annotation content for craete params
 		EventHandler handlerAnno = method.getDeclaredAnnotation(EventHandler.class);
 		if(handlerAnno == null) return false;
-		@SuppressWarnings("unchecked")	//Checks have been made above
-		final EventHandlerImpl eventHandler = EventHandlerReflection.create(method, (Class<? extends Event>) param, handlerAnno.priority(), handlerAnno.receiveCancelled());
-		if(eventHandler == null) return false;
-		return registerHandler(eventHandler);
+		try {
+			@SuppressWarnings("unchecked")
+			EventHandlerImpl eventHandler = EventHandlerInvoke.create(MethodHandles.lookup().unreflect(method),
+					(Class<? extends Event>) param, handlerAnno.priority(), handlerAnno.receiveCancelled());
+			if(eventHandler == null) return false;
+			return registerHandler(eventHandler);
+		} catch (IllegalAccessException e) {
+			return false;
+		}
 	}
 	
 	//Registers an EventHandler of any implementation. Does interaction with the map and is therefor synchronized. Used by all register() methods
@@ -228,7 +234,7 @@ public class EventBus {
 	 * it is currently executing an event handler. The return value is different for every thread.
 	 * @return Whether the calling thread can currently use this event bus
 	 */
-	public boolean canInteract() {
+	public boolean canThreadInteract() {
 		return !isHandlerThread();
 	}
 	

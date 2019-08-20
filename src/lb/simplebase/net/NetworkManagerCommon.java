@@ -1,5 +1,7 @@
 package lb.simplebase.net;
 
+import lb.simplebase.event.EventBusRegistry;
+
 public interface NetworkManagerCommon extends PacketIdMappingContainer{
 	
 	/**
@@ -18,4 +20,5 @@ public interface NetworkManagerCommon extends PacketIdMappingContainer{
 	
 	public TargetIdentifier getLocalID();
 	
+	public EventBusRegistry getEventBus();
 }

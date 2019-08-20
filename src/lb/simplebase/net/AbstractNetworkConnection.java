@@ -109,14 +109,12 @@ public abstract class AbstractNetworkConnection {
 	 * Tries to make a network connection to the remote target, using the connection information
 	 * that this instance was created with.
 	 * @param timeout The maximal timeout in milliseconds
-	 * @throws ConnectionStateException When the connection could not be made
 	 */
 	public abstract ConnectionStateFuture connect(int timeout);
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
 	 * @param packet The {@link Packet} containing the data that should be sent
-	 * @throws ConnectionStateException When the {@link Packet} could not be sent
 	 */
 	public abstract PacketSendFuture sendPacketToTarget(Packet packet);
 	
@@ -147,21 +145,4 @@ public abstract class AbstractNetworkConnection {
 		return packetHandler;
 	}
 	
-	///////////////////////////////////////THE STATIC METHODS BEGIN HERE/////////////////////////////////////////////////////////////////////
-	
-	//Called from the Networkmanager
-	/**
-	 * Creates a connection and chooses the implementation depending on the {@link TargetIdentifier} type.<br>
-	 * Normally not called by application code.
-	 * @param remote The {@link TargetIdentifier} holding information about the remote partner of this connection
-	 * @param manager The {@link NetworkManager} that represents the local side of the connection
-	 * @return A {@link AbstractNetworkConnection} implementation
-	 */
- 	public static AbstractNetworkConnection createConnection(TargetIdentifier remote, NetworkManager manager, boolean serverSide, Object customData) {
-		if(remote.isLocalOnly()) {
-			return new LocalNetworkConnection(manager.getLocalID(), remote, manager, serverSide, customData);
-		} else {
-			return new RemoteNetworkConnection(manager.getLocalID(), remote, manager, serverSide, customData);
-		}
- 	}
 }

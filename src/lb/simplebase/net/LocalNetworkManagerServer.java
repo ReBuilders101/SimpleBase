@@ -2,8 +2,8 @@ package lb.simplebase.net;
 
 public class LocalNetworkManagerServer extends CommonServer {
 
-	public LocalNetworkManagerServer(TargetIdentifier localId, ServerConfiguration config) {
-		super(localId, config);
+	public LocalNetworkManagerServer(TargetIdentifier localId, int threads) {
+		super(localId, threads);
 	}
 
 	@Override

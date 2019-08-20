@@ -1,10 +1,10 @@
 package lb.simplebase.net;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import lb.simplebase.log.CurrentThreadNameFormat;
@@ -17,7 +17,7 @@ import lb.simplebase.reflect.ReflectionUtils;
  * The {@link NetworkManager} provides static methods to create servers and clients <br>
  * The {@link #cleanUp()} method should be called before the program exits
  */
-public abstract class NetworkManager implements PacketIdMappingContainer, PacketReceiver, NetworkManagerCommon {
+public abstract class NetworkManager implements PacketReceiver, NetworkManagerCommon {
 	
 	public static final Logger NET_LOG = LogHelper.create("SimpleBase-NetAPI", LogLevel.DEBUG, new CurrentThreadNameFormat());
 	
@@ -87,15 +87,23 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 		}
 	}
 	
-	public static NetworkManagerServer createServer(TargetIdentifier localId, ServerConfiguration config) {
+	public static NetworkManagerServer createServer(TargetIdentifier localId) {
+		return createServer(localId, ServerConfig.createForServer(localId));
+	}
+	
+	public static NetworkManagerServer createServer(TargetIdentifier localId, ServerConfig config) {
+		
+		Objects.requireNonNull(localId, "Server local TargetIdentifier must not be null");
+		Objects.requireNonNull(config,  "ServerConfig must not be null");
+		
 		if(localId.isLocalOnly()) {
-			return new LocalNetworkManagerServer(localId, config.copy());
+			return new LocalNetworkManagerServer(localId, config.getThreadCount());
 		} else {
-			try {
-				return new SocketNetworkManagerServer(config.copy(), localId);
-			} catch (IOException e) {
-				NET_LOG.error("Could not create SocketNetworkManagerServer", e);
+			if(config.configuredSocket() == null) {
+				NetworkManager.NET_LOG.warn("Error while creating ServerSocket");
 				return null;
+			} else {
+				return new SocketNetworkManagerServer(localId, config.configuredSocket(), config.getThreadCount());
 			}
 		}
 	}
@@ -113,7 +121,11 @@ public abstract class NetworkManager implements PacketIdMappingContainer, Packet
 	}
 	
 	public static NetworkManagerClient createClient(TargetIdentifier localId, TargetIdentifier serverId) {
-		return new SocketNetworkManagerClient(localId, serverId);
+		return new SocketNetworkManagerClient(localId, serverId, ClientConfig.forConnectionTo(serverId));
+	}
+	
+	public static NetworkManagerClient createClient(TargetIdentifier localId, TargetIdentifier serverId, ClientConfig config) {
+		return new SocketNetworkManagerClient(localId, serverId, config);
 	}
 	
 	public static Set<TargetIdentifier> getLocalServerIds() {

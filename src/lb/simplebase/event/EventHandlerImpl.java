@@ -1,5 +1,6 @@
 package lb.simplebase.event;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -135,6 +136,62 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		}
 	}
 	
+	
+	static class EventHandlerInvoke extends EventHandlerImpl {
+
+		private final MethodHandle handle;
+		
+		protected EventHandlerInvoke(final MethodHandle handle, final Class<? extends Event> checkType, final EventPriority priority,
+				final boolean receiveCanceled) {
+			super(checkType, priority, receiveCanceled);
+			this.handle = handle;
+		}
+
+		@Override
+		protected boolean isBlocking() {
+			return false;
+		}
+
+		@Override
+		protected void postEventImpl(Event instance) {
+			try {
+				handle.invokeExact(instance);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		protected static EventHandlerInvoke create(final MethodHandle toCall, final Class<? extends Event> checkType, final EventPriority priority, final boolean receiveCancelled) {
+			if(checkType == null || toCall == null || priority == null) return null;	//Objects must not be null
+			return new EventHandlerInvoke(toCall, checkType, priority, receiveCancelled);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((handle == null) ? 0 : handle.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			EventHandlerInvoke other = (EventHandlerInvoke) obj;
+			if (handle == null) {
+				if (other.handle != null)
+					return false;
+			} else if (!handle.equals(other.handle))
+				return false;
+			return true;
+		}
+		
+	}
 	
 	
 	

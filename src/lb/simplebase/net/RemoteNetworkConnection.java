@@ -10,10 +10,6 @@ class RemoteNetworkConnection extends AbstractNetworkConnection{
 	private final DataReceiverThread dataThread;
 	private final PacketFactory factory;
 	
-	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean isServer, Object payload) {
-		this(source, target, packetHandler, new Socket(), isServer, payload);
-	}
-	
 	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket, boolean isServer, Object payload) {
 		super(source, target, packetHandler, ConnectionState.fromSocket(connectedSocket), isServer, payload); //Create the state from the socket (that might be open from a server)
 		connection = connectedSocket;

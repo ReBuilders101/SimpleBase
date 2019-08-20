@@ -83,12 +83,6 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 */
 	public int getCurrentClientCount();
 	
-	/**
-	 * The {@link ServerConfiguration} that has settings for new connections.
-	 * @return The server's configuration
-	 */
-	public ServerConfiguration getConfiguration();
-	
 	public ServerStateFuture startServer();
 	public ServerStateFuture stopServer();
 	
@@ -97,10 +91,4 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 * @return The state of the server
 	 */
 	public ServerState getServerState();
-	
-	/**
-	 * Registers a listener that will be called  when a new connection is added to the client list.
-	 * @param newConnection The listener function. It will be called with the {@link TargetIdentifier} of the new connection
-	 */
-	public void addNewConnectionHandler(Consumer<TargetIdentifier> newConnection);
 }

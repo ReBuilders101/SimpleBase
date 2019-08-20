@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
+import lb.simplebase.event.EventResult;
+import lb.simplebase.util.ReflectedMethod;
 
 class SocketNetworkManagerServer extends CommonServer {
 
 	
-	protected SocketNetworkManagerServer(ServerConfiguration config, TargetIdentifier localId) throws IOException {
-		super(localId, config);
-		
-		serverSocket = new ServerSocket();
+	protected SocketNetworkManagerServer(TargetIdentifier localId, ServerSocket socket, int threads) {
+		super(localId, threads);
+		serverSocket = socket;
 		acceptor = new ConnectionAcceptorThread(serverSocket, this);
 	}
 	
@@ -20,31 +20,32 @@ class SocketNetworkManagerServer extends CommonServer {
 	private final ConnectionAcceptorThread acceptor;
 	
 	protected void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
-		try {
-			NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
-			clientListLock.writeLock().lock();
-			if(config.canAcceptConnection(this, ConnectionInformation.create(newConnectionSocket))) {
-				TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
-				
-				try {
-					newConnectionSocket.setSoTimeout(config.getTimeout());
-					newConnectionSocket.setTcpNoDelay(config.getNoDelay());
-					newConnectionSocket.setKeepAlive(config.getKeepAlive());
-				} catch (SocketException e) {
-					e.printStackTrace();
-				}
-				AbstractNetworkConnection newConn = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket);
-				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
-				onNewConnection(remote);
-				clientList.add(newConn);
-			} else {
-				NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");
+		NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
+		
+		//Post the event
+		final EventResult result = bus.post(new AttemptedConnectionEvent(newConnectionSocket.getInetAddress(), this));
+		if(ReflectedMethod.wrapException(() -> result.wasCanceled(), true)) { //TODO move the method somewhere else
+			NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");
+			try {
+				newConnectionSocket.close();
+			} catch (IOException e) {
+				NetworkManager.NET_LOG.error("Server Manager: Could not close socket of rejected connection", e);
 			}
-		}finally {
-			clientListLock.writeLock().unlock();
+		} else {
+			TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
+			final EventResult result2 = bus.post(new ConfigureConnectionEvent(newConnectionSocket, remote, this));
+			final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ReflectedMethod.wrapException(() -> result2.getHandledEvent(), result2.getCurrentEvent());
+			AbstractNetworkConnection newCon = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket, true, handledEvent.getCustomObject());
+			try {
+				clientListLock.writeLock().lock();
+				clientList.add(newCon);
+				NetworkManager.NET_LOG.info("Server Manager: Remote connection accepted successfully (" + remote + ")");
+			} finally {
+				clientListLock.writeLock().unlock();
+			}
 		}
 	}
-	
+
 
 	@Override
 	public ServerStateFuture startServer() {

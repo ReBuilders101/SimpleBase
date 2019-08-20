@@ -5,52 +5,53 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import lb.simplebase.event.EventBus;
+import lb.simplebase.event.EventBusRegistry;
+import lb.simplebase.event.EventResult;
+import lb.simplebase.util.ReflectedMethod;
 
 /**
  * Implements common behavior and features of a {@link NetworkManagerServer}.<br>
  * Should be used when a custom implementation of that interface is required.
  */
 public abstract class CommonServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer {
-
-	protected final ServerConfiguration config;
 	
 	protected final Set<AbstractNetworkConnection> clientList;
-	protected final Set<Consumer<TargetIdentifier>> newCon;
 	protected final ReadWriteLock clientListLock;
 	
 	protected final InboundPacketThreadHandler handler;
 	protected final PacketDistributor toAllHandlers;
 	
 	protected volatile ServerState state;
+	protected final EventBus bus;
 	
 	
-	protected CommonServer(TargetIdentifier localId, ServerConfiguration config) {
+	protected CommonServer(TargetIdentifier localId, int threads) {
 		super(localId);
 		
-		this.config = config;
 		this.state = ServerState.INITIALIZED;
+		this.bus = EventBus.create();
 		
 		this.clientList = new HashSet<>();
-		this.newCon = new HashSet<>();
 		this.clientListLock = new ReentrantReadWriteLock(true);
 		
 		this.toAllHandlers = new PacketDistributor();
-		this.handler = new InboundPacketThreadHandler(toAllHandlers, config.getHandlerThreadCount());
+		this.handler = new InboundPacketThreadHandler(toAllHandlers, threads);
 	}
 	
 	/**
-	 * Registers a listener that will be called  when a new connection is added to the client list.
-	 * @param newConnection The listener function. It will be called with the {@link TargetIdentifier} of the new connection
+	 * Event listeners for this Server can be registered here.<p>
+	 * Supported events:<ul>
+	 * <li> {@link AttemptedConnectionEvent} </li>
+	 * <li> {@link ConfigureConnectionEvent} </li>
+	 * </ul>
+	 * </p>
 	 */
 	@Override
-	public void addNewConnectionHandler(Consumer<TargetIdentifier> newConnection) {
-		newCon.add(newConnection);
-	}
-	
-	protected void onNewConnection(TargetIdentifier target) {
-		newCon.forEach((c) -> c.accept(target)); 
+	public EventBusRegistry getEventBus() {
+		return bus;
 	}
 	
 	@Override
@@ -71,7 +72,9 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 */
 	@Override
 	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
-		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection);
+		final EventResult result = bus.post(new ConfigureConnectionEvent(connection.getLocalTargetId(), this));
+		final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ReflectedMethod.wrapException(() -> result.getHandledEvent(), result.getCurrentEvent());
+		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection, true, handledEvent.getCustomObject());
 		try {
 			clientListLock.writeLock().lock();
 			clientList.add(con);
@@ -80,15 +83,6 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		}
 		NetworkManager.NET_LOG.info("Server Manager: Accepted local connection (" + connection.getLocalTargetId() +")");
 		return con;
-	}
-	
-	/**
-	 * The {@link ServerConfiguration} that has settings for new connections.
-	 * @return The server's configuration
-	 */
-	@Override
-	public ServerConfiguration getConfiguration() {
-		return config;
 	}
 	
 	/**

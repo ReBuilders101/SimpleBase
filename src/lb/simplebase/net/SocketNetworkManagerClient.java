@@ -1,5 +1,10 @@
 package lb.simplebase.net;
 
+import java.util.Objects;
+
+import lb.simplebase.event.EventBus;
+import lb.simplebase.event.EventBusRegistry;
+
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
@@ -7,24 +12,37 @@ package lb.simplebase.net;
 @ClientSide
 class SocketNetworkManagerClient extends NetworkManager implements NetworkManagerClient{
 
-	private final AbstractNetworkConnection serverConnection;
+	private final AbstractNetworkConnection serverConnection; 
 	private final TargetIdentifier serverId;
 	
 	private final PacketDistributor allHandlers;
 	private final InboundPacketThreadHandler handler;
 	
+	private final EventBus bus;
+	
 	/**
 	 * 
-	 * @param threadReceiver The {@link PacketReceiver} that will receive incoming {@link Packet}s from all clients on a separate {@link Thread}
 	 * @param localId The {@link TargetIdentifier} of the network target represented by this {@link SocketNetworkManagerClient}
 	 * @param serverId The {@link TargetIdentifier} of the server that the client should connect to
+	 * @param config Options for this client
 	 */
-	public SocketNetworkManagerClient(TargetIdentifier localId, TargetIdentifier serverId) {
+	protected SocketNetworkManagerClient(TargetIdentifier localId, TargetIdentifier serverId, ClientConfig config) {
 		super(localId);
+		
+		Objects.requireNonNull(localId,  "Local TargetIdentifier must not be null");
+		Objects.requireNonNull(serverId, "Server TargetIdentifier must not be null");
+		Objects.requireNonNull(config,   "ClientConfig must not be null");
+		
 		this.serverId = serverId;
-		serverConnection = AbstractNetworkConnection.createConnection(serverId, this);
 		allHandlers = new PacketDistributor();
 		handler = new InboundPacketThreadHandler(allHandlers, 0);
+		bus = EventBus.create();
+		
+		if(serverId.isLocalOnly()) {
+			serverConnection = new LocalNetworkConnection(localId, serverId, this, false, config.getCustomObject());
+		} else {
+			serverConnection = new RemoteNetworkConnection(localId, serverId, this, config.configuredSocket(), false, config.getCustomObject());
+		}
 	}
 	
 	/**
@@ -98,6 +116,11 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	@Override
 	public void onConnectionClosed(Runnable task) {
 		onClose = task;
+	}
+
+	@Override
+	public EventBusRegistry getEventBus() {
+		return bus;
 	}
 
 }

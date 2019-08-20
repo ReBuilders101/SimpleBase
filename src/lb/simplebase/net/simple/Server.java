@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import lb.simplebase.net.ConfigureConnectionEvent;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.TargetIdentifier;
 
 public abstract class Server extends ReceiveSide {
