@@ -1,11 +1,11 @@
 package lb.simplebase.net;
 
-import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 /**
- * A simple filter that can be used in a {@link ServerConfiguration} to limit the amount of clients on the server
+ * A simple filter that can be used as a listener for the {@link AttemptedConnectionEvent} to limit the amount of clients on the server
  */
-public class ConnectionCountFilter implements BiPredicate<NetworkManagerServer, ConnectionInformation>{
+public class ConnectionCountFilter implements Consumer<AttemptedConnectionEvent>{
 
 	private int connectionLimit;
 	
@@ -15,17 +15,6 @@ public class ConnectionCountFilter implements BiPredicate<NetworkManagerServer, 
 	 */
 	public ConnectionCountFilter(int connectionLimit) {
 		this.connectionLimit = connectionLimit;
-	}
-	
-	/**
-	 * The method used to check whether a connection should be accepted.
-	 * Gets called by the {@link NetworkManagerServer} when a new connection is attempted.
-	 * @param server The {@link NetworkManagerServer} that calls this method.
-	 * @param info A {@link ConnectionInformation} object with information about the attempted connection. For {@link ConnectionCountFilter}, this may be <code>null</code>
-	 */
-	@Override
-	public boolean test(NetworkManagerServer var1, ConnectionInformation var2) {
-		return var1.getCurrentClientCount() < connectionLimit;
 	}
 	
 	/**
@@ -42,6 +31,11 @@ public class ConnectionCountFilter implements BiPredicate<NetworkManagerServer, 
 	 */
 	public int getConnectionLimit() {
 		return connectionLimit;
+	}
+
+	@Override
+	public void accept(AttemptedConnectionEvent var1) {
+		if(var1.getServerManager().getCurrentClientCount() >= connectionLimit) var1.tryCancel();
 	}
 
 }

@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 /**
- * A simple filter that can be used in a {@link ServerConfiguration} to prevent certain ips, represented by {@link InetAddress}es,
+ * A simple filter that can be used as a listener for the {@link AttemptedConnectionEvent} to prevent certain ips, represented by {@link InetAddress}es,
  * form making a connection to the server. 
  */
-public class BannedIpFilter implements BiPredicate<NetworkManagerServer, ConnectionInformation>, Iterable<InetAddress>{
+public class BannedIpFilter implements Consumer<AttemptedConnectionEvent>, Iterable<InetAddress>{
 
 	private final Set<InetAddress> bannedIps;
 	
@@ -60,15 +60,9 @@ public class BannedIpFilter implements BiPredicate<NetworkManagerServer, Connect
 		return bannedIps.iterator();
 	}
 
-	/**
-	 * The method used to check whether a connection should be accepted.
-	 * Gets called by the {@link NetworkManagerServer} when a new connection is attempted.
-	 * @param server The {@link NetworkManagerServer} that calls this method. For a {@link BannedIpFilter}, this parameter may be <code>null</code>
-	 * @param info A {@link ConnectionInformation} object with information about the attempted connection
-	 */
 	@Override
-	public boolean test(NetworkManagerServer server, ConnectionInformation info) {
-		return !bannedIps.contains(info.getAddress());
+	public void accept(AttemptedConnectionEvent var1) {
+		if(bannedIps.contains(var1.getRemoteConnectionAddress())) var1.tryCancel();
 	}
 
 }
