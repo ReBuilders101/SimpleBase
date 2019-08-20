@@ -15,6 +15,8 @@ public abstract class PacketContext {
 		Objects.requireNonNull(manager, "Network manager must not be null");
 		Objects.requireNonNull(connection, "Network connection must not be null");
 		
+		if(!GenericPacketContext.class.isAssignableFrom(getClass())) throw new RuntimeException("All PacketContext implementations must extend GenericPacketContext");
+		
 		if(isServer) {
 			if(!(manager instanceof NetworkManagerServer)) throw new IllegalArgumentException("When PacketContext represents server side, the manager must implement NetworkManagerServer");
 		} else {

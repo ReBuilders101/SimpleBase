@@ -17,8 +17,8 @@ import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.Packet;
+import lb.simplebase.net.PacketContext;
 import lb.simplebase.net.PacketIdMapping;
-import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.ServerState;
 import lb.simplebase.net.TargetIdentifier;
 
@@ -48,7 +48,7 @@ class NetworkTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		serverManager = NetworkManager.createServer(server, ServerConfiguration.create());
+		serverManager = NetworkManager.createServer(server);
 		serverManager.addIncomingPacketHandler(this::getPacket);
 		clientManager = NetworkManager.createClient(clientFromClient, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);
@@ -109,7 +109,7 @@ class NetworkTest {
 		System.out.println("test");
 	}
 
-	void getPacket(Packet packet, TargetIdentifier source) {
+	void getPacket(Packet packet, PacketContext source) {
 //		assertEquals(assertionPacket, packet);
 		System.out.println("Received");
 		assertionPacket = packet;

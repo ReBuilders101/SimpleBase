@@ -45,7 +45,6 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 */
 	public ConnectionStateFuture closeConnectionToServer();
 	
-	public void onConnectionClosed(Runnable task);
 	
 	/**
 	 * @return The {@link TargetIdentifier} for the server that this client connects to

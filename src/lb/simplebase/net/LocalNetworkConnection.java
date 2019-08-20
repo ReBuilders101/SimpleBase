@@ -2,6 +2,8 @@ package lb.simplebase.net;
 
 import java.util.concurrent.TimeoutException;
 
+import lb.simplebase.net.ClosedConnectionEvent.Cause;
+
 public class LocalNetworkConnection extends AbstractNetworkConnection{
 
 	private LocalNetworkConnection partner = null;
@@ -63,7 +65,7 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 
 	@Override
 	public ConnectionStateFuture close() {
-		ConnectionStateFuture superFuture = super.close();
+		ConnectionStateFuture superFuture = super.close(); //Uses EXPECTED reason
 		if(partner != null) //If it was even connected
 			partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
 		return ConnectionStateFuture.quickDone(superFuture.getOldState(), getState());
@@ -73,7 +75,7 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 	 * Close connection without notifying Partner
 	 */
 	protected void closeNoNotify() {
-		super.close(); //NOT this.close() !!!
+		super.closeWithReason(Cause.REMOTE); //NOT this.close() !!! //Closed by peer
 	}
 	
 }

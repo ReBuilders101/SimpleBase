@@ -7,8 +7,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-import lb.simplebase.event.EventBus;
-import lb.simplebase.event.EventBusRegistry;
 import lb.simplebase.event.EventResult;
 import lb.simplebase.util.ReflectedMethod;
 
@@ -25,14 +23,12 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	protected final PacketDistributor toAllHandlers;
 	
 	protected volatile ServerState state;
-	protected final EventBus bus;
 	
 	
 	protected CommonServer(TargetIdentifier localId, int threads) {
 		super(localId);
 		
 		this.state = ServerState.INITIALIZED;
-		this.bus = EventBus.create();
 		
 		this.clientList = new HashSet<>();
 		this.clientListLock = new ReentrantReadWriteLock(true);
@@ -41,21 +37,10 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		this.handler = new InboundPacketThreadHandler(toAllHandlers, threads);
 	}
 	
-	/**
-	 * Event listeners for this Server can be registered here.<p>
-	 * Supported events:<ul>
-	 * <li> {@link AttemptedConnectionEvent} </li>
-	 * <li> {@link ConfigureConnectionEvent} </li>
-	 * </ul>
-	 * </p>
-	 */
-	@Override
-	public EventBusRegistry getEventBus() {
-		return bus;
-	}
 	
 	@Override
-	protected void notifyConnectionClosed(AbstractNetworkConnection connection) {
+	protected void notifyConnectionClosed(AbstractNetworkConnection connection, ClosedConnectionEvent.Cause cause) {
+		super.notifyConnectionClosed(connection, cause);
 		try {
 			clientListLock.writeLock().lock();
 			clientList.remove(connection);

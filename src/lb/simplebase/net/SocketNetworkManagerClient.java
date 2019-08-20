@@ -2,9 +2,6 @@ package lb.simplebase.net;
 
 import java.util.Objects;
 
-import lb.simplebase.event.EventBus;
-import lb.simplebase.event.EventBusRegistry;
-
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
@@ -17,8 +14,6 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	
 	private final PacketDistributor allHandlers;
 	private final InboundPacketThreadHandler handler;
-	
-	private final EventBus bus;
 	
 	/**
 	 * 
@@ -36,7 +31,6 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 		this.serverId = serverId;
 		allHandlers = new PacketDistributor();
 		handler = new InboundPacketThreadHandler(allHandlers, 0);
-		bus = EventBus.create();
 		
 		if(serverId.isLocalOnly()) {
 			serverConnection = new LocalNetworkConnection(localId, serverId, this, false, config.getCustomObject());
@@ -74,11 +68,6 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	}
 
 	@Override
-	public void notifyConnectionClosed(AbstractNetworkConnection connection) {
-		if(onClose != null) onClose.run();
-	}
-
-	@Override
 	public ConnectionState getConnectionState() {
 		return serverConnection.getState();
 	}
@@ -109,18 +98,6 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	protected void shutdown() {
 		closeConnectionToServer();
 		handler.shutdownExecutor();
-	}
-
-	private Runnable onClose;
-	
-	@Override
-	public void onConnectionClosed(Runnable task) {
-		onClose = task;
-	}
-
-	@Override
-	public EventBusRegistry getEventBus() {
-		return bus;
 	}
 
 }

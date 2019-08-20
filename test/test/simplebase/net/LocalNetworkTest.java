@@ -23,7 +23,6 @@ import lb.simplebase.net.NetworkManagerServer;
 import lb.simplebase.net.Packet;
 import lb.simplebase.net.PacketContext;
 import lb.simplebase.net.PacketIdMapping;
-import lb.simplebase.net.ServerConfiguration;
 import lb.simplebase.net.TargetIdentifier;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -52,7 +51,7 @@ class LocalNetworkTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		serverManager = NetworkManager.createServer(server, ServerConfiguration.create());
+		serverManager = NetworkManager.createServer(server);
 		serverManager.addIncomingPacketHandler(this::getPacket);
 		clientManager = NetworkManager.createClient(client, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);

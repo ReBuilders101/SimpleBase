@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import lb.simplebase.event.EventBus;
+import lb.simplebase.event.EventBusRegistry;
 import lb.simplebase.log.CurrentThreadNameFormat;
 import lb.simplebase.log.LogHelper;
 import lb.simplebase.log.LogLevel;
@@ -24,12 +26,19 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	private static final List<Runnable> cleanupTasks = new ArrayList<>();
 	
 	private final Set<PacketIdMapping> mappings;
+	protected final EventBus bus;
 	
 	protected NetworkManager(TargetIdentifier localId) {
 		NetworkManager.createNetworkParty();
 		NetworkManager.addCleanupTask(this::shutdown);
 		local = localId;
 		mappings = Collections.synchronizedSet(new HashSet<>());
+		this.bus = EventBus.create();
+	}
+
+	@Override
+	public EventBusRegistry getEventBus() {
+		return bus;
 	}
 
 	private final TargetIdentifier local; //every manager represents one party
@@ -38,7 +47,9 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 		return local;
 	}
 	
-	protected abstract void notifyConnectionClosed(AbstractNetworkConnection connection);
+	protected void notifyConnectionClosed(AbstractNetworkConnection connection, ClosedConnectionEvent.Cause cause) {
+		bus.post(new ClosedConnectionEvent(connection, cause));
+	}
 
 	protected abstract void shutdown();
 	

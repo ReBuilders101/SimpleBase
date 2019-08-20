@@ -3,8 +3,10 @@ package lb.simplebase.net;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import lb.simplebase.net.ClosedConnectionEvent.Cause;
+
 /**
- * A {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>
+ * An {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>
  * It contains the {@link TargetIdentifier} of the connection partner and the own {@link TargetIdentifier}.
  * It provides methods to send packets to the remote partner and accepts received {@link Packet}s, which are sent
  * to a connected {@link NetworkManager} after being constructed by a {@link PacketFactory}.<p>
@@ -70,10 +72,14 @@ public abstract class AbstractNetworkConnection {
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
-	public synchronized ConnectionStateFuture close() {
+	public ConnectionStateFuture close() {
+		return closeWithReason(Cause.EXPECTED);
+	}
+	
+	protected synchronized ConnectionStateFuture closeWithReason(ClosedConnectionEvent.Cause cause) {
 		ConnectionState oldState = state;
 		state = ConnectionState.CLOSED;
-		packetHandler.notifyConnectionClosed(this);
+		packetHandler.notifyConnectionClosed(this, cause);
 		return ConnectionStateFuture.quickDone(oldState, state);
 	}
 	
@@ -143,6 +149,10 @@ public abstract class AbstractNetworkConnection {
 	 */
 	public NetworkManager getNetworkManager() {
 		return packetHandler;
+	}
+	
+	protected PacketContext getContext() {
+		return context;
 	}
 	
 }
