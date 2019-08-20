@@ -119,12 +119,12 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 		}
 	}
 	
-	public static void fixLogLevel(LogLevel level) {
+	public static void setLogLevel(LogLevel level) {
 		ReflectionUtils.setDeclaredField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, LogLevel.WARN);
 	}
 	
-	public static void fixLogLevel() {
-		fixLogLevel(LogLevel.WARN);
+	public static void setAsyncMode(boolean enabled) {
+		FutureState.RUN_ASYNC = enabled;
 	}
 	
 	public static ClientNetworkSession createMultiClient(TargetIdentifier localId) {
