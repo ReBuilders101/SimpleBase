@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.reflect.UnsafeUtils;
 
+@Deprecated
 @FunctionalInterface
 public interface ReflectedMethod {
 

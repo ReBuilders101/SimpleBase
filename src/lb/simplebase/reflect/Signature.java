@@ -7,6 +7,7 @@ package lb.simplebase.reflect;
  * If an array of signatures is required, most of the time one of the static helper
  * methods can be used instead of creating a new array.
  */
+@Deprecated
 public class Signature {
 
 	private Object value;

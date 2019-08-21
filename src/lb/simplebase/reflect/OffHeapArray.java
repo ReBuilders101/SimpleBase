@@ -14,6 +14,7 @@ import lb.simplebase.core.RequireUndocumented;
  * Implementation mainly taken from <a href="https://www.baeldung.com/java-unsafe">https://www.baeldung.com/java-unsafe</a>
  * @param <T> The element type
  */
+@Deprecated
 @RequireUndocumented("sun.misc.Unsafe")
 public final class OffHeapArray<T> extends AllocatedMemory implements Iterable<T>{
 

@@ -26,7 +26,7 @@ public final class EnumUtils {
 	@SuppressWarnings("unchecked")
 	public static <T extends Enum<T>> T getInstanceAlt(Class<T> clazz, Signature[] params) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalArgumentException, InvocationTargetException {
 		Constructor<T> constructor = clazz.getDeclaredConstructor(Signature.createTypeArray(params));
-		ConstructorAccessor accessor = ReflectionUtils.executeDeclaredMethod(Constructor.class, "acquireConstructorAccessor",
+		ConstructorAccessor accessor = OldReflectionUtils.executeDeclaredMethod(Constructor.class, "acquireConstructorAccessor",
 				constructor, ConstructorAccessor.class, Signature.empty());
 		return (T) accessor.newInstance(Signature.createValueArray(params));
 	}

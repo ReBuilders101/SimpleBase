@@ -16,7 +16,7 @@ public final class UnsafeUtils {
 	private static boolean errorFlag;
 	
 	static {
-		UNSAFE = ReflectionUtils.getStaticField(Unsafe.class, "theUnsafe", Unsafe.class);
+		UNSAFE = OldReflectionUtils.getStaticField(Unsafe.class, "theUnsafe", Unsafe.class);
 		errorFlag = UNSAFE == null;	
 	}
 	

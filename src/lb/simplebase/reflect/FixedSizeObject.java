@@ -10,6 +10,7 @@ import sun.misc.Unsafe;
  * Instances are available for all primitive types as static fields.
  * @param <T> The type that is represented by this {@link FixedSizeObject} instance
  */
+@Deprecated
 public final class FixedSizeObject<T> {
 	
 	/**

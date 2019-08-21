@@ -10,6 +10,7 @@ import sun.misc.Unsafe;
  * <p>
  * <b>To avoid memory leaks, {@link #freeMemory()} must be called on every instance before the program terminates.</b>
  */
+@Deprecated
 @RequireUndocumented("sun.misc.Unsafe")
 public class AllocatedMemory {
 	

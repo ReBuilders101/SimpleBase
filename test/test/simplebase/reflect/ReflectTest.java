@@ -8,7 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.reflect.ReflectionUtils;
+import lb.simplebase.reflect.OldReflectionUtils;
 import lb.simplebase.reflect.Signature;
 import lb.simplebase.util.ReflectedMethodNE;
 
@@ -40,13 +40,13 @@ class ReflectTest {
 
 	@Test
 	void readTest() {
-		int refPriv = ReflectionUtils.getDeclaredField(TestClass.class, "priv1", test, int.class);
+		int refPriv = OldReflectionUtils.getDeclaredField(TestClass.class, "priv1", test, int.class);
 		assertEquals(priv1, refPriv);
-		int refPub = ReflectionUtils.getField(TestClass.class, "pub1", test, int.class);
+		int refPub = OldReflectionUtils.getField(TestClass.class, "pub1", test, int.class);
 		assertEquals(test.pub1, refPub);
-		String result = ReflectionUtils.executeDeclaredMethod(TestClass.class, "getTestString", test, String.class, Signature.empty());
+		String result = OldReflectionUtils.executeDeclaredMethod(TestClass.class, "getTestString", test, String.class, Signature.empty());
 		assertEquals(ret1, result);
-		ReflectedMethodNE testMethod = ReflectionUtils.getStaticMethodExecutor(TestClass.class, "calc", int.class, int.class).wrapNull();
+		ReflectedMethodNE testMethod = OldReflectionUtils.getStaticMethodExecutor(TestClass.class, "calc", int.class, int.class).wrapNull();
 		assertNotNull(testMethod);
 		int a = random.nextInt(1000);
 		int b = random.nextInt(1000);
@@ -54,7 +54,7 @@ class ReflectTest {
 		int res1 = a * b;
 		int res2 = a - b + c;
 		assertEquals(res1, testMethod.getOrExecute(a, b));
-		int refRes2 = ReflectionUtils.executeStaticMethod(TestClass.class, "calc", int.class, Signature.allOf(int.class, a, b, c));
+		int refRes2 = OldReflectionUtils.executeStaticMethod(TestClass.class, "calc", int.class, Signature.allOf(int.class, a, b, c));
 		assertEquals(res2, refRes2);
 	}
 

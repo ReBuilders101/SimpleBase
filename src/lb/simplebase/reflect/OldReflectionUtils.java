@@ -15,14 +15,15 @@ import lb.simplebase.util.ReflectedMethod;
 /**
  * Contains static utility methods for reflection. 
  */
-public final class ReflectionUtils {
+@Deprecated
+public final class OldReflectionUtils {
 	
 	/**
 	 * Empty method parameter list
 	 */
 	public static final Class<?>[] EMPTY = new Class<?>[]{};
 
-	private ReflectionUtils() {}
+	private OldReflectionUtils() {}
 	
 	/**
 	 * Returns the content of a field. The field can be declared in the class in the <i>clazz</i> parameter,

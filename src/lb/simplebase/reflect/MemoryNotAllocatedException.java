@@ -4,6 +4,7 @@ package lb.simplebase.reflect;
  * This exception is thrown when a memory region is accessed through an {@link AllocatedMemory} instance
  * that is no longer allocated.
  */
+@Deprecated
 public class MemoryNotAllocatedException extends RuntimeException{
 
 	private static final long serialVersionUID = 7428856765309235613L;
