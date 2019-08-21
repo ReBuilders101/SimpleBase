@@ -34,6 +34,10 @@ public class Parameters {
 		return values;
 	}
 	
+	protected int getLength() {
+		return types.length;
+	}
+	
 	/**
 	 * Creates a new {@link Parameters} that represents a method or constructor with no parameters
 	 * @return The empty method signature

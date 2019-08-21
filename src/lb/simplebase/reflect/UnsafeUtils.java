@@ -16,7 +16,7 @@ public final class UnsafeUtils {
 	private static boolean errorFlag;
 	
 	static {
-		UNSAFE = OldReflectionUtils.getStaticField(Unsafe.class, "theUnsafe", Unsafe.class);
+		UNSAFE = QuickReflectionUtils.Fields.getStaticField(Unsafe.class, "theUnsafe", Unsafe.class);
 		errorFlag = UNSAFE == null;	
 	}
 	
@@ -84,10 +84,11 @@ public final class UnsafeUtils {
 	 * @param type The {@link FixedSizeObject} that describes the type of the array's elements.
 	 * @return The created {@link OffHeapArray}
 	 */
+	@Deprecated
 	public static <T> OffHeapArray<T> createOffHeapArray(long size, FixedSizeObject<T> type) {
 		long allocSize = size * type.getSize();
 		long pointer = UNSAFE.allocateMemory(allocSize); //Allocates size bytes
-		return new OffHeapArray<T>(pointer, allocSize, size, type);
+		return new OffHeapArray<>(pointer, allocSize, size, type);
 	}
 	
 	/**
@@ -99,6 +100,7 @@ public final class UnsafeUtils {
 	 * @param byteSize The size of the memory region in bytes
 	 * @return The allocated memory region
 	 */
+	@Deprecated
 	public static AllocatedMemory allocateMemory(long byteSize) {
 		long address = UNSAFE.allocateMemory(byteSize);
 		return new AllocatedMemory(address, byteSize);
@@ -110,6 +112,7 @@ public final class UnsafeUtils {
 	 * It only exists here so both memory allocation and freeing of memory are in the same place.
 	 * @param memory The {@link AllocatedMemory} that should be freed
 	 */
+	@Deprecated
 	public static void freeMemory(AllocatedMemory memory) {
 		memory.freeMemory();
 	}

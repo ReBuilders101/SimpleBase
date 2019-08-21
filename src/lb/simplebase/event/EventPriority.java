@@ -5,7 +5,7 @@ import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import lb.simplebase.reflect.EnumUtils;
-import lb.simplebase.reflect.Signature;
+import lb.simplebase.reflect.Parameters;
 
 /**
  * Priority with which an event handler will be called.
@@ -45,9 +45,9 @@ public enum EventPriority {
 	private static AtomicInteger ordinal = new AtomicInteger(5);
 	
 	public static EventPriority createCustom(final int ranking) {
-		return EnumUtils.getInstanceOrNull(EventPriority.class,
+		return EnumUtils.getInstance(EventPriority.class,
 				"Custom-Priority-" + ordinal + "-Rank-" + ranking,
-				ordinal.getAndIncrement(), Signature.of(ranking, int.class));
+				ordinal.getAndIncrement(), Parameters.of(int.class, ranking));
 	}
 
 }

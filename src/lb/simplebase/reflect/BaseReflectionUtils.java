@@ -71,6 +71,18 @@ public final class BaseReflectionUtils {
 	}
 	
 	/**
+	 * Tries to find a {@link Constructor} of any visiblity in the class parameter.
+	 * The returned constructor will be accessible.
+	 * @param <T> The type of the class and the returned constructor
+	 * @param declaringClass The class that contains the constructor
+	 * @param signature The parameter types of the constructor
+	 * @return The {@link Constructor} that represents the constructor, or {@code null} if the constructor was not found
+	 */
+	public static <T> Constructor<T> getConstructor(final Class<T> declaringClass, final Parameters signature) {
+		return INSTANCE.getConstructor(declaringClass, signature.getTypeArray());
+	}
+	
+	/**
 	 * After this method was called, all reflection operations in this package will run as privileged actions with all premissions of the
 	 * library protection domain.<br>Requires the {@code RuntimePermission("accessDeclaredMembers")} and {@code ReflectPermission("suppressAccessChecks")}.
 	 * @throws AccessControlException If the required permission was denied

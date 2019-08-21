@@ -13,7 +13,7 @@ import lb.simplebase.log.CurrentThreadNameFormat;
 import lb.simplebase.log.LogHelper;
 import lb.simplebase.log.LogLevel;
 import lb.simplebase.log.Logger;
-import lb.simplebase.reflect.OldReflectionUtils;
+import lb.simplebase.reflect.QuickReflectionUtils;
 
 /**
  * The {@link NetworkManager} provides static methods to create servers and clients <br>
@@ -120,7 +120,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static void setLogLevel(LogLevel level) {
-		OldReflectionUtils.setDeclaredField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, LogLevel.WARN);
+		QuickReflectionUtils.Fields.setField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, LogLevel.WARN);
 	}
 	
 	public static void setAsyncMode(boolean enabled) {
