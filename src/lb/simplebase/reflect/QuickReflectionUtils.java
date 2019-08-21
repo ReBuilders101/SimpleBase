@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import lb.simplebase.core.RequireUndocumented;
 import lb.simplebase.util.Validate;
+import sun.reflect.ConstructorAccessor;
 
 /**
  * Utility Methods to quickly get / set fields and invoke methods without throwing exceptions.<br>
@@ -197,6 +198,9 @@ public final class QuickReflectionUtils {
 		
 	}
 
+	/**
+	 * Utility Methods that execute methods using reflection
+	 */
 	public static final class Methods {
 		
 		//NOT TYPED
@@ -347,6 +351,9 @@ public final class QuickReflectionUtils {
 
 	}
 	
+	/**
+	 * Utility Methods that create new instances using reflection
+	 */
 	public static class Constructors {
 		
 		@SuppressWarnings("unchecked")
@@ -364,6 +371,20 @@ public final class QuickReflectionUtils {
 			}
 		}
 		
+		@SuppressWarnings("unchecked")
+		public static <T> T constructObjectUnchecked(final Class<T> declaringClass, Parameters params) {
+			Constructor<T> constructor = BaseReflectionUtils.getConstructor(declaringClass, params);
+			if(constructor == null) return null;
+			ConstructorAccessor accessor = QuickReflectionUtils.Methods.executeMethod(Constructor.class, "acquireConstructorAccessor",
+					constructor, Parameters.empty(), ConstructorAccessor.class);
+			if(accessor == null) return null;
+			try {
+				return (T) accessor.newInstance(params.getValueArray());
+			} catch (InstantiationException | IllegalArgumentException | InvocationTargetException e) {
+				return null;
+			}
+		}
+		
 		@RequireUndocumented("sun.misc.unsafe")
 		public static <T> T constructUninitializedObject(final Class<T> declaringClass) {
 			return UnsafeUtils.getInstanceWithoutConstructor(declaringClass);
@@ -371,7 +392,4 @@ public final class QuickReflectionUtils {
 		
 	}
 	
-	public static class Invoke {
-		
-	}
 }
