@@ -10,12 +10,12 @@ import lb.simplebase.net.ClosedConnectionEvent.Cause;
 class DataReceiverThread extends Thread {
 
 	private final Socket socket;
-	private final AbstractNetworkConnection connection;
+	private final NetworkConnection connection;
 	private final PacketFactory factory;
 	
 	private static final AtomicInteger threadId = new AtomicInteger(0);
 	
-	public DataReceiverThread(Socket socket, PacketFactory factory, AbstractNetworkConnection connection) {
+	public DataReceiverThread(Socket socket, PacketFactory factory, NetworkConnection connection) {
 		this.socket = socket;
 		this.connection = connection;
 		this.factory = factory;

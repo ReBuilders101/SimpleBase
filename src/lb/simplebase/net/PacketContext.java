@@ -6,12 +6,12 @@ public abstract class PacketContext {
 
 	private final boolean isServer;
 	private final NetworkManagerCommon manager;
-	private final AbstractNetworkConnection connection;
+	private final NetworkConnection connection;
 	
 	private final Object payload;
 	
 	
-	protected PacketContext(boolean isServer, NetworkManagerCommon manager, AbstractNetworkConnection connection, Object payload) {
+	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
 		Objects.requireNonNull(manager, "Network manager must not be null");
 		Objects.requireNonNull(connection, "Network connection must not be null");
 		
@@ -67,7 +67,7 @@ public abstract class PacketContext {
 		return payload != null;
 	}
 	
-	public AbstractNetworkConnection getConnection() {
+	public NetworkConnection getConnection() {
 		return connection;
 	}
 	

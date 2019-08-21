@@ -2,7 +2,7 @@ package lb.simplebase.net;
 
 public class GenericPacketContext<T> extends PacketContext {
 
-	protected GenericPacketContext(boolean isServer, NetworkManagerCommon manager, AbstractNetworkConnection connection, T payload) {
+	protected GenericPacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, T payload) {
 		super(isServer, manager, connection, payload);
 	}
 	

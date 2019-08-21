@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-class RemoteNetworkConnection extends AbstractNetworkConnection{
+class RemoteNetworkConnection extends NetworkConnection{
 
 	private final Socket connection;
 	private final DataReceiverThread dataThread;

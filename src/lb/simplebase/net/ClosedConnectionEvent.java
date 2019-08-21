@@ -7,7 +7,7 @@ import lb.simplebase.event.Event;
 
 public final class ClosedConnectionEvent extends Event {
 
-	protected ClosedConnectionEvent(AbstractNetworkConnection connection, Cause cause) {
+	protected ClosedConnectionEvent(NetworkConnection connection, Cause cause) {
 		super(false);
 		connectionContext = connection.getContext();
 		this.remoteClosed = cause;

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeoutException;
 
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
-public class LocalNetworkConnection extends AbstractNetworkConnection{
+public class LocalNetworkConnection extends NetworkConnection{
 
 	private LocalNetworkConnection partner = null;
 	
@@ -54,7 +54,7 @@ public class LocalNetworkConnection extends AbstractNetworkConnection{
 		}
 	}
 
-	protected AbstractNetworkConnection getPartner() {
+	protected NetworkConnection getPartner() {
 		return partner;
 	}
 

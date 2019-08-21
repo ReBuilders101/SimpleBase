@@ -47,7 +47,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 		return local;
 	}
 	
-	protected void notifyConnectionClosed(AbstractNetworkConnection connection, ClosedConnectionEvent.Cause cause) {
+	protected void notifyConnectionClosed(NetworkConnection connection, ClosedConnectionEvent.Cause cause) {
 		bus.post(new ClosedConnectionEvent(connection, cause));
 	}
 

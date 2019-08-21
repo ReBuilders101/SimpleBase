@@ -6,16 +6,16 @@ import java.net.Socket;
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
 /**
- * An {@link AbstractNetworkConnection} represents the connection between two network targets, seen from one side.<br>
+ * An {@link NetworkConnection} represents the connection between two network targets, seen from one side.<br>
  * It contains the {@link TargetIdentifier} of the connection partner and the own {@link TargetIdentifier}.
  * It provides methods to send packets to the remote partner and accepts received {@link Packet}s, which are sent
  * to a connected {@link NetworkManager} after being constructed by a {@link PacketFactory}.<p>
- * Every connection has a basic lifecycle: First the {@link AbstractNetworkConnection} object is created with all information
+ * Every connection has a basic lifecycle: First the {@link NetworkConnection} object is created with all information
  * necessary to open the connection. Then the connection is opened by calling the {@link #connect()} method.
  * Now data can be sent through the connection. The connection remains open until either the {@link #close()} method is called,
  * or the connection is closed by the remote partner. After the connection has been closed, no more data can be sent through the connection.
  */
-public abstract class AbstractNetworkConnection {
+public abstract class NetworkConnection {
 	
 	private final TargetIdentifier local; //is this even necessary?
 	private final TargetIdentifier remote;
@@ -26,7 +26,7 @@ public abstract class AbstractNetworkConnection {
 	
 	private final PacketContext context;
 	
-	protected AbstractNetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
+	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
@@ -46,7 +46,7 @@ public abstract class AbstractNetworkConnection {
 	}
 	
 	/**
-	 * The {@link TargetIdentifier} of the network target that is sending and receiving packets throgh this {@link AbstractNetworkConnection}.
+	 * The {@link TargetIdentifier} of the network target that is sending and receiving packets throgh this {@link NetworkConnection}.
 	 * It does not contain a valid {@link InetSocketAddress}, because connections to the same target that the rpogram is running on make no sense.
 	 * It is however necessary, because one program can contain more than one network target, for example a server and a local client.
 	 * @return The own {@link TargetIdentifier}
@@ -67,7 +67,7 @@ public abstract class AbstractNetworkConnection {
 	}
 	
 	/**
-	 * Closes this {@link AbstractNetworkConnection}. After closing, no {@link Packet}s can be sent or received.
+	 * Closes this {@link NetworkConnection}. After closing, no {@link Packet}s can be sent or received.
 	 * The connected {@link NetworkManager} will be notified when a connection is closed, and
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
@@ -134,9 +134,9 @@ public abstract class AbstractNetworkConnection {
 	public abstract boolean isLocalConnection();
 	
 	/**
-	 * The current {@link ConnectionState} of this {@link AbstractNetworkConnection}.
+	 * The current {@link ConnectionState} of this {@link NetworkConnection}.
 	 * Some actions can throw {@link ConnectionStateException}s if the current state does not match the required state.
-	 * @return The current {@link ConnectionState} of this {@link AbstractNetworkConnection}
+	 * @return The current {@link ConnectionState} of this {@link NetworkConnection}
 	 */
 	public synchronized ConnectionState getState() {
 		return state;

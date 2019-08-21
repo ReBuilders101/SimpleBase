@@ -43,8 +43,8 @@ final class LocalConnectionManager {
 	
 	/**
 	 * 
-	 * @param connection A {@link AbstractNetworkConnection} to the server that should be connected to
-	 * @return A {@link AbstractNetworkConnection} to the server, from the server's perspective
+	 * @param connection A {@link NetworkConnection} to the server that should be connected to
+	 * @return A {@link NetworkConnection} to the server, from the server's perspective
 	 * @throws ConnectionStateException When the server was not found or when the server refused the connection
 	 */
 	protected static LocalNetworkConnection getLocalConnectionServer(LocalNetworkConnection connection) {

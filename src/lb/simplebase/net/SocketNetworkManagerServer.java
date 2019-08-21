@@ -35,7 +35,7 @@ class SocketNetworkManagerServer extends CommonServer {
 			TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
 			final EventResult result2 = bus.post(new ConfigureConnectionEvent(newConnectionSocket, remote, this));
 			final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ReflectedMethod.wrapException(() -> result2.getHandledEvent(), result2.getCurrentEvent());
-			AbstractNetworkConnection newCon = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket, true, handledEvent.getCustomObject());
+			NetworkConnection newCon = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket, true, handledEvent.getCustomObject());
 			try {
 				clientListLock.writeLock().lock();
 				clientList.add(newCon);
@@ -79,7 +79,7 @@ class SocketNetworkManagerServer extends CommonServer {
 				LocalConnectionManager.removeServer(this);
 				//Then kick everyone
 				NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
-				for(AbstractNetworkConnection con : clientList) {
+				for(NetworkConnection con : clientList) {
 					NetworkManager.NET_LOG.debug("Closing client connection: " + con.getRemoteTargetId());
 					con.close().runInSync();
 				}

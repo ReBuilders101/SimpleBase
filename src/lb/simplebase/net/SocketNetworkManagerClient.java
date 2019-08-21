@@ -9,7 +9,7 @@ import java.util.Objects;
 @ClientSide
 class SocketNetworkManagerClient extends NetworkManager implements NetworkManagerClient{
 
-	private final AbstractNetworkConnection serverConnection; 
+	private final NetworkConnection serverConnection; 
 	private final TargetIdentifier serverId;
 	
 	private final PacketDistributor allHandlers;
@@ -60,10 +60,10 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	}
 	
 	/**
-	 * The {@link AbstractNetworkConnection} to the server that is used to send packets.
-	 * @return The {@link AbstractNetworkConnection} to the server
+	 * The {@link NetworkConnection} to the server that is used to send packets.
+	 * @return The {@link NetworkConnection} to the server
 	 */
-	public AbstractNetworkConnection getServerConnection() {
+	public NetworkConnection getServerConnection() {
 		return serverConnection;
 	}
 

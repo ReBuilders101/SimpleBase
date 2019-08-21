@@ -16,7 +16,7 @@ import lb.simplebase.util.ReflectedMethod;
  */
 public abstract class CommonServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer {
 	
-	protected final Set<AbstractNetworkConnection> clientList;
+	protected final Set<NetworkConnection> clientList;
 	protected final ReadWriteLock clientListLock;
 	
 	protected final InboundPacketThreadHandler handler;
@@ -39,7 +39,7 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	
 	
 	@Override
-	protected void notifyConnectionClosed(AbstractNetworkConnection connection, ClosedConnectionEvent.Cause cause) {
+	protected void notifyConnectionClosed(NetworkConnection connection, ClosedConnectionEvent.Cause cause) {
 		super.notifyConnectionClosed(connection, cause);
 		try {
 			clientListLock.writeLock().lock();
@@ -80,7 +80,7 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 */
 	@Override
 	public synchronized PacketSendFuture sendPacketToClient(Packet packet, TargetIdentifier client) {
-		AbstractNetworkConnection con = getCurrentClient(client);
+		NetworkConnection con = getCurrentClient(client);
 		if(con == null) return PacketSendFuture.quickFailed("Target ID is not a client on this server");
 		if(!con.isConnectionOpen()) return PacketSendFuture.quickFailed("Connection to client is not open");
 		return con.sendPacketToTarget(packet);
@@ -101,10 +101,10 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 		}
 	}
 
-	protected AbstractNetworkConnection getCurrentClient(TargetIdentifier client) {
+	protected NetworkConnection getCurrentClient(TargetIdentifier client) {
 		try {
 			clientListLock.readLock().lock();
-			for(AbstractNetworkConnection con : clientList) {
+			for(NetworkConnection con : clientList) {
 				if(con.getRemoteTargetId().equals(client)) return con;
 			}
 			return null;
@@ -130,7 +130,7 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 */
 	@Override
 	public ConnectionStateFuture disconnectClient(TargetIdentifier client) {
-		AbstractNetworkConnection con = getCurrentClient(client);
+		NetworkConnection con = getCurrentClient(client);
 		if(con == null) {
 			return ConnectionStateFuture.quickFailed("No client with this Id was found", ConnectionState.UNCONNECTED); //Maybe closed is better?
 		} else {

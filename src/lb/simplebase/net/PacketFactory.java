@@ -29,9 +29,9 @@ public class PacketFactory {
 	private int packetId = 0;
 	
 	/**
-	 * Creates a new {@link PacketFactory} for this {@link AbstractNetworkConnection}.
+	 * Creates a new {@link PacketFactory} for this {@link NetworkConnection}.
 	 * @param mapCon The {@link PacketIdMappingContainer} that contains all packet &lt;-&gt; id mappings
-	 * @param finishedPacketReceiver The {@link AbstractNetworkConnection} that will receive finished {@link Packet}s
+	 * @param finishedPacketReceiver The {@link NetworkConnection} that will receive finished {@link Packet}s
 	 */
 	public PacketFactory(PacketIdMappingContainer mapCon, Consumer<Packet> finishedPacketReceiver) {
 		Objects.requireNonNull(mapCon);
