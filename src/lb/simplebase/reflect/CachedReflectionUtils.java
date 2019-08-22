@@ -48,26 +48,14 @@ public final class CachedReflectionUtils {
 	public static final class Methods {
 		
 		public static MethodAccess<Object> getMethodAccess(final Class<?> declaringClass, final String methodName, final Parameters params) {
-			return getMethodAccess(declaringClass, methodName, Object.class, params.getTypeArray());
-		}
-		
-		public static MethodAccess<Object> getMethodAccess(final Class<?> declaringClass, final String methodName, final Class<?>...params) {
-			return getMethodAccess(declaringClass, methodName, Object.class, params);
+			return getMethodAccess(declaringClass, methodName, params, Object.class);
 		}
 		
 		public static MethodAccess<Object> getBoundMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Parameters params) {
-			return getBoundMethodAccess(declaringClass, methodName, instance, Object.class, params.getTypeArray());
-		}
-		
-		public static MethodAccess<Object> getBoundMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Class<?>...params) {
-			return getBoundMethodAccess(declaringClass, methodName, instance, Object.class, params);
+			return getBoundMethodAccess(declaringClass, methodName, instance, params, Object.class);
 		}
 		
 		public static <T> MethodAccess<T> getMethodAccess(final Class<?> declaringClass, final String methodName, final Parameters params, final Class<T> returnType) {
-			return getMethodAccess(declaringClass, methodName, returnType, params.getTypeArray());
-		}
-		
-		public static <T> MethodAccess<T> getMethodAccess(final Class<?> declaringClass, final String methodName, final Class<T> returnType, final Class<?>...params) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
@@ -79,10 +67,6 @@ public final class CachedReflectionUtils {
 		}
 		
 		public static <T> MethodAccess<T> getBoundMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Parameters params, final Class<T> returnType) {
-			return getBoundMethodAccess(declaringClass, methodName, instance, returnType, params.getTypeArray());
-		}
-		
-		public static <T> MethodAccess<T> getBoundMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Class<T> returnType, final Class<?>...params) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
@@ -95,19 +79,11 @@ public final class CachedReflectionUtils {
 		}
 		
 		public static MethodAccess<Void> getVoidMethodAccess(final Class<?> declaringClass, final String methodName, final Parameters params) {
-			return getMethodAccess(declaringClass, methodName, void.class, params.getTypeArray());
+			return getMethodAccess(declaringClass, methodName, params, void.class);
 		}
 		
 		public static MethodAccess<Void> getBoundVoidMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Parameters params) {
-			return getBoundMethodAccess(declaringClass, methodName, instance, void.class, params.getTypeArray());
-		}
-		
-		public static MethodAccess<Void> getVoidMethodAccess(final Class<?> declaringClass, final String methodName, final Class<?>...params) {
-			return getMethodAccess(declaringClass, methodName, void.class, params);
-		}
-		
-		public static MethodAccess<Void> getBoundVoidMethodAccess(final Class<?> declaringClass, final String methodName, final Object instance, final Class<?>...params) {
-			return getBoundMethodAccess(declaringClass, methodName, instance, void.class, params);
+			return getBoundMethodAccess(declaringClass, methodName, instance, params, void.class);
 		}
 		
 	}
