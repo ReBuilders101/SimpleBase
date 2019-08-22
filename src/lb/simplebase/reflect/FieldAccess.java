@@ -2,7 +2,7 @@ package lb.simplebase.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Function;
 
 public abstract class FieldAccess<T> extends MemberAccess {
@@ -26,6 +26,9 @@ public abstract class FieldAccess<T> extends MemberAccess {
 		setInstance(null, value);
 	}
 	
+	@Override
+	public abstract FieldAccess<T> bindToInstance(final Object instance);
+
 	public T getBound() {
 		if(!isBound()) throw new UnsupportedOperationException("getBound can only be used if an instance is bound to this FieldAccess");
 		return getInstance(null);
@@ -34,27 +37,63 @@ public abstract class FieldAccess<T> extends MemberAccess {
 	public abstract void setInstance(final Object instance, final T value);
 	public abstract T getInstance(final Object instance);
 	
+	@Override
+	public abstract FieldAccess<T> clone();
+ 	
 	public <R> FieldAccess<R> applyFunction(final Function<T, R> getFunction, final Function<R, T> setFunction) {
-		return new DelegateFieldAccess<>(this, getFunction, setFunction);
+		return new DelegateFieldAccess<>(this.clone(), getFunction, setFunction);
+	}
+	
+	public MethodAccess<T> createGetter() {
+		return new MethodAccess.GetterMethodAccess<>(this.clone());
+	}
+	
+	public MethodAccess<Void> createSetter() {
+		return new MethodAccess.SetterMethodAccess<>(this.clone());
 	}
 	
 	protected static class GetAndSetFieldAccess<T> extends FieldAccess<T> {
 
-		protected GetAndSetFieldAccess(MethodAccess<T> getter, MethodAccess<?> setter) { 
-			super(false, null);
-			// TODO Auto-generated constructor stub
+		private final MethodAccess<T> getterFunction;
+		private final MethodAccess<Void> setterFunction;
+		
+		protected GetAndSetFieldAccess(final MethodAccess<T> getter, final MethodAccess<Void> setter) { 
+			super(getter.isStatic, getter.instance);
+			this.getterFunction = getter;
+			this.setterFunction = setter;
 		}
 
 		@Override
-		public void setInstance(Object instance, T value) {
-			// TODO Auto-generated method stub
-			
+		public void setInstance(final Object instance, final T value) {
+			setterFunction.callInstance(instance, value);
+			setException(setterFunction.getLastException());
 		}
 
 		@Override
-		public T getInstance(Object instance) {
-			// TODO Auto-generated method stub
-			return null;
+		public T getInstance(final Object instance) {
+			final T t = getterFunction.callInstance(instance);
+			setException(getterFunction.getLastException());
+			return t;
+		}
+
+		@Override
+		public FieldAccess<T> bindToInstance(final Object instanceParam) {
+			return new GetAndSetFieldAccess<>(getterFunction.bindToInstance(instance), setterFunction.bindToInstance(instanceParam));
+		}
+
+		@Override
+		public MethodAccess<T> createGetter() {
+			return getterFunction.clone();
+		}
+
+		@Override
+		public MethodAccess<Void> createSetter() {
+			return setterFunction.clone();
+		}
+
+		@Override
+		public FieldAccess<T> clone() {
+			return new GetAndSetFieldAccess<>(getterFunction.clone(), setterFunction.clone());
 		}
 		
 	}
@@ -66,45 +105,10 @@ public abstract class FieldAccess<T> extends MemberAccess {
 		private final Function<R, T> setTransform;
 		
 		protected DelegateFieldAccess(final FieldAccess<T> delegate, final Function<T, R> getTransform, final Function<R, T> setTransform) {
-			super(false, null);
+			super(delegate.isStatic, delegate.instance);
 			this.delegate = delegate;
 			this.getTransform = getTransform;
 			this.setTransform = setTransform;
-		}
-
-		@Override
-		public void setStatic(final R value) {
-			delegate.setStatic(setTransform.apply(value));
-		}
-
-		@Override
-		public R getStatic() {
-			return getTransform.apply(delegate.getStatic());
-		}
-
-		@Override
-		public void setBound(final R value) {
-			delegate.setBound(setTransform.apply(value));
-		}
-
-		@Override
-		public R getBound() {
-			return getTransform.apply(delegate.getBound());
-		}
-
-		@Override
-		public void setInstance(final Object instance, final R value) {
-			delegate.setInstance(instance, setTransform.apply(value));
-		}
-
-		@Override
-		public R getInstance(final Object instance) {
-			return getTransform.apply(delegate.getInstance(instance));
-		}
-
-		@Override
-		public void bindToInstance(final Object instance) {
-			delegate.bindToInstance(instance);
 		}
 
 		@Override
@@ -113,40 +117,27 @@ public abstract class FieldAccess<T> extends MemberAccess {
 		}
 
 		@Override
-		public boolean isStatic() {
-			return delegate.isStatic();
+		public FieldAccess<R> bindToInstance(final Object instance) {
+			return new DelegateFieldAccess<>(delegate.bindToInstance(instance), getTransform, setTransform);
 		}
 
 		@Override
-		public boolean isBound() {
-			return delegate.isBound();
+		public void setInstance(final Object instance, final R value) {
+			delegate.setInstance(instance, setTransform.apply(value));
+			setException(delegate.getLastException());
 		}
 
 		@Override
-		public Exception getLastException() {
-			return delegate.getLastException();
+		public R getInstance(final Object instance) {
+			final R r = getTransform.apply(delegate.getInstance(instance));
+			setException(delegate.getLastException());
+			return r;
 		}
 
 		@Override
-		public Optional<Exception> getLastExceptionOptional() {
-			return delegate.getLastExceptionOptional();
+		public FieldAccess<R> clone() {
+			return new DelegateFieldAccess<>(delegate.clone(), getTransform, setTransform);
 		}
-
-		@Override
-		public boolean hasLastException() {
-			return delegate.hasLastException();
-		}
-
-		@Override
-		protected void setException(final Exception e) {
-			delegate.setException(e);
-		}
-
-		@Override
-		public void rethrowException() throws Exception {
-			delegate.rethrowException();
-		}
-
 		
 	}
 	
@@ -180,6 +171,27 @@ public abstract class FieldAccess<T> extends MemberAccess {
 				return null;
 			}
 		}
+
+		@Override
+		public FieldAccess<T> bindToInstance(final Object instance) {
+			return new ReflectionFieldAccess<>(field, instance);
+		}
+
+		@Override
+		public FieldAccess<T> clone() {
+			return new ReflectionFieldAccess<>(field, instance);
+		}
+	}
+	
+	public static <T> FieldAccess<T> fromMethods(final MethodAccess<T> getter, final MethodAccess<Void> setter) {
+		Objects.requireNonNull(getter, "Getter method must not be null");
+		Objects.requireNonNull(setter, "Setter method must not be null");
+		
+		if(getter.isStatic() != setter.isStatic()) throw new IllegalArgumentException("Getter and setter must have the same value for the isStatic() status");
+		if(getter.isBound() != setter.isBound()) throw new IllegalArgumentException("Getter and setter must have the same value for the isBound() status");
+		if(getter.instance != setter.instance) throw new IllegalArgumentException("If getter and setter are bound to an instance, the instances must be identical");
+		
+		return new GetAndSetFieldAccess<>(getter.clone(), setter.clone());
 	}
 	
 }
