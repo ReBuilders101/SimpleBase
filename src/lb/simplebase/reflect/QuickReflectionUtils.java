@@ -373,6 +373,10 @@ public final class QuickReflectionUtils {
 		
 		@SuppressWarnings("unchecked")
 		public static <T> T constructObjectUnchecked(final Class<T> declaringClass, Parameters params) {
+			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
+			Objects.requireNonNull(params, "Parameters must not be null");
+			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for constructor execution");
+			
 			Constructor<T> constructor = BaseReflectionUtils.getConstructor(declaringClass, params);
 			if(constructor == null) return null;
 			ConstructorAccessor accessor = QuickReflectionUtils.Methods.executeMethod(Constructor.class, "acquireConstructorAccessor",
