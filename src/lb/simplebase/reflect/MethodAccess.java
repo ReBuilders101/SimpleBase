@@ -15,6 +15,18 @@ public abstract class MethodAccess<T> extends MemberAccess {
 		return callInstance(null, params);
 	}
 	
+	public T callStatic() {
+		return callStatic((Object[]) null);
+	}
+	
+	public T callBound() {
+		return callBound((Object[]) null);
+	}
+	
+	public T callInstance(Object instance) {
+		return callInstance(instance, (Object[]) null);
+	}
+	
 	public T callBound(final Object...params) {
 		if(!isBound()) throw new UnsupportedOperationException("callBound can only be used if an instance is bound to this MethodAccess");
 		return callInstance(instance, params);
