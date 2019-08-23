@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import lb.simplebase.event.EventResult;
-import lb.simplebase.util.ReflectedMethod;
+import lb.simplebase.util.ExceptionUtils;
 
 class SocketNetworkManagerServer extends CommonServer {
 
@@ -24,7 +24,7 @@ class SocketNetworkManagerServer extends CommonServer {
 		
 		//Post the event
 		final EventResult result = bus.post(new AttemptedConnectionEvent(newConnectionSocket.getInetAddress(), this));
-		if(ReflectedMethod.wrapException(() -> result.wasCanceled(), true)) { //TODO move the method somewhere else
+		if(ExceptionUtils.wrapException(() -> result.wasCanceled(), true)) { //TODO move the method somewhere else
 			NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");
 			try {
 				newConnectionSocket.close();
@@ -34,7 +34,7 @@ class SocketNetworkManagerServer extends CommonServer {
 		} else {
 			TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) newConnectionSocket.getRemoteSocketAddress());
 			final EventResult result2 = bus.post(new ConfigureConnectionEvent(newConnectionSocket, remote, this));
-			final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ReflectedMethod.wrapException(() -> result2.getHandledEvent(), result2.getCurrentEvent());
+			final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ExceptionUtils.wrapException(() -> result2.getHandledEvent(), result2.getCurrentEvent());
 			NetworkConnection newCon = new RemoteNetworkConnection(getLocalID(), remote, this, newConnectionSocket, true, handledEvent.getCustomObject());
 			try {
 				clientListLock.writeLock().lock();

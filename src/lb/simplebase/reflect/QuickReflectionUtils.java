@@ -82,7 +82,7 @@ public final class QuickReflectionUtils {
 		public static Object getField(final Class<?> declaringClass, final String fieldName, final Object instance) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
 			//Instance may be null
 			
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
@@ -109,7 +109,7 @@ public final class QuickReflectionUtils {
 		public static Optional<Object> getFieldOptional(final Class<?> declaringClass, final String fieldName, final Object instance) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
 			//Instance may be null
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
 			if(field == null) return null;
@@ -131,7 +131,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
 			Objects.requireNonNull(fieldType, "Field type must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
 			//Instance may be null
 			
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
@@ -160,7 +160,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
 			Objects.requireNonNull(fieldType, "Field type must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
 			//Instance may be null
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
 			if(field == null) return null;
@@ -176,7 +176,7 @@ public final class QuickReflectionUtils {
 		public static boolean setField(final Class<?> declaringClass, final String fieldName, final Object instance, final Object value) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field");
 			//Instance and value may be null
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
 			if(field == null) return false;
@@ -211,7 +211,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for method execution");
 			
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);
@@ -228,7 +228,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for method execution");
 			
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);
@@ -268,7 +268,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
 			Objects.requireNonNull(returnType, "Return type must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for method execution");
 
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);
@@ -287,7 +287,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
 			Objects.requireNonNull(returnType, "Return type must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for method execution");
 
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);
@@ -326,7 +326,7 @@ public final class QuickReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for method execution");
 
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);

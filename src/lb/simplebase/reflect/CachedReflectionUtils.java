@@ -36,7 +36,7 @@ public final class CachedReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(fieldName, "Field name must not be null");
 			Objects.requireNonNull(fieldType, "Field type must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the field"); //May be null
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the field"); //May be null
 			
 			final Field field = BaseReflectionUtils.getField(declaringClass, fieldName);
 			if(field == null) return null;
@@ -70,7 +70,7 @@ public final class CachedReflectionUtils {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(methodName, "Method name must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			Validate.requireType(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
+			Validate.requireTypeOrNull(instance, declaringClass, "Instance must be a subtype of the type that contains the method");
 			
 			final Method method = BaseReflectionUtils.getMethod(declaringClass, methodName, params);
 			if(method == null) return null;

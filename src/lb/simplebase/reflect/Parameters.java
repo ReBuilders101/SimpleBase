@@ -56,7 +56,7 @@ public class Parameters {
 		if(types == null || types.length == 0) {
 			return EMPTY;
 		} else {
-			Validate.noMatchingElements(types, VALID_PARAM, new IllegalArgumentException("Type array must not contain null elements or void.class"));
+			Validate.noMatchingElements(types, VALID_PARAM, "Type array must not contain null elements or void.class");
 			return new Parameters(types, null);
 		}
 	}
@@ -86,7 +86,7 @@ public class Parameters {
 	public static Parameters ofArrays(final Class<?>[] types, final Object[] values) {
 		Objects.requireNonNull(types, "Type array must not be null");
 		Objects.requireNonNull(values, "Value array must not be null");
-		Validate.noMatchingElements(types, VALID_PARAM, new IllegalArgumentException("Type array must not contain null elements or void.class"));
+		Validate.noMatchingElements(types, VALID_PARAM, "Type array must not contain null elements or void.class");
 		
 		if(types.length == values.length) {
 			for(int i = 0; i < types.length; i++) {
