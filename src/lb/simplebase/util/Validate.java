@@ -1,5 +1,6 @@
 package lb.simplebase.util;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -13,39 +14,112 @@ public final class Validate {
 
 	private Validate() {}
 	
-	public static <T> void noNullElements(final T[] array, final String message) throws IllegalArgumentException {
+	public static <T> T[] noNullElements(final T[] array, final String message) throws IllegalArgumentException {
 		Objects.requireNonNull(array, "Array that should be checked for null elements must not be null");
 		for(T t : array) {
 			if(t == null) throw new IllegalArgumentException(message);
 		}
+		return array;
 	}
 	
-	public static <T> void noMatchingElements(final T[] array, final Predicate<T> tester, final String message) throws IllegalArgumentException {
+	public static <T> T[] noMatchingElements(final T[] array, final Predicate<T> tester, final String message) throws IllegalArgumentException {
 		Objects.requireNonNull(array, "Array that should be checked for matching elements must not be null");
 		Objects.requireNonNull(array, "Predicate for matching elements must not be null");
 		for(T t : array) {
 			if(tester.test(t)) throw new IllegalArgumentException(message);
 		}
+		return array;
 	}
 	
-	public static <T> void requireTypeOrNull(Object object, Class<?> type, String message) throws IllegalArgumentException {
+	public static <T> T[] onlyMatchingElements(final T[] array, final Predicate<T> tester, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(array, "Array that should be checked for matching elements must not be null");
+		Objects.requireNonNull(array, "Predicate for matching elements must not be null");
+		for(T t : array) {
+			if(!tester.test(t)) throw new IllegalArgumentException(message);
+		}
+		return array;
+	}
+	
+	public static <T> Iterable<T> noNullElements(final Iterable<T> iterable, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(iterable, "Iterable that should be checked for null elements must not be null");
+		for(T t : iterable) {
+			if(t == null) throw new IllegalArgumentException(message);
+		}
+		return iterable;
+	}
+	
+	public static <T> Iterable<T> noMatchingElements(final Iterable<T> iterable, final Predicate<T> tester, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(iterable, "Iterable that should be checked for matching elements must not be null");
+		Objects.requireNonNull(iterable, "Predicate for matching elements must not be null");
+		for(T t : iterable) {
+			if(tester.test(t)) throw new IllegalArgumentException(message);
+		}
+		return iterable;
+	}
+	
+	public static <T> Iterable<T> onlyMatchingElements(final Iterable<T> iterable, final Predicate<T> tester, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(iterable, "Iterable that should be checked for matching elements must not be null");
+		Objects.requireNonNull(iterable, "Predicate for matching elements must not be null");
+		for(T t : iterable) {
+			if(!tester.test(t)) throw new IllegalArgumentException(message);
+		}
+		return iterable;
+	}
+	
+	public static <T> void requireTypeOrNull(final Object object, final Class<?> type, final String message) throws IllegalArgumentException {
 		Objects.requireNonNull(type, "Type to check must not be null");
 		if(!QuickReflectionUtils.isOfType(object, type)) throw new IllegalArgumentException(message);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T requireType(Object object, Class<T> type, String message) throws IllegalArgumentException {
+	public static <T> T requireType(final Object object, final Class<T> type, final String message) throws IllegalArgumentException {
 		Objects.requireNonNull(type, "Type to check must not be null");
 		Objects.requireNonNull(object, "Object to check must not be null");
-		if(!QuickReflectionUtils.isOfType(object, type)) throw new IllegalArgumentException(message);
+		if(!type.isInstance(object));
 		return (T) object;
 	}
 	
-	public static void requireTrue(boolean value, String message) throws IllegalArgumentException {
+	public static <T> T[] requireSize(final T[] array, final int exactSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(array, "Array to check must not be null");
+		if(array.length != exactSize) throw new IllegalArgumentException(message);
+		return array;
+	}
+	
+	public static <T> T[] requireMinSize(final T[] array, final int minSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(array, "Array to check must not be null");
+		if(array.length < minSize) throw new IllegalArgumentException(message);
+		return array;
+	}
+	
+	public static <T> T[] requireMaxSize(final T[] array, final int maxSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(array, "Array to check must not be null");
+		if(array.length > maxSize) throw new IllegalArgumentException(message);
+		return array;
+	}
+	
+	public static <T> Collection<T> requireSize(final Collection<T> collection, final int exactSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(collection, "Collection to check must not be null");
+		if(collection.size() != exactSize) throw new IllegalArgumentException(message);
+		return collection;
+	}
+	
+	public static <T> Collection<T> requireMinSize(final Collection<T> collection, final int minSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(collection, "Collection to check must not be null");
+		if(collection.size() < minSize) throw new IllegalArgumentException(message);
+		return collection;
+	}
+	
+	public static <T> Collection<T> requireMaxSize(final Collection<T> collection, final int maxSize, final String message) throws IllegalArgumentException {
+		Objects.requireNonNull(collection, "Collection to check must not be null");
+		if(collection.size() > maxSize) throw new IllegalArgumentException(message);
+		return collection;
+	}
+	
+	public static void requireTrue(final boolean value, final String message) throws IllegalArgumentException {
 		if(!value) throw new IllegalArgumentException(message);
 	}
 	
-	public static void requireFalse(boolean value, String message) throws IllegalArgumentException {
+	public static void requireFalse(final boolean value, final String message) throws IllegalArgumentException {
 		if(value) throw new IllegalArgumentException(message);
 	}
 }

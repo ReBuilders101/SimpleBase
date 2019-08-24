@@ -13,6 +13,7 @@ import java.util.function.Function;
  * Created {@link NetworkManagerClient}s are cached and can be reused.
  * Should be used to create a {@link NetworkManagerClient} with the same mappings and handlers for every connection to a server.
  */
+@Deprecated
 public class ClientNetworkSession implements PacketIdMappingContainer{
 
 	private final TargetIdentifier localId;

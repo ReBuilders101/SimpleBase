@@ -26,9 +26,9 @@ public final class ExceptionUtils {
 		}
 	}
 	
-	public static boolean wrapException(Runnable task) {
+	public static boolean wrapException(Callable<?> task) {
 		try {
-			task.run();
+			task.call();
 			return true;
 		} catch(Exception e) {
 			return false;
@@ -51,22 +51,5 @@ public final class ExceptionUtils {
 			UnsafeUtils.throwExceptionUnchecked(e);
 			return null;
 		}
-	} 
-	
-	public static void wrapUnchekedException(Runnable task) {
-		try {
-			task.run();
-		} catch(Exception e) {
-			throw new RuntimeException(e);
-		}
-	} 
-	
-	@RequireUndocumented("sun.misc.Unsafe")
-	public static void wrapUnsafeException(Runnable task) {
-		try {
-			task.run();
-		} catch(Exception e) {
-			UnsafeUtils.throwExceptionUnchecked(e);
-		}
-	} 
+	}
 }
