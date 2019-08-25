@@ -27,7 +27,7 @@ public class FlatIterator<T> implements Iterator<T>{
 	@Override
 	public boolean hasNext() {
 		if(current == null) return false;
-		return current.hasNext() || iters.peek().hasNext();
+		return current.hasNext() || (iters.hasNext() && iters.peek().hasNext());
 	}
 
 	@Override
