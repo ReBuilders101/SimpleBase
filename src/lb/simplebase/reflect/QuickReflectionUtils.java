@@ -67,6 +67,16 @@ public final class QuickReflectionUtils {
 //		return testType.isAssignableFrom(object.getClass());
 	}
 	
+	/**
+	 * Checks whether a class is a valid functional interface matching the definition for {@link FunctionalInterface}.<br>
+	 * Checks are performed in this order:
+	 * <ol><li>If the class has the {@link FunctionalInterface} annotation, {@code true} is returned.</li>
+	 * <li>If the class does not have the interface modifier, {@code false} is returned. </li>
+	 * <li>All public methods in this interface and from superinterfaces are checked: The amount of methods that have the abstract modifier is counted.</li>
+	 * <li>If that amount is {@code 1}, {@code true} is returned, otherwise {@code false}.</li></ol>
+	 * @param testClass The class to test
+	 * @return Whether it is a functional interface
+	 */
 	public static boolean isFunctionalInterface(Class<?> testClass) {
 		Objects.requireNonNull(testClass, "Class must not be null");
 		
@@ -78,7 +88,7 @@ public final class QuickReflectionUtils {
 		int abstractCounter = 0; //Amount of abstract methods in the interface
 		for(Method m : methods) {
 			//Increase if abstract method is found (static methods don't count)
-			if(Modifier.isAbstract(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) abstractCounter++; 
+			if(Modifier.isAbstract(m.getModifiers())) abstractCounter++; 
 		}
 		
 		return abstractCounter == 1; //There must be exactly one abstract method

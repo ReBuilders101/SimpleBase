@@ -1,6 +1,9 @@
 package lb.simplebase.event;
 
+import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.MutableCallSite;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -136,15 +139,19 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		}
 	}
 	
+	private static final MethodType handlerType = MethodType.methodType(void.class, Event.class);
+	private static final CallSite handlerCallSite = new MutableCallSite(handlerType); //Handlers are event -> void methods
+	private static final MethodHandle handlerInvoker = handlerCallSite.dynamicInvoker();
+	private static final Object setAndInvokeLock = new Object();
 	
 	static class EventHandlerInvoke extends EventHandlerImpl {
-
+		
 		private final MethodHandle handle;
 		
 		protected EventHandlerInvoke(final MethodHandle handle, final Class<? extends Event> checkType, final EventPriority priority,
 				final boolean receiveCanceled) {
 			super(checkType, priority, receiveCanceled);
-			this.handle = handle;
+			this.handle = handle.asType(handlerType);
 		}
 
 		@Override
@@ -155,7 +162,11 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 		@Override
 		protected void postEventImpl(Event instance) {
 			try {
-				handle.invokeExact(instance);
+				//invoke through static callSite
+				synchronized (setAndInvokeLock) { //Make sure we are not interrupted
+					handlerCallSite.setTarget(handle); //Set the method to run through the callSite
+					handlerInvoker.invoke(instance); //can't use invokeExact because event is a subclass and requires widening conversion
+				}
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
