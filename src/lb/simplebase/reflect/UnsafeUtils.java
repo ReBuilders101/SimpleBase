@@ -1,9 +1,19 @@
 package lb.simplebase.reflect;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
 import lb.simplebase.core.RequireUndocumented;
 import sun.misc.Unsafe;
 
 /**
+ * <b>Alternatives to using the Unsafe class:</b>
+ * <ul>
+ * <li>Atomic field updates: Consider using {@link AtomicReference} or {@link AtomicReferenceFieldUpdater}</li>
+ * <li>Memory allocation off heap: Consider using native {@link ByteBuffer}s instead</li>
+ * </ul>
+ * <hr>
  * This class provides easy access to the inofficial {@link Unsafe} class/API that
  * can do 'unsafe' operations like allocating memory manually.
  * <p>
@@ -70,5 +80,12 @@ public final class UnsafeUtils {
 		} catch (InstantiationException e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Can be called by applications that can not run without the unsafe API. Will throw a {@link RuntimeException} when the unsafe instance was not found.
+	 */
+	public static void requireUnsafe() {
+		if(errorFlag) throw new RuntimeException("Application reqires the Unsafe API to run (Field 'theUnsafe' in sun.misc.Unsafe not present or not accessible");
 	}
 }

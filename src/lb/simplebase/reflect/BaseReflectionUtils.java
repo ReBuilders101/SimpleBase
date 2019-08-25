@@ -8,6 +8,10 @@ import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import lb.simplebase.log.LogHelper;
+import lb.simplebase.log.LogLevel;
+import lb.simplebase.log.Logger;
+
 /**
  * Basic reflection operations for getting {@link Field}, {@link Method} and {@link Constructor} references.
  * Used by other Reflection utility classes, but can also be used directly.
@@ -93,6 +97,18 @@ public final class BaseReflectionUtils {
 		INSTANCE = PRIVILEGED;
 	}
 	
+	protected static Logger REF_LOG = null;
+	protected static boolean enabled = false;
+	
+	public static void enableErrorLogging() {
+		if(REF_LOG == null) REF_LOG = LogHelper.create("Reflection", LogLevel.ERROR);
+		enabled = true;
+	}
+	
+	public static void disableErrorLogging() {
+		enabled = false;
+	}
+	
 	private static abstract class BaseReflectionUtilsImpl {
 		
 		protected abstract Field getField(final Class<?> declaringClass, final String fieldName);
@@ -119,6 +135,7 @@ public final class BaseReflectionUtils {
 					found2.setAccessible(true); //And make it accessible //Is this necessary for public field??
 					return found2;
 				} catch (NoSuchFieldException | SecurityException e1) {
+					if(enabled) REF_LOG.error("Field " + fieldName + " not found in " + declaringClass.getSimpleName() + " or superclass", e1);
 					return null; //Can't do anything about it
 				}
 			}
@@ -138,6 +155,7 @@ public final class BaseReflectionUtils {
 					found2.setAccessible(true); //And make it accessible //Is this necessary for public field??
 					return found2;
 				} catch (NoSuchMethodException | SecurityException e1) {
+					if(enabled) REF_LOG.error("Method " + methodName + " not found in " + declaringClass.getSimpleName() + " or superclass", e1);
 					return null; //Can't do anything about it
 				}
 			}
@@ -150,6 +168,7 @@ public final class BaseReflectionUtils {
 				found.setAccessible(true);
 				return found;
 			} catch (NoSuchMethodException | SecurityException e) { //Or not
+				if(enabled) REF_LOG.error("Constructor not found in " + declaringClass.getSimpleName(), e);
 				return null;
 			}
 		}

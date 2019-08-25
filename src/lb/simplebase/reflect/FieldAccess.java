@@ -54,8 +54,8 @@ public abstract class FieldAccess<T> extends MemberAccess {
 	
 	protected static class GetAndSetFieldAccess<T> extends FieldAccess<T> {
 
-		private final MethodAccess<T> getterFunction;
-		private final MethodAccess<Void> setterFunction;
+		protected final MethodAccess<T> getterFunction;
+		protected final MethodAccess<Void> setterFunction;
 		
 		protected GetAndSetFieldAccess(final MethodAccess<T> getter, final MethodAccess<Void> setter) { 
 			super(getter.isStatic, getter.instance);
@@ -100,9 +100,9 @@ public abstract class FieldAccess<T> extends MemberAccess {
 	
 	protected static class DelegateFieldAccess<T,R> extends FieldAccess<R> {
 
-		private final FieldAccess<T> delegate;
-		private final Function<T, R> getTransform;
-		private final Function<R, T> setTransform;
+		protected final FieldAccess<T> delegate;
+		protected final Function<T, R> getTransform;
+		protected final Function<R, T> setTransform;
 		
 		protected DelegateFieldAccess(final FieldAccess<T> delegate, final Function<T, R> getTransform, final Function<R, T> setTransform) {
 			super(delegate.isStatic, delegate.instance);
@@ -143,7 +143,7 @@ public abstract class FieldAccess<T> extends MemberAccess {
 	
 	protected static class ReflectionFieldAccess<T> extends FieldAccess<T> {
 
-		private final Field field;
+		protected final Field field;
 		
 		protected ReflectionFieldAccess(final Field field, final Object instance) {
 			super(Modifier.isStatic(field.getModifiers()), instance);
@@ -156,6 +156,7 @@ public abstract class FieldAccess<T> extends MemberAccess {
 			try {
 				field.set(instance, value);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not set value of field (through access): " + field, e);
 				setException(e);
 			}
 		}
@@ -167,6 +168,7 @@ public abstract class FieldAccess<T> extends MemberAccess {
 			try {
 				return (T) field.get(instance);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not get value of field (through access): " + field, e);
 				setException(e);
 				return null;
 			}

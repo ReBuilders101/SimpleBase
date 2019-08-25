@@ -1,9 +1,15 @@
 package lb.simplebase.reflect;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.Function;
+
+import lb.simplebase.reflect.FieldAccess.DelegateFieldAccess;
+import lb.simplebase.reflect.FieldAccess.GetAndSetFieldAccess;
+import lb.simplebase.reflect.FieldAccess.ReflectionFieldAccess;
 
 public abstract class MethodAccess<T> extends MemberAccess {
 
@@ -42,6 +48,11 @@ public abstract class MethodAccess<T> extends MemberAccess {
 	
 	public abstract T callInstance(final Object instance, final Object...params);
 	
+	/**
+	 * Will only work if this MethodAccess refers to a reflected method directly, or to a FieldAccess that refers to a field directly
+	 */
+	public abstract MethodHandle createHandle();
+	
 	@Override
 	public abstract MethodAccess<T> clone();
 	
@@ -61,6 +72,7 @@ public abstract class MethodAccess<T> extends MemberAccess {
 			try {
 				return (T) method.invoke(instance, params);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not call method (through access): " + method, e);
 				setException(e);
 				return null;
 			}
@@ -75,7 +87,18 @@ public abstract class MethodAccess<T> extends MemberAccess {
 		public MethodAccess<T> clone() {
 			return new ReflectionMethodAccess<>(method, instance);
 		}
-		
+
+		@Override
+		public MethodHandle createHandle() {
+			try {
+				final MethodHandle handle = MethodHandles.lookup().unreflect(method);
+				if(isBound()) return handle.bindTo(instance);
+				return handle;
+			} catch (IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create a MethodHandle from MethodAccess", e);
+				return null;
+			}
+		}
 	}
 	
 	protected static class GetterMethodAccess<T> extends MethodAccess<T> {
@@ -103,7 +126,29 @@ public abstract class MethodAccess<T> extends MemberAccess {
 		public MethodAccess<T> clone() {
 			return new GetterMethodAccess<>(fieldAccess.clone());
 		}
-		
+
+		@Override
+		public MethodHandle createHandle() {
+			try {
+				if(fieldAccess instanceof ReflectionFieldAccess<?>) {
+					ReflectionFieldAccess<?> refField = (ReflectionFieldAccess<?>) fieldAccess;
+					final MethodHandle handle = MethodHandles.lookup().unreflectGetter(refField.field);
+					if(refField.isBound()) return handle.bindTo(refField.instance);
+					return handle;
+				} else if(fieldAccess instanceof DelegateFieldAccess<?,?>) {
+					if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field is a delegate");
+					return null;
+				} else if(fieldAccess instanceof GetAndSetFieldAccess<?>) {
+					return ((GetAndSetFieldAccess<?>) fieldAccess).getterFunction.createHandle();
+				} else {
+					if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field is of unknown implementation");
+					return null;
+				}
+			} catch (IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field not accessible");
+				return null;
+			}
+		}
 	}
 	
 	protected static class SetterMethodAccess<V> extends MethodAccess<Void> {
@@ -133,7 +178,29 @@ public abstract class MethodAccess<T> extends MemberAccess {
 		public MethodAccess<Void> clone() {
 			return new SetterMethodAccess<>(fieldAccess.clone());
 		}
-		
+
+		@Override
+		public MethodHandle createHandle() {
+			try {
+				if(fieldAccess instanceof ReflectionFieldAccess<?>) {
+					ReflectionFieldAccess<?> refField = (ReflectionFieldAccess<?>) fieldAccess;
+					final MethodHandle handle = MethodHandles.lookup().unreflectSetter(refField.field);
+					if(refField.isBound()) return handle.bindTo(refField.instance);
+					return handle;
+				} else if(fieldAccess instanceof DelegateFieldAccess<?,?>) {
+					if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field is a delegate");
+					return null;
+				} else if(fieldAccess instanceof GetAndSetFieldAccess<?>) {
+					return ((GetAndSetFieldAccess<?>) fieldAccess).getterFunction.createHandle();
+				} else {
+					if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field is of unknown implementation");
+					return null;
+				}
+			} catch (IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Encapsulated field not accessible");
+				return null;
+			}
+		}
 	}
 
 	protected static class DelegateMethodAccess<T, R> extends MethodAccess<R> {
@@ -167,6 +234,12 @@ public abstract class MethodAccess<T> extends MemberAccess {
 		@Override
 		public MethodAccess<R> clone() {
 			return new DelegateMethodAccess<>(delegate.clone(), resultTransform);
+		}
+
+		@Override
+		public MethodHandle createHandle() {
+			if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create MethodHandle from MethodAccess: Cannot create MethodHandle for delegates");
+			return null;
 		}
 		
 	}

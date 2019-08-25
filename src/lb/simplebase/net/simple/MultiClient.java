@@ -7,6 +7,7 @@ import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.TargetIdentifier;
 
+@Deprecated
 public abstract class MultiClient extends ReceiveSide{
 
 	private final ClientNetworkSession session;

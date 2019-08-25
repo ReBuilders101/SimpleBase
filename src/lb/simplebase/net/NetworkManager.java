@@ -127,6 +127,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 		FutureState.RUN_ASYNC = enabled;
 	}
 	
+	@Deprecated
 	public static ClientNetworkSession createMultiClient(TargetIdentifier localId) {
 		return new ClientNetworkSession(localId);
 	}

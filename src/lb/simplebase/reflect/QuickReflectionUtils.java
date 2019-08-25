@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -66,6 +67,23 @@ public final class QuickReflectionUtils {
 //		return testType.isAssignableFrom(object.getClass());
 	}
 	
+	public static boolean isFunctionalInterface(Class<?> testClass) {
+		Objects.requireNonNull(testClass, "Class must not be null");
+		
+		if(testClass.isAnnotationPresent(FunctionalInterface.class)) return true; //This is validated at compile time
+		//But an interface can be functioonal without declaring it
+		if(!Modifier.isInterface(testClass.getModifiers())) return false; //Must be an interface
+		final Method[] methods = testClass.getMethods(); //Interface methods are always public, so no need for getDeclaredMethods
+		
+		int abstractCounter = 0; //Amount of abstract methods in the interface
+		for(Method m : methods) {
+			//Increase if abstract method is found (static methods don't count)
+			if(Modifier.isAbstract(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) abstractCounter++; 
+		}
+		
+		return abstractCounter == 1; //There must be exactly one abstract method
+	}
+	
 	/**
 	 * Utility Methods that get and set field values using reflection.
 	 */
@@ -90,6 +108,7 @@ public final class QuickReflectionUtils {
 			try {
 				return field.get(instance);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not get value of field: " + field, e);
 				return null;
 			}
 		}
@@ -116,6 +135,7 @@ public final class QuickReflectionUtils {
 			try {
 				return Optional.ofNullable(field.get(instance));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not get value of field: " + field, e);
 				return null;
 			}
 		}
@@ -139,6 +159,7 @@ public final class QuickReflectionUtils {
 			try {
 				return (T) field.get(instance);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not get value of field: " + field, e);
 				return null;
 			}
 		}
@@ -167,6 +188,7 @@ public final class QuickReflectionUtils {
 			try {
 				return Optional.ofNullable((T) field.get(instance));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not get value of field: " + field, e);
 				return null;
 			}
 		}
@@ -184,6 +206,7 @@ public final class QuickReflectionUtils {
 				field.set(instance, value);
 				return true;
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not set value of field: " + field, e);
 				return false;
 			}
 		}
@@ -219,6 +242,7 @@ public final class QuickReflectionUtils {
 			try {
 				return method.invoke(instance, params.getValueArray());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not invoke method: " + method, e);
 				return null;
 			}
 		}
@@ -236,6 +260,7 @@ public final class QuickReflectionUtils {
 			try {
 				return Optional.ofNullable(method.invoke(instance, params.getValueArray()));
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not invoke method: " + method, e);
 				return null; //on error null
 			}
 		}
@@ -276,6 +301,7 @@ public final class QuickReflectionUtils {
 			try {
 				return (T) method.invoke(instance, params.getValueArray());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not invoke method: " + method, e);
 				return null;
 			}
 		}
@@ -295,6 +321,7 @@ public final class QuickReflectionUtils {
 			try {
 				return Optional.ofNullable((T) method.invoke(instance, params.getValueArray()));
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not invoke method: " + method, e);
 				return null; //on error null
 			}
 		}
@@ -335,6 +362,7 @@ public final class QuickReflectionUtils {
 				method.invoke(instance, params.getValueArray());
 				return true;
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not invoke method: " + method, e);
 				return false;
 			}
 		}
@@ -367,6 +395,7 @@ public final class QuickReflectionUtils {
 			try {
 				return (T) constructor.newInstance(params.getValueArray());
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException	| InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create instance from constructor: " + constructor, e);
 				return null;
 			}
 		}
@@ -385,6 +414,7 @@ public final class QuickReflectionUtils {
 			try {
 				return (T) accessor.newInstance(params.getValueArray());
 			} catch (InstantiationException | IllegalArgumentException | InvocationTargetException e) {
+				if(BaseReflectionUtils.enabled) BaseReflectionUtils.REF_LOG.error("Could not create instance from constructor accessor: " + accessor, e);
 				return null;
 			}
 		}
