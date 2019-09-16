@@ -398,7 +398,7 @@ public final class QuickReflectionUtils {
 		public static <T> T constructObject(final Class<T> declaringClass, Parameters params) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for constructor execution");
+			Validate.requireTrue(params.hasValues(), "Parameter object must contain values for constructor execution");
 			
 			final Constructor<?> constructor = BaseReflectionUtils.getConstructor(declaringClass, params.getTypeArray());
 			if(constructor == null) return null;
@@ -411,10 +411,11 @@ public final class QuickReflectionUtils {
 		}
 		
 		@SuppressWarnings("unchecked")
-		public static <T> T constructObjectUnchecked(final Class<T> declaringClass, Parameters params) {
+		@RequireUndocumented("sun.reflect.ConstructorAccessor")
+		protected static <T> T constructObjectUnchecked(final Class<T> declaringClass, Parameters params) {
 			Objects.requireNonNull(declaringClass, "Declaring class must not be null");
 			Objects.requireNonNull(params, "Parameters must not be null");
-			if(!params.hasValues()) throw new IllegalArgumentException("Parameter object must contain values for constructor execution");
+			Validate.requireTrue(params.hasValues(), "Parameter object must contain values for constructor execution");
 			
 			Constructor<T> constructor = BaseReflectionUtils.getConstructor(declaringClass, params);
 			if(constructor == null) return null;

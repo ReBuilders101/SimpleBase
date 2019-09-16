@@ -115,6 +115,21 @@ public final class Validate {
 		return collection;
 	}
 	
+	public static int requireMin(final int value, final int minValue, final String message) {
+		if(value < minValue) throw new IllegalArgumentException(message);
+		return value;
+	}
+	
+	public static int requireMax(final int value, final int maxValue, final String message) {
+		if(value > maxValue) throw new IllegalArgumentException(message);
+		return value;
+	}
+	
+	public static int requireRange(final int value, final int minValue, final int maxValue, final String message) {
+		if(value <  minValue || value > maxValue) throw new IllegalArgumentException(message);
+		return value;
+	}
+	
 	public static void requireTrue(final boolean value, final String message) throws IllegalArgumentException {
 		if(!value) throw new IllegalArgumentException(message);
 	}

@@ -2,14 +2,20 @@ package lb.simplebase.reflect;
 
 import java.util.Objects;
 
+import lb.simplebase.core.RequireUndocumented;
+import lb.simplebase.util.Validate;
+
 public final class EnumUtils {
 	
 	private EnumUtils() {}
 	
-	public static <T extends Enum<T>> T getInstance(Class<T> clazz, String name, int ordinal, Parameters params){
+	@RequireUndocumented("sun.reflect.ConstructorAccessor")
+	public static <T extends Enum<T>> T getInstance(final Class<T> clazz, final String name, final int ordinal, final Parameters params){
 		Objects.requireNonNull(name, "Enum item name must not be null");
 		Objects.requireNonNull(clazz, "Enum class must not be null");
 		Objects.requireNonNull(params, "Enum constructor parameters must not be null");
+		Validate.requireTrue(clazz.isEnum(), "Class in parameter must be an enum class");
+		Validate.requireMin(ordinal, 0, "Enum item ordinal must be larger than 0");
 		
 		final Parameters fullSig;
 		if(params == null || params.getLength() == 0) {
