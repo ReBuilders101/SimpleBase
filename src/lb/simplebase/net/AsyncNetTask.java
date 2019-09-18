@@ -27,8 +27,20 @@ public final class AsyncNetTask implements AsyncResult {
 	private Exception error;
 	private String errorMessage;
 	private Collection<Runnable> doneTasks;
+	private final Accessor accessor;
 	
 	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
+	
+	public class Accessor {
+		protected synchronized void setErrorAndMessage(Exception e, String message) {
+			error = e;
+			if(message == null && error != null) {
+				errorMessage = e.getMessage();
+			} else {
+				errorMessage = message;
+			}
+		}
+	}
 	
 	/**
 	 * If <code>true</code>, tasks will run in another thread.
@@ -36,15 +48,11 @@ public final class AsyncNetTask implements AsyncResult {
 	 */
 	protected static volatile boolean RUN_ASYNC = true;
 	
-	public static AsyncResult submitTask(Runnable task) {
+	public static AsyncResult submitTask(Consumer<Accessor> task) {
 		return createTask(task).run();
 	}
 	
-	protected static AsyncNetTask createTask(Runnable task) {
-		return new AsyncNetTask(false, (f) -> task.run(), null, null, false);
-	}
-	
-	protected static AsyncNetTask createTask(Consumer<AsyncNetTask> task) {
+	protected static AsyncNetTask createTask(Consumer<Accessor> task) {
 		return new AsyncNetTask(false, task, null, null, false);
 	}
 	
@@ -52,7 +60,8 @@ public final class AsyncNetTask implements AsyncResult {
 		return new AsyncNetTask(true, null, ex, message, true);
 	}
 	
-	private AsyncNetTask(boolean failed, Consumer<AsyncNetTask> asyncTask, Exception ex, String message, boolean log) {
+	private AsyncNetTask(boolean failed, Consumer<Accessor> asyncTask, Exception ex, String message, boolean log) {
+		this.accessor = new Accessor();
 		if(failed) {
 			this.task = CompletableFuture.completedFuture(null);
 			this.state = State.FINISHED;
@@ -68,7 +77,7 @@ public final class AsyncNetTask implements AsyncResult {
 		} else {
 			Callable<Void> newTask = () -> {
 				try {
-					asyncTask.accept(this);
+					asyncTask.accept(accessor);
 				} finally { //Make sure that taskDoneHandler is called when an uncaught exception is thrown
 					taskDoneHandler();
 				}
@@ -85,15 +94,6 @@ public final class AsyncNetTask implements AsyncResult {
 	
 	public String getErrorMessage() {
 		return errorMessage;
-	}
-	
-	protected synchronized void setErrorAndMessage(Exception e, String message) {
-		error = e;
-		if(message == null && error != null) {
-			errorMessage = e.getMessage();
-		} else {
-			errorMessage = message;
-		}
 	}
 	
 	@Override
@@ -154,7 +154,7 @@ public final class AsyncNetTask implements AsyncResult {
 		try {
 			task.get();
 		} catch (ExecutionException e) {
-			setErrorAndMessage(e, null);
+			accessor.setErrorAndMessage(e, null);
 		}
 		return this;
 	}

@@ -23,7 +23,7 @@ public class LocalNetworkConnection extends NetworkConnection{
 	@Override
 	public AsyncResult sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN && partner != null) {
-			return AsyncNetTask.createTask(() -> {
+			return AsyncNetTask.createTask((f) -> {
 				LocalConnectionManager.submitLocalPacketTask(() -> partner.handleReceivedPacket(packet));
 			}).run();
 		} else {
