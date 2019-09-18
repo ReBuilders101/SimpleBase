@@ -120,7 +120,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static void setLogLevel(LogLevel level) {
-		QuickReflectionUtils.Fields.setField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, LogLevel.WARN);
+		QuickReflectionUtils.Fields.setField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, level);
 	}
 	
 	public static void setAsyncMode(boolean enabled) {
