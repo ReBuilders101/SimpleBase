@@ -32,7 +32,7 @@ public final class AsyncNetTask implements AsyncResult {
 	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
 	
 	public class Accessor {
-		protected synchronized void setErrorAndMessage(Exception e, String message) {
+		public synchronized void setErrorAndMessage(Exception e, String message) {
 			error = e;
 			if(message == null && error != null) {
 				errorMessage = e.getMessage();
