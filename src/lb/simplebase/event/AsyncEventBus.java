@@ -35,6 +35,7 @@ public class AsyncEventBus extends EventBus {
 		taskRunner = service;
 	}
 	
+	@Deprecated //Needs rework
 	public synchronized AwaitableEventResult postAwaitable(Event event, EventPriority priority) {
 		if(event == null || !isActive() || isHandlerThread()) return AwaitableEventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();

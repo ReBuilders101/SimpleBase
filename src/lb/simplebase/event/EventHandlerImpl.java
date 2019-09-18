@@ -165,7 +165,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 				//invoke through static callSite
 				synchronized (setAndInvokeLock) { //Make sure we are not interrupted
 					handlerCallSite.setTarget(handle); //Set the method to run through the callSite
-					handlerInvoker.invoke(instance); //can't use invokeExact because event is a subclass and requires widening conversion
+					handlerInvoker.invokeExact(instance); //can't use invokeExact because event is a subclass and requires widening conversion
 				}
 			} catch (Throwable e) {
 				e.printStackTrace();
