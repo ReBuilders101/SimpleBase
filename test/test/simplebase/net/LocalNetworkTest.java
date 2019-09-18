@@ -55,7 +55,7 @@ class LocalNetworkTest {
 		serverManager.addIncomingPacketHandler(this::getPacket);
 		clientManager = NetworkManager.createClient(client, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);
-		serverManager.startServer().sync();
+		serverManager.startServer();
 	}
 
 	@AfterEach
@@ -68,7 +68,7 @@ class LocalNetworkTest {
 
 	@Test
 	void connectTest() throws InterruptedException {
-		clientManager.openConnectionToServer().sync(); //wait for it!!
+		clientManager.openConnectionToServer();
 		Assertions.assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN);
 	}
 	
@@ -77,12 +77,12 @@ class LocalNetworkTest {
 		serverManager.addMapping(PacketIdMapping.create(5, TestPacket.class, TestPacket::new));
 		clientManager.addAllMappings(serverManager);
 		
-		clientManager.openConnectionToServer().sync();
+		clientManager.openConnectionToServer();
 		
 		byte[] data = new byte[50];
 		new Random().nextBytes(data);
 		Packet test = new TestPacket(data);
-		assertTrue(clientManager.sendPacketToServer(test).ensurePacketSent(), "Cannot send packet");
+		assertTrue(clientManager.sendPacketToServer(test).sync().isSuccess(), "Cannot send packet");
 		
 		//Wait with assertion until packet has been processed 
 		barrier.await();
@@ -92,7 +92,7 @@ class LocalNetworkTest {
 		Packet test2 = new TestPacket(data);
 		assertTrue(serverManager.isCurrentClient(client), "No client connection");
 		assertTrue(serverManager.isCurrentClient(client), "No open client connection");
-		assertTrue(serverManager.sendPacketToClient(test2, client).ensurePacketSent(), "Cannot send packet");
+		assertTrue(serverManager.sendPacketToClient(test2, client).sync().isSuccess(), "Cannot send packet");
 		
 		//Wait with assertion until packet has been processed 
 		barrier.await();

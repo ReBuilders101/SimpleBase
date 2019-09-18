@@ -52,7 +52,7 @@ class NetworkTest {
 		serverManager.addIncomingPacketHandler(this::getPacket);
 		clientManager = NetworkManager.createClient(clientFromClient, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);
-		serverManager.startServer().sync();
+		serverManager.startServer();
 	}
 
 	@AfterEach
@@ -66,7 +66,7 @@ class NetworkTest {
 	@Test
 	void connectTest() throws InterruptedException {
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
-		assertTrue(clientManager.openConnectionToServer().ensureState(ConnectionState.OPEN), "Could not open connection");
+		clientManager.openConnectionToServer();
 		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
 	}
 	
@@ -77,13 +77,13 @@ class NetworkTest {
 		clientManager.addAllMappings(serverManager); //ensure the mappings are always the same
 		
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
-		assertTrue(clientManager.openConnectionToServer().ensureState(ConnectionState.OPEN), "Could not open connection");
+		clientManager.openConnectionToServer();
 		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
 		
 		byte[] dataArray = new byte[50];
 		new Random().nextBytes(dataArray);
 		Packet data = new TestPacket(dataArray);
-		clientManager.sendPacketToServer(data).ensurePacketSent();
+		clientManager.sendPacketToServer(data).sync();
 		System.out.println("sent!");
 		
 		//Now try the other dircetion
@@ -102,7 +102,7 @@ class NetworkTest {
 		new Random().nextBytes(dataArray);
 		data = new TestPacket(dataArray);
 		
-		assertTrue(serverManager.sendPacketToClient(data, clientFromServer).ensurePacketSent(), "Could not send Packet");
+		assertTrue(serverManager.sendPacketToClient(data, clientFromServer).sync().isSuccess(), "Could not send Packet");
 		
 		barrier.await(); //wait for received packet
 		assertEquals(data, assertionPacket, "Packets are not equal (2)");
