@@ -1,14 +1,15 @@
 package lb.simplebase.event;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import lb.simplebase.event.EventHandlerImpl.EventHandlerAwaitable;
 import lb.simplebase.event.HandlerList.HandlerListAwaitable;
+import lb.simplebase.util.NamedThreadFactory;
 
 /**
  * A concurrent implementation of {@link EventBus} that executes handlers
@@ -16,22 +17,18 @@ import lb.simplebase.event.HandlerList.HandlerListAwaitable;
  */
 public class AsyncEventBus extends EventBus {
 	
-	private static final AtomicInteger threadId = new AtomicInteger();
+	private static final Collection<ExecutorService> services = new ArrayList<>();
+	private static final ThreadFactory executorFactory = new NamedThreadFactory("AsyncEventBus-Executor-");
 	
-	private static final ThreadFactory executorFactory = new ThreadFactory() {
-		
-		@Override
-		public Thread newThread(Runnable var1) {
-			Thread t = Executors.defaultThreadFactory().newThread(var1);
-			t.setName("AsyncEventBus-Executor-" + threadId.getAndIncrement());
-			return t;
-		}
-	};
+	public static void shotdownExecutors() {
+		services.forEach((e) -> e.shutdown());
+	}
 	
 	private final ExecutorService taskRunner;
 	
-	protected AsyncEventBus(ExecutorService service) {
+	protected AsyncEventBus(final ExecutorService service) {
 		super();
+		services.add(service);
 		taskRunner = service;
 	}
 	
