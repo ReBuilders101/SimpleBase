@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.util.concurrent.TimeoutException;
 
+import lb.simplebase.action.AsyncResult;
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
 public class LocalNetworkConnection extends NetworkConnection{
@@ -20,37 +21,33 @@ public class LocalNetworkConnection extends NetworkConnection{
 	}
 	
 	@Override
-	public PacketSendFuture sendPacketToTarget(Packet packet) {
+	public AsyncResult sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN && partner != null) {
-			return PacketSendFuture.create((f) -> {
+			return AsyncNetTask.createTask(() -> {
 				LocalConnectionManager.submitLocalPacketTask(() -> partner.handleReceivedPacket(packet));
-				f.setPacketSent(true);
 			}).run();
 		} else {
-			return PacketSendFuture.quickFailed("Connection is not open");
+			return AsyncNetTask.createFailed(null, "Connection is not open");
 		}
 	}
 
 	@Override
-	public ConnectionStateFuture connect(int timeout) {
+	public void connect(int timeout) {
 		if(getState() == ConnectionState.UNCONNECTED) {
-			return ConnectionStateFuture.create(getState(), (f) -> {
 				try {
 					partner = LocalConnectionManager.waitForLocalConnectionServer(this, timeout);
 				} catch (TimeoutException e) {
-					f.setErrorAndMessage(e, "The timeout expired before a local connection could be made");
+					NetworkManager.NET_LOG.warn("The timeout expired before a local connection could be made", e);
 					return;
 				} catch (InterruptedException e) {
-					f.setErrorAndMessage(e, "The thread was interrupted while waiting for the connection");
+					NetworkManager.NET_LOG.warn("The thread was interrupted while waiting for the connection", e);
 					return;
 				}
 				setConnectionState(ConnectionState.OPEN);
-				f.setCurrentState(getState());
-			}).run();
 			
 		} else {
-			return ConnectionStateFuture.quickFailed("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
-					+ " and cannot be connected again", getState());
+			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+					+ " and cannot be connected again");
 		}
 	}
 
@@ -64,11 +61,10 @@ public class LocalNetworkConnection extends NetworkConnection{
 	}
 
 	@Override
-	public ConnectionStateFuture close() {
-		ConnectionStateFuture superFuture = super.close(); //Uses EXPECTED reason
+	public void close() {
+		super.close(); //Uses EXPECTED reason
 		if(partner != null) //If it was even connected
 			partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
-		return ConnectionStateFuture.quickDone(superFuture.getOldState(), getState());
 	}
 	
 	/**

@@ -1,9 +1,6 @@
-package lb.simplebase.net;
+package lb.simplebase.action;
 
-/**
- * Result of a task that can be executed on another thread
- */
-public interface AsyncResult extends Result{
+public interface AsyncAction {
 
 	/**
 	 * Waits for the asynchrounous task to complete.
@@ -12,7 +9,7 @@ public interface AsyncResult extends Result{
 	 * @throws InterruptedException When the calling thread is interrupted while waiting
 	 * @see #trySync()
 	 */
-	public AsyncResult sync() throws InterruptedException;
+	public AsyncAction syncOrError() throws InterruptedException;
 	
 	/**
 	 * Waits for the asynchrounous task to complete.
@@ -20,9 +17,9 @@ public interface AsyncResult extends Result{
 	 * When the thread is interrupted, this method will return without throwing an {@link InterruptedException}.
 	 * @return This {@link AsyncResult}, for method chaining
 	 * @see #sync()
-	 */	public default AsyncResult trySync() {
+	 */	public default AsyncAction sync() {
 		try {
-			return sync();
+			return syncOrError();
 		} catch (InterruptedException e) {
 			return this; //ignore
 		}
@@ -33,5 +30,7 @@ public interface AsyncResult extends Result{
 	 * @return Whether the task is done
 	 */
 	public boolean isDone();
+
+	public void addDoneHandler(Runnable handler);
 	
 }

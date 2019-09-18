@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import lb.simplebase.action.AsyncResult;
+import lb.simplebase.action.AsyncResultGroup;
+
 @ServerSide
 public interface NetworkManagerServer extends NetworkManagerCommon{
 	
@@ -16,43 +19,43 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 * @param client The {@link TargetIdentifier} that this packet should be sent to
 	 * @return A {@link PacketSendFuture} containing information about sending progress, success and errors
 	 */
-	public PacketSendFuture sendPacketToClient(Packet packet, TargetIdentifier client);
+	public AsyncResult sendPacketToClient(Packet packet, TargetIdentifier client);
 	
-	public default MultiPacketSendFuture sendPacketToClients(Packet packet, TargetIdentifier...clients) {
-		PacketSendFuture[] results = new PacketSendFuture[clients.length];
+	public default AsyncResultGroup sendPacketToClients(Packet packet, TargetIdentifier...clients) {
+		AsyncResult[] results = new AsyncResult[clients.length];
 		for(int i = 0; i < clients.length; i++) {
 			TargetIdentifier client = clients[i];
 			results[i] = sendPacketToClient(packet, client);
 		}
-		return MultiPacketSendFuture.of(results);
+		return new AsyncResultGroup(results);
 	}
-	public default MultiPacketSendFuture sendPacketToClients(Packet packet, Iterable<TargetIdentifier> clients) {
-		List<PacketSendFuture> results = new LinkedList<>();
+	public default AsyncResultGroup sendPacketToClients(Packet packet, Iterable<TargetIdentifier> clients) {
+		List<AsyncResult> results = new LinkedList<>();
 		for(TargetIdentifier client : clients) {
 			results.add(sendPacketToClient(packet, client));
 		}
-		return MultiPacketSendFuture.of(results);
+		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
-	public default MultiPacketSendFuture sendPacketToAllClients(Packet packet) {
+	public default AsyncResultGroup sendPacketToAllClients(Packet packet) {
 		return sendPacketToClients(packet, getCurrentClients());
 	}
 	
-	public default MultiPacketSendFuture sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, TargetIdentifier...clients) {
-		PacketSendFuture[] results = new PacketSendFuture[clients.length];
+	public default AsyncResultGroup sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, TargetIdentifier...clients) {
+		AsyncResult[] results = new AsyncResult[clients.length];
 		for(int i = 0; i < clients.length; i++) {
 			TargetIdentifier client = clients[i];
 			results[i] = sendPacketToClient(mapper.apply(client), client);
 		}
-		return MultiPacketSendFuture.of(results);
+		return new AsyncResultGroup(results);
 	}
-	public default MultiPacketSendFuture sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, Iterable<TargetIdentifier> clients) {
-		List<PacketSendFuture> results = new LinkedList<>();
+	public default AsyncResultGroup sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, Iterable<TargetIdentifier> clients) {
+		List<AsyncResult> results = new LinkedList<>();
 		for(TargetIdentifier client : clients) {
 			results.add(sendPacketToClient(mapper.apply(client), client));
 		}
-		return MultiPacketSendFuture.of(results);
+		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
-	public default MultiPacketSendFuture sendCustomPacketToAllClients(Function<TargetIdentifier, Packet> mapper) {
+	public default AsyncResultGroup sendCustomPacketToAllClients(Function<TargetIdentifier, Packet> mapper) {
 		return sendCustomPacketToClients(mapper, getCurrentClients());
 	}
 	
@@ -74,7 +77,7 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 * @param client The {@link TargetIdentifier} of the client to remove
 	 * @return A {@link ConnectionStateFuture} containing information about progress, success and errors
 	 */
-	public ConnectionStateFuture disconnectClient(TargetIdentifier client);
+	public void disconnectClient(TargetIdentifier client);
 	
 	/**
 	 * Returns the number of client connections that this server has active. 
@@ -82,8 +85,8 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 */
 	public int getCurrentClientCount();
 	
-	public ServerStateFuture startServer();
-	public ServerStateFuture stopServer();
+	public void startServer();
+	public void stopServer();
 	
 	/**
 	 * The state of the server

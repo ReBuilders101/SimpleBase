@@ -7,28 +7,24 @@ public class LocalNetworkManagerServer extends CommonServer {
 	}
 
 	@Override
-	public ServerStateFuture startServer() {
+	public void startServer() {
 		if(state == ServerState.INITIALIZED) {
 			NetworkManager.NET_LOG.info("Server Manager: Starting server...");
-			return (ServerStateFuture) ServerStateFuture.create(getServerState(), (f) -> {
 				LocalConnectionManager.addServer(this);
 				NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
-			}).runInSync(); //Not in a new thread
 		} else {
-			return ServerStateFuture.quickFailed("Server has already been started", state);
+			NetworkManager.NET_LOG.warn("Server Manager: Server has already been started");
 		}
 	}
 
 	@Override
-	public ServerStateFuture stopServer() {
+	public void stopServer() {
 		if(state == ServerState.STOPPED) {
-			return ServerStateFuture.quickDone(ServerState.STOPPED);
+			NetworkManager.NET_LOG.info("Server Manager: Server already stopped");
 		} else {
 			NetworkManager.NET_LOG.info("Server Manager: Stopping server...");
-			return (ServerStateFuture) ServerStateFuture.create(getServerState(), (f) -> {
-				LocalConnectionManager.removeServer(this);
-				NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
-			}).runInSync(); //Not in a new thread
+			LocalConnectionManager.removeServer(this);
+			NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
 		}
 	}
 

@@ -1,5 +1,7 @@
 package lb.simplebase.net;
 
+import lb.simplebase.action.AsyncResult;
+
 /**
  * A client side manager for a single network session.
  * Used to send packets to a server and to handle incoming packets
@@ -13,11 +15,11 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 * @param target The target server. Normally, a client can only send data to a single server in one session, which must match the target parameter
 	 * @return Information about the sending process, which is updated asynchounously.
 	 */
-	public default PacketSendFuture sendPacketTo(Packet packet, TargetIdentifier target) {
+	public default AsyncResult sendPacketTo(Packet packet, TargetIdentifier target) {
 		if(target.equals(getServerIndentifier())) {
 			return sendPacketToServer(packet);
 		} else {
-			return PacketSendFuture.quickFailed("Target id does not match server id");
+			return AsyncNetTask.createFailed(null, "Target id does not match server id");
 		}
 	}
 	
@@ -26,7 +28,7 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 * @param packet The packet to send
 	 * @return Information about the sending process, which is updated asynchounously.
 	 */
-	public PacketSendFuture sendPacketToServer(Packet packet);
+	public AsyncResult sendPacketToServer(Packet packet);
 	
 	/**
 	 * @return {@link ConnectionState} of the connection to the server
@@ -37,13 +39,13 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 * Opens the connection to the server. No data can be sent or received before the connection has been opened
 	 * @return Information about the connection.
 	 */
-	public ConnectionStateFuture openConnectionToServer();
+	public void openConnectionToServer();
 	
 	/**
 	 * Closes the connection to the server. No data can be sent or received after the connection has been closed
 	 * @return Information about the connection.
 	 */
-	public ConnectionStateFuture closeConnectionToServer();
+	public void closeConnectionToServer();
 	
 	
 	/**

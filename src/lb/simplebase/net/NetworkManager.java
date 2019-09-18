@@ -73,7 +73,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	public static synchronized void cleanUp() {
 		if(currentState == Lifecycle.STOPPED) return;
 		cleanupTasks.forEach(Runnable::run);
-		FutureState.shutdownExecutor();
+		AsyncNetTask.shutdownExecutor();
 		LocalConnectionManager.shutdownExecutor();
 		currentState = Lifecycle.STOPPED;
 	}
@@ -124,12 +124,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static void setAsyncMode(boolean enabled) {
-		FutureState.RUN_ASYNC = enabled;
-	}
-	
-	@Deprecated
-	public static ClientNetworkSession createMultiClient(TargetIdentifier localId) {
-		return new ClientNetworkSession(localId);
+		AsyncNetTask.RUN_ASYNC = enabled;
 	}
 	
 	public static NetworkManagerClient createClient(TargetIdentifier localId, TargetIdentifier serverId) {

@@ -2,6 +2,8 @@ package lb.simplebase.net;
 
 import java.util.Objects;
 
+import lb.simplebase.action.AsyncResult;
+
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
  * supports one connectiont to the server.
@@ -44,8 +46,8 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 * @param packet The Packet that should be sent
 	 * @return Whether the {@link Packet} was sent successfully
 	 */
-	public PacketSendFuture sendPacketToServer(Packet packet) {
-		if(!serverConnection.isConnectionOpen()) return PacketSendFuture.quickFailed("Connection to server is not open");
+	public AsyncResult sendPacketToServer(Packet packet) {
+		if(!serverConnection.isConnectionOpen()) return AsyncNetTask.createFailed(null, "Connection to server is not open");
 		return serverConnection.sendPacketToTarget(packet);
 	}
 	
@@ -54,9 +56,9 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 * If the connection is already open, or could not be made, <code>false</code> is returned.
 	 * @return Whether the connection was opened successfully
 	 */
-	public ConnectionStateFuture openConnectionToServer() {
-		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.getConnectionAddress() +")...");
-		return serverConnection.connect();
+	public void openConnectionToServer() {
+		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.getConnectionAddress() +")");
+		serverConnection.connect();
 	}
 	
 	/**
@@ -73,10 +75,10 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	}
 
 	@Override
-	public ConnectionStateFuture closeConnectionToServer() {
-		if(serverConnection.state == ConnectionState.CLOSED) return ConnectionStateFuture.quickDone(ConnectionState.CLOSED, ConnectionState.CLOSED);
-		NetworkManager.NET_LOG.info("Client Manager: Closing server connection...");
-		return serverConnection.close();
+	public void closeConnectionToServer() {
+		if(serverConnection.state == ConnectionState.CLOSED) return;
+		NetworkManager.NET_LOG.info("Client Manager: Closing server connection");
+		serverConnection.close();
 	}
 
 	@Override

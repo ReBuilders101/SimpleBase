@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import lb.simplebase.action.AsyncResult;
+
 class RemoteNetworkConnection extends NetworkConnection{
 
 	private final Socket connection;
@@ -19,9 +21,9 @@ class RemoteNetworkConnection extends NetworkConnection{
 	}
 	
 	@Override
-	public PacketSendFuture sendPacketToTarget(Packet packet) {
+	public AsyncResult sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN) {
-			return PacketSendFuture.create((f) -> {
+			return AsyncNetTask.createTask((f) -> {
 				byte[] dataToSend;
 				//1. Split packet into bytes
 				try {
@@ -38,55 +40,48 @@ class RemoteNetworkConnection extends NetworkConnection{
 					return;
 				}
 				//3. Done!
-				f.setPacketSent(true);
 			}).run();
 		} else {
-			return PacketSendFuture.quickFailed("Connection was not open");
+			return AsyncNetTask.createFailed(null, "Connection was not open");
 		}
 	}
 	
 	@Override
-	public ConnectionStateFuture close() {
-		ConnectionStateFuture superClose = super.close(); //Ignore result, it will always be a success
+	public void close() {
+		super.close(); //Ignore result, it will always be a success
 		NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
-		if(superClose.getOldState() == ConnectionState.CLOSED) return superClose;
-		return ConnectionStateFuture.create(superClose.getOldState(), (f) -> {
+		if(state == ConnectionState.CLOSED) {
+			NetworkManager.NET_LOG.info("Connection already closed");
+		} else {
 			try {
 				connection.shutdownOutput();
 				connection.close();
-				f.setCurrentState(ConnectionState.CLOSED);
-				NetworkManager.NET_LOG.info("Closing Network connection to " + getRemoteTargetId());
+				super.close();
+				NetworkManager.NET_LOG.info("Closed Network connection to " + getRemoteTargetId());
 			} catch (IOException e) {
 				//If closing fails
-				f.setErrorAndMessage(e, "Closing the Socket failed with exception");
+				NetworkManager.NET_LOG.error("Closing the Socket failed with exception", e);
 			}
-		}).run();
+		}
 	}
 
 	@Override
-	public ConnectionStateFuture connect(int timeout) {
+	public void connect(int timeout) {
 		if(getState() == ConnectionState.UNCONNECTED) {
-			return ConnectionStateFuture.create(getState(), (f) -> {
-				try {
-					if(timeout == 0) {
-						connection.connect(getRemoteTargetId().getConnectionAddress());
-					} else {
-						connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
-					}
-					//After connecting successfully, start the listener thread
-					dataThread.start();
-					//And lastly set the state
-					state = ConnectionState.OPEN;
-					f.setCurrentState(state);
-				} catch (SocketTimeoutException e) {
-					f.setErrorAndMessage(e, "The timeout (" + timeout + "ms) expired before a connection could be made");
-				} catch (IOException e) {
-					f.setErrorAndMessage(e, "An IO error occurred while trying to connect the Socket");
-				}
-			}).run();
+			try {
+				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
+				//After connecting successfully, start the listener thread
+				dataThread.start();
+				//And lastly set the state
+				state = ConnectionState.OPEN;
+			} catch (SocketTimeoutException e) {
+				NetworkManager.NET_LOG.warn("The timeout (" + timeout + "ms) expired before a connection could be made", e);
+			} catch (IOException e) {
+				NetworkManager.NET_LOG.error("An IO error occurred while trying to connect the Socket", e);
+			}
 		} else {
-			return ConnectionStateFuture.quickFailed("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
-					+ " and cannot be connected again", getState());
+			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+					+ " and cannot be connected again");
 		}
 	}
 

@@ -29,17 +29,17 @@ public abstract class Client extends ReceiveSide {
 	
 	public void send(String message) {
 		if(client.getConnectionState() == ConnectionState.UNCONNECTED) {
-			client.openConnectionToServer().trySync();
-			client.sendPacketToServer(new StringMessagePacket(message)).trySync();
+			client.openConnectionToServer();
+			client.sendPacketToServer(new StringMessagePacket(message)).sync();
 		} else if(client.getConnectionState() == ConnectionState.CLOSED) {
 			throw new RuntimeException("Connection to server is closed");
 		} else {
-			client.sendPacketToServer(new StringMessagePacket(message)).trySync();
+			client.sendPacketToServer(new StringMessagePacket(message)).sync();
 		}
 	}
 	
 	public void close() {
-		client.closeConnectionToServer().trySync();
+		client.closeConnectionToServer();
 	}
 	
 	public boolean isClosed() {

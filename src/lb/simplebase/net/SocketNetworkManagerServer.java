@@ -9,19 +9,18 @@ import lb.simplebase.util.ExceptionUtils;
 
 class SocketNetworkManagerServer extends CommonServer {
 
-	
 	protected SocketNetworkManagerServer(TargetIdentifier localId, ServerSocket socket, int threads) {
 		super(localId, threads);
 		serverSocket = socket;
 		acceptor = new ConnectionAcceptorThread(serverSocket, this);
 	}
-	
+
 	private final ServerSocket serverSocket;
 	private final ConnectionAcceptorThread acceptor;
-	
+
 	protected void acceptIncomingUnconfirmedConnection(Socket newConnectionSocket) {
 		NetworkManager.NET_LOG.info("Server Manager: Remote connection attempted (" + newConnectionSocket.getRemoteSocketAddress() + ")");
-		
+
 		//Post the event
 		final EventResult result = bus.post(new AttemptedConnectionEvent(newConnectionSocket.getInetAddress(), this));
 		if(ExceptionUtils.wrapException(() -> result.wasCanceled(), true)) { //TODO move the method somewhere else
@@ -48,52 +47,47 @@ class SocketNetworkManagerServer extends CommonServer {
 
 
 	@Override
-	public ServerStateFuture startServer() {
+	public void startServer() {
 		if(state == ServerState.INITIALIZED) {
 			NetworkManager.NET_LOG.info("Server Manager: Starting server...");
-			return ServerStateFuture.create(state, (f) -> {
-				LocalConnectionManager.addServer(this);
-				try {
-					serverSocket.bind(getLocalID().getConnectionAddress());
-				} catch (IOException e) {
-					f.setErrorAndMessage(e);
-					return;
-				}
-				acceptor.start();
-				state = ServerState.STARTED;
-				f.setServerState(state);
-				NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
-			}).run();
+			LocalConnectionManager.addServer(this);
+			try {
+				serverSocket.bind(getLocalID().getConnectionAddress());
+			} catch (IOException e) {
+				NetworkManager.NET_LOG.error("Server Manager: Error while binding socket", e);
+				return;
+			}
+			acceptor.start();
+			state = ServerState.STARTED;
+			NetworkManager.NET_LOG.info("Server Manager: Server start complete.");
 		} else {
-			return ServerStateFuture.quickFailed("Server has already been started", state);
+			NetworkManager.NET_LOG.warn("Server Manager: Server has already been started");
 		}
 	}
 
 	@Override
-	public ServerStateFuture stopServer() {
+	public void stopServer() {
 		if(state == ServerState.STOPPED) {
-			return ServerStateFuture.quickDone(ServerState.STOPPED);
+			NetworkManager.NET_LOG.info("Server Manager: Server already stopped");
+			return;
 		} else {
 			NetworkManager.NET_LOG.info("Server Manager: Stopping server...");
-			return ServerStateFuture.create(getServerState(), (f) -> {
-				LocalConnectionManager.removeServer(this);
-				//Then kick everyone
-				NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
-				for(NetworkConnection con : clientList) {
-					NetworkManager.NET_LOG.debug("Closing client connection: " + con.getRemoteTargetId());
-					con.close().runInSync();
-				}
-				handler.shutdownExecutor();
-				try {
-					serverSocket.close();
-				} catch (IOException e) {
-					f.setErrorAndMessage(e);
-					return;
-				}
-				state = ServerState.STOPPED;
-				f.setServerState(state);
-				NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
-			}).run();
+			LocalConnectionManager.removeServer(this);
+			//Then kick everyone
+			NetworkManager.NET_LOG.info("Server Manager: Disconnecting all clients");
+			for(NetworkConnection con : clientList) {
+				NetworkManager.NET_LOG.debug("Closing client connection: " + con.getRemoteTargetId());
+				con.close();
+			}
+			handler.shutdownExecutor();
+			try {
+				serverSocket.close();
+			} catch (IOException e) {
+				NetworkManager.NET_LOG.error("Server Manager: Error while closing Socket", e);
+				return;
+			}
+			state = ServerState.STOPPED;
+			NetworkManager.NET_LOG.info("Server Manager: Server stop complete.");
 		}
 	}
 

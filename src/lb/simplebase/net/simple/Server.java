@@ -20,7 +20,7 @@ public abstract class Server extends ReceiveSide {
 			server.addIncomingGenericPacketHandler(this::receive0);
 			server.getEventBus().register((e) -> this.newConnection(e.getRemoteAddress().getHostString(), e.getRemoteAddress().getPort()), ConfigureConnectionEvent.class);
 //			server.addNewConnectionHandler((t) -> this.newConnection(t.getConnectionAddress().getHostString(), t.getConnectionAddress().getPort()));
-			server.startServer().trySync();
+			server.startServer();
 		} catch (UnknownHostException e) {
 			throw new RuntimeException("Server Address not found", e);
 		}
@@ -33,13 +33,13 @@ public abstract class Server extends ReceiveSide {
 	protected abstract void newConnection(String hostname, int port);
 	
 	public final void sendToAll(String message) {
-		server.sendPacketToAllClients(new StringMessagePacket(message)).trySync();
+		server.sendPacketToAllClients(new StringMessagePacket(message)).sync();
 	}
 	
 	public final void sendTo(String address, int port, String message) {
 		for(TargetIdentifier client : server.getCurrentClients()) {
 			if(client.matches(address, port)) {
-				server.sendPacketToClient(new StringMessagePacket(message), client).trySync();
+				server.sendPacketToClient(new StringMessagePacket(message), client).sync();
 				return;
 			}
 		}
@@ -47,7 +47,7 @@ public abstract class Server extends ReceiveSide {
 	}
 	
 	public final void close() {
-		server.stopServer().trySync();
+		server.stopServer();
 	}
 	
 	

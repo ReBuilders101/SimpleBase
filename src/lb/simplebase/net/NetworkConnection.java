@@ -3,6 +3,7 @@ package lb.simplebase.net;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import lb.simplebase.action.AsyncResult;
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
 /**
@@ -72,15 +73,13 @@ public abstract class NetworkConnection {
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
-	public ConnectionStateFuture close() {
-		return closeWithReason(Cause.EXPECTED);
+	public void close() {
+		closeWithReason(Cause.EXPECTED);
 	}
 	
-	protected synchronized ConnectionStateFuture closeWithReason(ClosedConnectionEvent.Cause cause) {
-		ConnectionState oldState = state;
+	protected synchronized void closeWithReason(ClosedConnectionEvent.Cause cause) {
 		state = ConnectionState.CLOSED;
 		packetHandler.notifyConnectionClosed(this, cause);
-		return ConnectionStateFuture.quickDone(oldState, state);
 	}
 	
 	/**
@@ -107,8 +106,8 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionStateException When the connection could not be made
 	 * @see #connect(int)
 	 */
-	public ConnectionStateFuture connect() {
-		return connect(30000); //Default timeout 30s = 30,000 ms
+	public void connect() {
+		connect(30000); //Default timeout 30s = 30,000 ms
 	}
 	
 	/**
@@ -116,13 +115,13 @@ public abstract class NetworkConnection {
 	 * that this instance was created with.
 	 * @param timeout The maximal timeout in milliseconds
 	 */
-	public abstract ConnectionStateFuture connect(int timeout);
+	public abstract void connect(int timeout);
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
 	 * @param packet The {@link Packet} containing the data that should be sent
 	 */
-	public abstract PacketSendFuture sendPacketToTarget(Packet packet);
+	public abstract AsyncResult sendPacketToTarget(Packet packet);
 	
 	/**
 	 * A local connection is a connection between two network targets that exist within the same program.

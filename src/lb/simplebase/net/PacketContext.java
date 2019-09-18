@@ -2,6 +2,8 @@ package lb.simplebase.net;
 
 import java.util.Objects;
 
+import lb.simplebase.action.AsyncResult;
+
 public abstract class PacketContext {
 
 	private final boolean isServer;
@@ -79,7 +81,7 @@ public abstract class PacketContext {
 		return getCommonManager().getLocalID();
 	}
 	
-	public PacketSendFuture replyPacket(Packet packet) {
+	public AsyncResult replyPacket(Packet packet) {
 		return getConnection().sendPacketToTarget(packet);
 	}
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import lb.simplebase.action.AsyncResult;
 import lb.simplebase.event.EventResult;
 import lb.simplebase.util.ExceptionUtils;
 
@@ -23,7 +24,6 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	protected final PacketDistributor toAllHandlers;
 	
 	protected volatile ServerState state;
-	
 	
 	protected CommonServer(TargetIdentifier localId, int threads) {
 		super(localId);
@@ -79,10 +79,10 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 * @return A {@link PacketSendFuture} containing information about sending progress, success and errors
 	 */
 	@Override
-	public synchronized PacketSendFuture sendPacketToClient(Packet packet, TargetIdentifier client) {
+	public synchronized AsyncResult sendPacketToClient(Packet packet, TargetIdentifier client) {
 		NetworkConnection con = getCurrentClient(client);
-		if(con == null) return PacketSendFuture.quickFailed("Target ID is not a client on this server");
-		if(!con.isConnectionOpen()) return PacketSendFuture.quickFailed("Connection to client is not open");
+		if(con == null) return AsyncNetTask.createFailed(null, "Target ID is not a client on this server");
+		if(!con.isConnectionOpen()) return AsyncNetTask.createFailed(null, "Connection to client is not open");
 		return con.sendPacketToTarget(packet);
 	}
 
@@ -129,13 +129,13 @@ public abstract class CommonServer extends NetworkManager implements NetworkMana
 	 * @return A {@link ConnectionStateFuture} containing information about progress, success and errors
 	 */
 	@Override
-	public ConnectionStateFuture disconnectClient(TargetIdentifier client) {
+	public void disconnectClient(TargetIdentifier client) {
 		NetworkConnection con = getCurrentClient(client);
 		if(con == null) {
-			return ConnectionStateFuture.quickFailed("No client with this Id was found", ConnectionState.UNCONNECTED); //Maybe closed is better?
+			NetworkManager.NET_LOG.warn("Server Manager: Disconnecting client: No client with this ID was found: " + client);
 		} else {
-			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + con.getRemoteTargetId() + ")");
-			return con.close();
+			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + client + ")");
+			con.close();
 		}
 	}
 
