@@ -2,15 +2,16 @@ package lb.simplebase.action;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 
-public class AsyncResultGroup implements AsyncAction, Iterable<AsyncResult> {
+import lb.simplebase.action.AsyncAction.DoneHandler;
+
+public class AsyncResultGroup extends DoneHandler implements AsyncAction, Iterable<AsyncResult> {
 
 	private final AsyncResult[] results;
-	private Collection<Runnable> doneTasks;
 	
 	public AsyncResultGroup(AsyncResult...results) {
+		super(() -> new ArrayList<>());
 		this.results = results;
 		for(AsyncResult result : results) {
 			result.addDoneHandler(this::partTaskDoneHandler);
@@ -31,7 +32,7 @@ public class AsyncResultGroup implements AsyncAction, Iterable<AsyncResult> {
 
 	private void partTaskDoneHandler() {
 		if(isDone()) {
-			doneTasks.forEach((t) -> t.run());
+			runDoneHandlers();
 		}
 	}
 
@@ -65,12 +66,6 @@ public class AsyncResultGroup implements AsyncAction, Iterable<AsyncResult> {
 			if(result.isFailed()) count++;
 		}
 		return count;
-	}
-
-	@Override
-	public void addDoneHandler(Runnable handler) {
-		if(doneTasks == null) doneTasks = new ArrayList<>();
-		doneTasks.add(handler);
 	}
 
 	@Override

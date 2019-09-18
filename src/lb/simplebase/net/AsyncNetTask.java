@@ -1,7 +1,6 @@
 package lb.simplebase.net;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -14,19 +13,19 @@ import java.util.function.Consumer;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.util.NamedThreadFactory;
+import lb.simplebase.action.AsyncAction.DoneHandler;
 
 /**
  * Implementations represent a {@link Future}, but instead of
  * returning a value, the have members that change until the future is completed
  */
-public final class AsyncNetTask implements AsyncResult {
+public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 
 	private final Future<Void> task;
 	private volatile State state;
 	
 	private Exception error;
 	private String errorMessage;
-	private Collection<Runnable> doneTasks;
 	private final Accessor accessor;
 	
 	private static final ExecutorService futureExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("FutureStateProcessing-"));
@@ -61,6 +60,7 @@ public final class AsyncNetTask implements AsyncResult {
 	}
 	
 	private AsyncNetTask(boolean failed, Consumer<Accessor> asyncTask, Exception ex, String message, boolean log) {
+		super(() -> new ArrayList<>());
 		this.accessor = new Accessor();
 		if(failed) {
 			this.task = CompletableFuture.completedFuture(null);
@@ -96,16 +96,10 @@ public final class AsyncNetTask implements AsyncResult {
 		return errorMessage;
 	}
 	
-	@Override
-	public synchronized void addDoneHandler(Runnable handler) {
-		if(doneTasks == null) doneTasks = new ArrayList<>();
-		doneTasks.add(handler);
-	}
-	
 	protected void taskDoneHandler() {
 		state = State.FINISHED;
 		if(isFailed()) NetworkManager.NET_LOG.error(errorMessage, error);
-		if(doneTasks != null) doneTasks.forEach((r) -> r.run());
+		runDoneHandlers();
 	}
 	
 	@Override

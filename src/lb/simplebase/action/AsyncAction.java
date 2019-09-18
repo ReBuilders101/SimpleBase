@@ -1,5 +1,9 @@
 package lb.simplebase.action;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.Supplier;
+
 public interface AsyncAction {
 
 	/**
@@ -32,5 +36,33 @@ public interface AsyncAction {
 	public boolean isDone();
 
 	public void addDoneHandler(Runnable handler);
+	
+	public static abstract class DoneHandler implements AsyncAction {
+		
+		private Collection<Runnable> doneHandlers;
+		private final Supplier<? extends Collection<Runnable>> doneHandlersCreator;
+		
+		protected DoneHandler(Supplier<? extends Collection<Runnable>> collectionFactory) {
+			this.doneHandlersCreator = collectionFactory;
+			this.doneHandlers = null;
+		}
+		
+		@Override
+		public void addDoneHandler(Runnable handler) {
+			if(isDone()) {
+				handler.run();
+			} else {
+				if(doneHandlers == null) doneHandlers = doneHandlersCreator.get();
+				Objects.requireNonNull(doneHandlers, "The handler collection supplier must not return null");
+				doneHandlers.add(handler);
+			}
+		}
+		
+		protected void runDoneHandlers() {
+			if(doneHandlers == null) return;
+			doneHandlers.forEach((r) -> r.run()); 
+		}
+		
+	}
 	
 }
