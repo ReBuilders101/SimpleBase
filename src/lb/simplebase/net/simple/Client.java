@@ -17,7 +17,7 @@ public abstract class Client extends ReceiveSide {
 			client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
 					TargetIdentifier.createNetwork("server", remoteAddress, port));
 			client.addMapping(StringMessagePacket.getMapping(1));
-			client.addIncomingGenericPacketHandler(this::receive0);
+			client.addIncomingPacketHandler(this::receive0);
 		} catch (UnknownHostException e) {
 			throw new RuntimeException("Remote Address not found", e);
 		}

@@ -19,9 +19,9 @@ final class LocalConnectionManager {
 	private static final int SERVER_CHECK_INTERVAL = 50;
 	
 	private static final ExecutorService localPacketOutputThread = Executors.newCachedThreadPool(new NamedThreadFactory("LocalPacketProcessing-"));
-	private static final Map<TargetIdentifier, NetworkManagerServer> servers = Collections.synchronizedMap(new HashMap<>());
+	private static final Map<TargetIdentifier, LocalConnectionServer> servers = Collections.synchronizedMap(new HashMap<>());
 	
-	public static <T extends NetworkManagerServer & LocalConnectionServer> void addServer(T server) {
+	public static void addServer(LocalConnectionServer server) {
 		servers.put(server.getLocalID(), server);
 	}
 	
@@ -37,7 +37,7 @@ final class LocalConnectionManager {
 		localPacketOutputThread.shutdown();
 	}
 	
-	protected static Map<TargetIdentifier, NetworkManagerServer> getServers() {
+	protected static Map<TargetIdentifier, LocalConnectionServer> getServers() {
 		return servers;
 	}
 	
@@ -49,10 +49,9 @@ final class LocalConnectionManager {
 	 */
 	protected static LocalNetworkConnection getLocalConnectionServer(LocalNetworkConnection connection) {
 		TargetIdentifier key = connection.getRemoteTargetId();
-		NetworkManagerServer server = servers.get(key);
+		LocalConnectionServer server = servers.get(key);
 		if(server != null) {
-			LocalConnectionServer lcServer = (LocalConnectionServer) server;
-			return lcServer.attemptLocalConnection(connection);
+			return server.attemptLocalConnection(connection);
 		} else {
 			return null;
 		}

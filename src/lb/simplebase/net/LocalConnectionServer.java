@@ -1,6 +1,6 @@
 package lb.simplebase.net;
 
-public interface LocalConnectionServer {
+public interface LocalConnectionServer extends NetworkManagerServer{
 
 	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection);
 	

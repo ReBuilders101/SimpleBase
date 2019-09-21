@@ -15,7 +15,7 @@ import lb.simplebase.util.ExceptionUtils;
  * Implements common behavior and features of a {@link NetworkManagerServer}.<br>
  * Should be used when a custom implementation of that interface is required.
  */
-public abstract class CommonServer extends NetworkManager implements NetworkManagerServer, LocalConnectionServer {
+public abstract class CommonServer extends NetworkManager implements LocalConnectionServer {
 	
 	protected final Set<NetworkConnection> clientList;
 	protected final ReadWriteLock clientListLock;

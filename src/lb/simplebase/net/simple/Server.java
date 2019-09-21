@@ -17,7 +17,7 @@ public abstract class Server extends ReceiveSide {
 		try {
 			server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port));
 			server.addMapping(StringMessagePacket.getMapping(1));
-			server.addIncomingGenericPacketHandler(this::receive0);
+			server.addIncomingPacketHandler(this::receive0);
 			server.getEventBus().register((e) -> this.newConnection(e.getRemoteAddress().getHostString(), e.getRemoteAddress().getPort()), ConfigureConnectionEvent.class);
 //			server.addNewConnectionHandler((t) -> this.newConnection(t.getConnectionAddress().getHostString(), t.getConnectionAddress().getPort()));
 			server.startServer();
