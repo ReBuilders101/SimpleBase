@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import lb.simplebase.action.AsyncResult;
 
-public abstract class PacketContext {
+public final class PacketContext {
 
 	private final boolean isServer;
 	private final NetworkManagerCommon manager;
@@ -16,8 +16,6 @@ public abstract class PacketContext {
 	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
 		Objects.requireNonNull(manager, "Network manager must not be null");
 		Objects.requireNonNull(connection, "Network connection must not be null");
-		
-		if(!GenericPacketContext.class.isAssignableFrom(getClass())) throw new RuntimeException("All PacketContext implementations must extend GenericPacketContext");
 		
 		if(isServer) {
 			if(!(manager instanceof NetworkManagerServer)) throw new IllegalArgumentException("When PacketContext represents server side, the manager must implement NetworkManagerServer");
@@ -63,6 +61,11 @@ public abstract class PacketContext {
 	
 	public Object getCustomObject() {
 		return payload;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getCustomObject(Class<T> type) {
+		return (T) payload;
 	}
 	
 	public boolean hasCustomObject() {

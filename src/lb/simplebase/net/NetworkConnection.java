@@ -33,7 +33,7 @@ public abstract class NetworkConnection {
 		this.packetHandler = packetHandler;
 		this.state = initialState;
 		
-		this.context = new GenericPacketContext<>(isServer, packetHandler, this, payload);
+		this.context = new PacketContext(isServer, packetHandler, this, payload);
 //		this.factory = new PacketFactory(packetHandler, this);
 	}
 
