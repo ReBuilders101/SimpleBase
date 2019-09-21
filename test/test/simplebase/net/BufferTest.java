@@ -7,15 +7,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.io.ByteArrayBuffer;
+import lb.simplebase.io.ByteDataBuffer;
 
 class BufferTest {
 
-	ByteArrayBuffer buffer;
+	ByteDataBuffer buffer;
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		buffer = new ByteArrayBuffer();
+		buffer = new ByteDataBuffer();
 	}
 
 	@AfterEach

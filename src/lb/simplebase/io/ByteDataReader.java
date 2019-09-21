@@ -5,13 +5,13 @@ import java.util.Arrays;
 /**
  * A class that can be used to read different data types from a byte array
  */
-public class ByteArrayReader implements ReadableByteData{
+public class ByteDataReader implements ReadableByteData{
 
-	public ByteArrayReader(byte[] data) {
+	public ByteDataReader(byte[] data) {
 		this(data, 0);
 	}
 	
-	public ByteArrayReader(byte[] data, int startIndex) {
+	public ByteDataReader(byte[] data, int startIndex) {
 		this.data = data;
 		this.index = 0;
 	}

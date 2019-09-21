@@ -87,6 +87,9 @@ class NetworkTest {
 		System.out.println("sent!");
 		
 		//Now try the other dircetion
+		System.out.println(clientManager.getConnectionState());
+		System.out.println(serverManager.getCurrentClientCount());
+		System.out.println("Here!!!!!");
 		assertEquals(serverManager.getCurrentClientCount(), 1, "More or less than one client");
 		clientFromServer = serverManager.getCurrentClients().iterator().next(); //Get the only connection
 		assertNotNull(clientFromServer, "Client connection from server side not found");

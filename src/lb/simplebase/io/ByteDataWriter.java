@@ -2,11 +2,11 @@ package lb.simplebase.io;
 
 import java.io.ByteArrayOutputStream;
 
-public class ByteArrayWriter implements WritableByteData{
+public class ByteDataWriter implements WritableByteData{
 
 	private ByteArrayOutputStream baos;
 	
-	public ByteArrayWriter() {
+	public ByteDataWriter() {
 		baos = new ByteArrayOutputStream();
 	}
 	

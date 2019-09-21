@@ -3,7 +3,8 @@ package lb.simplebase.net;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import lb.simplebase.io.ByteArrayBuffer;
+import lb.simplebase.io.ByteDataBuffer;
+import lb.simplebase.io.FixedByteDataBuffer;
 
 /**
  * Encodes and decodes packets from / to bytes
@@ -18,7 +19,7 @@ import lb.simplebase.io.ByteArrayBuffer;
  */
 public class PacketFactory {
 	
-	public static final byte[] PACKET_HEADER_PRIV = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
+	public static final byte[] PACKETHEADER = {(byte) 0xFF, (byte) 0xF0, (byte) 0x0F, (byte) 0x00};
 	
 	private final PacketIdMappingContainer mapCon;
 	private final Consumer<Packet> finishedPacketReceiver;
@@ -51,7 +52,7 @@ public class PacketFactory {
 		//First save data and increase accumulation counter
 		tempData[accStep] = data; //save data in current step
 		if(mode == Mode.SEARCH_HEADER) { //Special case for header, because ti doesnt accept any data
-			if(data == PACKET_HEADER_PRIV[accStep]) {
+			if(data == PACKETHEADER[accStep]) {
 				accStep++; //Only increase header finding if data is correct
 			} else {
 				accStep = 0; //If one byte is not correct, completely reset
@@ -105,7 +106,7 @@ public class PacketFactory {
 	 * @throws PacketMappingNotFoundException When the packetId mapping was not found (duh)
 	 */
 	private void makePacket() throws PacketMappingNotFoundException {
-		ByteArrayBuffer packetData = new ByteArrayBuffer(tempData); //copy packet data
+		ByteDataBuffer packetData = new ByteDataBuffer(tempData); //copy packet data
 		PacketIdMapping mapping = mapCon.getMappingFor(packetId); //Mapping for id
 		if(mapping == null)
 			throw new PacketMappingNotFoundException("mapping not found for id while constructing packet", packetId);
@@ -125,23 +126,24 @@ public class PacketFactory {
 	/**
 	 * Converts a {@link Packet} into bytes, including header and metadata
 	 * @param packet The {@link Packet} to convert
-	 * @return The bytes repesenting the packet
+	 * @return The bytes repesenting the packet. The buffer will always have a backing array
 	 * @throws PacketMappingNotFoundException When the packet class cloud not be converted into an id
 	 */
 	public byte[] createPacketData(Packet packet) throws PacketMappingNotFoundException {
-		final ByteArrayBuffer packetData = new ByteArrayBuffer();
-		packet.writeData(packetData); //Write packet data
-		//create new buffer that also has metadata
-		final int packetDataLength = packetData.getLength();
+		//First, check for a mapping for the packet class
 		if(!mapCon.hasMappingFor(packet.getClass()))
 			throw new PacketMappingNotFoundException("No mapping was found when trying to send packet", packet);
 		final int packetId = mapCon.getMappingFor(packet.getClass()).getPacketId(); //The mapping must exist, otherwise ^^
-		final ByteArrayBuffer allData = new ByteArrayBuffer();
+		//Then move write packet data to a buffer
+		final ByteDataBuffer packetData = new ByteDataBuffer();
+		packet.writeData(packetData); //Write packet data
+		final int packetDataLength = packetData.getLength();
 		//Write data to buffer
-		allData.write(PACKET_HEADER_PRIV);
+		final FixedByteDataBuffer allData = new FixedByteDataBuffer(packetDataLength + 12);
+		allData.write(PACKETHEADER);
 		allData.writeInt(packetId);
 		allData.writeInt(packetDataLength);
-		allData.write(packetData);
+		allData.write(packetData.getAsArrayFast());
 		//create array
 		return allData.getAsArrayFast();
 	}

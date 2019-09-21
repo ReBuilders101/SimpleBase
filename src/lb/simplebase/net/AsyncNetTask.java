@@ -69,9 +69,9 @@ public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 			this.errorMessage = message;
 			if(log) {
 				if(error == null) {
-					NetworkManager.NET_LOG.error(errorMessage);
+					NetworkManager.NET_LOG.error("[AsyncNetTask]:" + errorMessage);
 				} else {
-					NetworkManager.NET_LOG.error(errorMessage == null ? error.getMessage() : errorMessage, error);
+					NetworkManager.NET_LOG.error("[AsyncNetTask]:" + errorMessage == null ? error.getMessage() : errorMessage, error);
 				}
 			}
 		} else {
@@ -98,7 +98,7 @@ public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 	
 	protected void taskDoneHandler() {
 		state = State.FINISHED;
-		if(isFailed()) NetworkManager.NET_LOG.error(errorMessage, error);
+		if(isFailed()) NetworkManager.NET_LOG.error("[AsyncNetTask]:" + errorMessage, error);
 		runDoneHandlers();
 	}
 	
