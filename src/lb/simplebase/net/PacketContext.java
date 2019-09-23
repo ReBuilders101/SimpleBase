@@ -4,16 +4,13 @@ import java.util.Objects;
 
 import lb.simplebase.action.AsyncResult;
 
-public final class PacketContext {
+public abstract class PacketContext {
 
 	private final boolean isServer;
 	private final NetworkManagerCommon manager;
 	private final NetworkConnection connection;
 	
-	private final Object payload;
-	
-	
-	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
+	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection) {
 		Objects.requireNonNull(manager, "Network manager must not be null");
 		Objects.requireNonNull(connection, "Network connection must not be null");
 		
@@ -26,10 +23,7 @@ public final class PacketContext {
 		this.isServer = isServer;
 		this.manager = manager;
 		this.connection = connection;
-		this.payload = payload;
 	}
-	
-	
 	
 	public boolean isServerSide() {
 		return isServer;
@@ -59,18 +53,14 @@ public final class PacketContext {
 		return manager;
 	}
 	
-	public Object getCustomObject() {
-		return payload;
-	}
+	public abstract Object getCustomObject();
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getCustomObject(Class<T> type) {
-		return (T) payload;
+		return (T) getCustomObject();
 	}
 	
-	public boolean hasCustomObject() {
-		return payload != null;
-	}
+	public abstract boolean hasCustomObject();
 	
 	public NetworkConnection getConnection() {
 		return connection;
@@ -87,4 +77,27 @@ public final class PacketContext {
 	public AsyncResult replyPacket(Packet packet) {
 		return getConnection().sendPacketToTarget(packet);
 	}
+	
+	
+	protected static final class PayloadPacketContext extends PacketContext {
+
+		private final Object payload;
+		
+		protected PayloadPacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
+			super(isServer, manager, connection);
+			this.payload = payload;
+		}
+
+		@Override
+		public Object getCustomObject() {
+			return payload;
+		}
+
+		@Override
+		public boolean hasCustomObject() {
+			return payload != null;
+		}
+		
+	}
+	
 }

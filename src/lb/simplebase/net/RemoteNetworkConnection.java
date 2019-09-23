@@ -11,12 +11,16 @@ class RemoteNetworkConnection extends NetworkConnection{
 	private final Socket connection;
 	private final DataReceiverThread dataThread;
 	private final PacketFactory factory;
+	private final PacketContext context;
 	
 	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket, boolean isServer, Object payload) {
 		super(source, target, packetHandler, ConnectionState.fromSocket(connectedSocket), isServer, payload); //Create the state from the socket (that might be open from a server)
-		connection = connectedSocket;
-		factory = new PacketFactory(getNetworkManager(), this::handleReceivedPacket);
-		dataThread = new DataReceiverThread(connection, factory, this);
+		
+		this.connection = connectedSocket;
+		this.factory = new PacketFactory(getNetworkManager(), this::handleReceivedPacket);
+		this.dataThread = new DataReceiverThread(connection, factory, this);
+		this.context = new PacketContext.PayloadPacketContext(isServer, packetHandler, this, payload);
+		
 		if(connectedSocket.isConnected()) dataThread.start(); //Begin when a live socket is used
 	}
 	
@@ -88,6 +92,11 @@ class RemoteNetworkConnection extends NetworkConnection{
 	@Override
 	public boolean isLocalConnection() {
 		return false;
+	}
+
+	@Override
+	protected PacketContext getContext() {
+		return context;
 	}
 	
 }

@@ -25,15 +25,13 @@ public abstract class NetworkConnection {
 	protected volatile ConnectionState state; //Threadsafe for socket listener
 //	private final PacketFactory factory;
 	
-	private final PacketContext context;
-	
 	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
 		this.local = local;
 		this.remote = remote;
 		this.packetHandler = packetHandler;
 		this.state = initialState;
 		
-		this.context = new PacketContext(isServer, packetHandler, this, payload);
+		
 //		this.factory = new PacketFactory(packetHandler, this);
 	}
 
@@ -97,7 +95,7 @@ public abstract class NetworkConnection {
 	 * @param received The packet that was received by this connection
 	 */
 	public void handleReceivedPacket(Packet received) {
-		packetHandler.accept(received, context);
+		packetHandler.accept(received, getContext());
 	}
 	
 	/**
@@ -150,8 +148,6 @@ public abstract class NetworkConnection {
 		return packetHandler;
 	}
 	
-	protected PacketContext getContext() {
-		return context;
-	}
+	protected abstract PacketContext getContext();
 	
 }
