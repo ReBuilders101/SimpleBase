@@ -10,7 +10,7 @@ import java.io.OutputStream;
  * data is encoded as Little Endian. Methods may be overridden by implementing classes, as long as compatibility is not broken.
  * <br>This interface is fully compatible to the data that should be read by the {@link ReadableByteData} interface and all valid implementations.
  */
-public interface WritableByteData extends ByteData{
+public interface WritableByteData {
 
 	/**
 	 * Writes a maximum of 8 boolean values, encoded as a byte, to the end of the byte sequence.
@@ -182,19 +182,6 @@ public interface WritableByteData extends ByteData{
 	 */
 	public static WritableByteData wrap(final OutputStream out) {
 		return new WritableByteData() {
-			
-			@Override
-			public byte[] getAsArrayFast() {
-				if(out instanceof ByteArrayOutputStream) {
-					return ((ByteArrayOutputStream) out).toByteArray(); //Can't get the backing array
-				}
-				return null;
-			}
-			
-			@Override
-			public byte[] getAsArray() {
-				return getAsArrayFast();
-			}
 			
 			@Override
 			public void writeByte(byte b) {

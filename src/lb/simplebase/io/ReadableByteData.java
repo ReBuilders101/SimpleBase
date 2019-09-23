@@ -9,7 +9,7 @@ import java.io.InputStream;
  * data is encoded as Little Endian. Methods may be overridden by implementing classes, as long as compatibility is not broken.
  * <br>This interface is fully compatible to the data written by the {@link WritableByteData} interface and all valid implementations.
  */
-public interface ReadableByteData extends ByteData{
+public interface ReadableByteData {
 
 	/**
 	 * Reads 8 boolean values, which are stored in the 8 bits of one byte.
@@ -183,6 +183,12 @@ public interface ReadableByteData extends ByteData{
 	 * @return Whether another byte can be read
 	 */
 	public boolean canRead();
+	
+	public byte[] getByteData();
+	
+	public int getByteLength();
+	
+	public int getRemainingLength();
 	
 	public default InputStream getInStream() {
 		return new InputStream() {

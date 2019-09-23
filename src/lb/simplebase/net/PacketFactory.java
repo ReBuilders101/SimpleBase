@@ -3,8 +3,11 @@ package lb.simplebase.net;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import lb.simplebase.io.ByteDataBuffer;
-import lb.simplebase.io.FixedByteDataBuffer;
+import lb.simplebase.io.ReadableArrayData;
+import lb.simplebase.io.WritableFixedData;
+import lb.simplebase.io.WritableFixedData.WritableArrayData;
+import lb.simplebase.io.WritableStreamData;
+
 
 /**
  * Encodes and decodes packets from / to bytes
@@ -106,11 +109,11 @@ public class PacketFactory {
 	 * @throws PacketMappingNotFoundException When the packetId mapping was not found (duh)
 	 */
 	private void makePacket() throws PacketMappingNotFoundException {
-		ByteDataBuffer packetData = new ByteDataBuffer(tempData); //copy packet data
-		PacketIdMapping mapping = mapCon.getMappingFor(packetId); //Mapping for id
+		final PacketIdMapping mapping = mapCon.getMappingFor(packetId); //Mapping for id
 		if(mapping == null)
 			throw new PacketMappingNotFoundException("mapping not found for id while constructing packet", packetId);
-		Packet newPacket = mapping.getNewInstance(); //make a packet
+		final Packet newPacket = mapping.getNewInstance(); //make a packet
+		final ReadableArrayData packetData = new ReadableArrayData(tempData, false);
 		newPacket.readData(packetData); //read the packet data
 		finishedPacketReceiver.accept(newPacket); //send the packet to the connection
 	}
@@ -126,7 +129,7 @@ public class PacketFactory {
 	/**
 	 * Converts a {@link Packet} into bytes, including header and metadata
 	 * @param packet The {@link Packet} to convert
-	 * @return The bytes repesenting the packet. The buffer will always have a backing array
+	 * @return The bytes repesenting the packet. The array must not be modified
 	 * @throws PacketMappingNotFoundException When the packet class cloud not be converted into an id
 	 */
 	public byte[] createPacketData(Packet packet) throws PacketMappingNotFoundException {
@@ -135,17 +138,17 @@ public class PacketFactory {
 			throw new PacketMappingNotFoundException("No mapping was found when trying to send packet", packet);
 		final int packetId = mapCon.getMappingFor(packet.getClass()).getPacketId(); //The mapping must exist, otherwise ^^
 		//Then move write packet data to a buffer
-		final ByteDataBuffer packetData = new ByteDataBuffer();
+		final WritableStreamData packetData = new WritableStreamData();
 		packet.writeData(packetData); //Write packet data
 		final int packetDataLength = packetData.getLength();
 		//Write data to buffer
-		final FixedByteDataBuffer allData = new FixedByteDataBuffer(packetDataLength + 12);
+		final WritableFixedData allData = new WritableArrayData(packetDataLength + 12);
 		allData.write(PACKETHEADER);
 		allData.writeInt(packetId);
 		allData.writeInt(packetDataLength);
-		allData.write(packetData.getAsArrayFast());
+		allData.write(packetData.internalArray());
 		//create array
-		return allData.getAsArrayFast();
+		return allData.internalArray();
 	}
 	
 	protected void notifyConnectionClosed() {
