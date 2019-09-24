@@ -7,7 +7,6 @@ import java.nio.channels.SocketChannel;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.io.WritableStreamData;
-import lb.simplebase.net.ClosedConnectionEvent.Cause;
 import lb.simplebase.io.WritableFixedData.WritableBufferData;
 
 public class NioNetworkConnection extends NetworkConnection{

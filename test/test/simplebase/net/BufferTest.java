@@ -7,20 +7,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.io.ByteDataBuffer;
+import lb.simplebase.io.ReadableArrayData;
+import lb.simplebase.io.WritableStreamData;
 
 class BufferTest {
 
-	ByteDataBuffer buffer;
+	WritableStreamData writeBuffer;
+	ReadableArrayData readBuffer;
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		buffer = new ByteDataBuffer();
+		writeBuffer = new WritableStreamData();
 	}
 
 	@AfterEach
 	void tearDown() throws Exception {
-		buffer = null;
 	}
 
 	@Test
@@ -30,15 +31,17 @@ class BufferTest {
 		int i1 = 57234986;
 		long l1 = 342986344738L;
 		
-		buffer.writeByte(b1);
-		buffer.writeShort(s1);
-		buffer.writeInt(i1);
-		buffer.writeLong(l1);
+		writeBuffer.writeByte(b1);
+		writeBuffer.writeShort(s1);
+		writeBuffer.writeInt(i1);
+		writeBuffer.writeLong(l1);
 		
-		byte b2 = buffer.readByte();
-		short s2 = buffer.readShort();
-		int i2 = buffer.readInt();
-		long l2 = buffer.readLong();
+		readBuffer = new ReadableArrayData(writeBuffer.getAsArray(), false);
+		
+		byte b2 = readBuffer.readByte();
+		short s2 = readBuffer.readShort();
+		int i2 = readBuffer.readInt();
+		long l2 = readBuffer.readLong();
 		
 		assertEquals(b1, b2, "Bytes not equal");
 		assertEquals(s1, s2, "Shorts not equal");
@@ -49,35 +52,10 @@ class BufferTest {
 	@Test
 	void testBufferToArray() {
 		final byte[] data = new byte[] { 2, 34, (byte) 255, 96};
-		buffer.write(data);
+		writeBuffer.write(data);
 		
-		byte[] newData = buffer.getAsArrayFast();
+		byte[] newData = writeBuffer.internalArray();
 		assertArrayEquals(data, newData, "Arrays not equal");
-	}
-	
-	@Test
-	void testBufferReadWriteMixed() {
-		int write1 = 651237;
-		int write2 = 327;
-		byte write3 = (byte) 194;
-		
-		int read1;
-		int read2;
-		byte read3;
-		
-		buffer.writeInt(write1);
-		buffer.writeInt(write2);
-		
-		read1 = buffer.readInt();
-		
-		buffer.writeByte(write3);
-		
-		read2 = buffer.readInt();
-		read3 = buffer.readByte();
-		
-		assertEquals(write1, read1, "First ints not equal");
-		assertEquals(write2, read2, "Second ints not equal");
-		assertEquals(write3, read3, "Third bytes not equal");
 	}
 
 }
