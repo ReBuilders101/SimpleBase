@@ -4,13 +4,14 @@ import java.util.Objects;
 
 import lb.simplebase.action.AsyncResult;
 
-public abstract class PacketContext {
+public final class PacketContext {
 
 	private final boolean isServer;
 	private final NetworkManagerCommon manager;
 	private final NetworkConnection connection;
+	private final Object payload;
 	
-	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection) {
+	protected PacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
 		Objects.requireNonNull(manager, "Network manager must not be null");
 		Objects.requireNonNull(connection, "Network connection must not be null");
 		
@@ -23,6 +24,7 @@ public abstract class PacketContext {
 		this.isServer = isServer;
 		this.manager = manager;
 		this.connection = connection;
+		this.payload = payload;
 	}
 	
 	public boolean isServerSide() {
@@ -53,14 +55,18 @@ public abstract class PacketContext {
 		return manager;
 	}
 	
-	public abstract Object getCustomObject();
+	public Object getCustomObject() {
+		return payload;
+	}
+
+	public boolean hasCustomObject() {
+		return payload != null;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getCustomObject(Class<T> type) {
 		return (T) getCustomObject();
 	}
-	
-	public abstract boolean hasCustomObject();
 	
 	public NetworkConnection getConnection() {
 		return connection;
@@ -76,28 +82,6 @@ public abstract class PacketContext {
 	
 	public AsyncResult replyPacket(Packet packet) {
 		return getConnection().sendPacketToTarget(packet);
-	}
-	
-	
-	protected static final class PayloadPacketContext extends PacketContext {
-
-		private final Object payload;
-		
-		protected PayloadPacketContext(boolean isServer, NetworkManagerCommon manager, NetworkConnection connection, Object payload) {
-			super(isServer, manager, connection);
-			this.payload = payload;
-		}
-
-		@Override
-		public Object getCustomObject() {
-			return payload;
-		}
-
-		@Override
-		public boolean hasCustomObject() {
-			return payload != null;
-		}
-		
 	}
 	
 }

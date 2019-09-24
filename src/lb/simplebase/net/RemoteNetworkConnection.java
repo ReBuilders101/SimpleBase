@@ -11,7 +11,6 @@ class RemoteNetworkConnection extends NetworkConnection{
 	private final Socket connection;
 	private final DataReceiverThread dataThread;
 	private final PacketFactory factory;
-	private final PacketContext context;
 	
 	public RemoteNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, Socket connectedSocket, boolean isServer, Object payload) {
 		super(source, target, packetHandler, ConnectionState.fromSocket(connectedSocket), isServer, payload); //Create the state from the socket (that might be open from a server)
@@ -19,7 +18,6 @@ class RemoteNetworkConnection extends NetworkConnection{
 		this.connection = connectedSocket;
 		this.factory = new PacketFactory(getNetworkManager(), this::handleReceivedPacket);
 		this.dataThread = new DataReceiverThread(connection, factory, this);
-		this.context = new PacketContext.PayloadPacketContext(isServer, packetHandler, this, payload);
 		
 		if(connectedSocket.isConnected()) dataThread.start(); //Begin when a live socket is used
 	}
@@ -27,7 +25,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 	@Override
 	public AsyncResult sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN) {
-			return AsyncNetTask.createTask((f) -> {
+			return AsyncNetTask.submitTask((f) -> {
 				byte[] dataToSend;
 				//1. Split packet into bytes
 				try {
@@ -44,7 +42,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 					return;
 				}
 				//3. Done!
-			}).run();
+			});
 		} else {
 			return AsyncNetTask.createFailed(null, "Connection was not open");
 		}
@@ -60,7 +58,6 @@ class RemoteNetworkConnection extends NetworkConnection{
 			try {
 				connection.shutdownOutput();
 				connection.close();
-				super.close();
 				NetworkManager.NET_LOG.info("Closed Network connection to " + getRemoteTargetId());
 			} catch (IOException e) {
 				//If closing fails
@@ -92,11 +89,6 @@ class RemoteNetworkConnection extends NetworkConnection{
 	@Override
 	public boolean isLocalConnection() {
 		return false;
-	}
-
-	@Override
-	protected PacketContext getContext() {
-		return context;
 	}
 	
 }

@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 /**
  * Saves information about the state of a {@link NetworkConnection}.
@@ -55,6 +56,16 @@ public enum ConnectionState {
 //		return UNCONNECTED;
 	}
 
+	public static ConnectionState fromChannel(SocketChannel channel) {
+		if(channel.isOpen()) {
+			return ConnectionState.OPEN;
+		} else if (channel.isConnected()){
+			return ConnectionState.CLOSED;
+		} else {
+			return ConnectionState.UNCONNECTED;
+		}
+	}
+	
 	public static ConnectionState fromSocket(ServerSocket socket) {
 		if(!socket.isBound()) {
 			return ConnectionState.UNCONNECTED; //If never connected, then still unconnected

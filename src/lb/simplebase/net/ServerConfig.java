@@ -9,8 +9,8 @@ public class ServerConfig {
 	private final ServerSocket socket;
 	private int threads;
 	
-	private ServerConfig(boolean net) throws IOException {
-		socket = net ? new ServerSocket() : null;
+	protected ServerConfig(ServerSocket soc) throws IOException {
+		socket = soc;
 		threads = 0; //Zero means unlimited threads
 	}
 	
@@ -64,25 +64,15 @@ public class ServerConfig {
 		return this;
 	}
 	
-	protected ServerSocket configuredSocket() {
+	/**
+	 * Internal use only
+	 * @return
+	 */
+	public ServerSocket configuredSocket() {
 		return socket;
 	}
 	
 	protected int getThreadCount() {
 		return threads;
-	}
-	
-	public static ServerConfig createForServer(TargetIdentifier serverId) {
-		try {
-			return new ServerConfig(!serverId.isLocalOnly());
-		} catch (IOException e) {
-			NetworkManager.NET_LOG.error("ServerConfig: Could not create ServerSocket");
-			try {
-				return new ServerConfig(false); //With false, it can't throw the exception
-			} catch (IOException e1) {
-				e1.printStackTrace(); //So this will not happen
-				throw new RuntimeException(e1);
-			}
-		}
 	}
 }

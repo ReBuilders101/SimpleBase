@@ -8,11 +8,9 @@ import lb.simplebase.net.ClosedConnectionEvent.Cause;
 public class LocalNetworkConnection extends NetworkConnection{
 
 	private LocalNetworkConnection partner = null;
-	private final PacketContext context;
 	
 	public LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, boolean isServer, Object payload) {
 		super(source, target, packetHandler, ConnectionState.UNCONNECTED, isServer, payload);
-		this.context = new PacketContext.PayloadPacketContext(isServer, packetHandler, this, payload);
 	}
 	
 	protected LocalNetworkConnection(TargetIdentifier source, TargetIdentifier target, NetworkManager packetHandler, LocalNetworkConnection setPartner, boolean isServer, Object payload) {
@@ -24,9 +22,9 @@ public class LocalNetworkConnection extends NetworkConnection{
 	@Override
 	public AsyncResult sendPacketToTarget(Packet packet) {
 		if(getState() == ConnectionState.OPEN && partner != null) {
-			return AsyncNetTask.createTask((f) -> {
+			return AsyncNetTask.submitTask((f) -> {
 				LocalConnectionManager.submitLocalPacketTask(() -> partner.handleReceivedPacket(packet));
-			}).run();
+			});
 		} else {
 			return AsyncNetTask.createFailed(null, "Connection is not open");
 		}
@@ -73,11 +71,6 @@ public class LocalNetworkConnection extends NetworkConnection{
 	 */
 	protected void closeNoNotify() {
 		super.closeWithReason(Cause.REMOTE); //NOT this.close() !!! //Closed by peer
-	}
-
-	@Override
-	protected PacketContext getContext() {
-		return context;
 	}
 	
 }

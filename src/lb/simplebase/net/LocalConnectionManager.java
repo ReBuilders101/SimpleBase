@@ -14,7 +14,7 @@ import lb.simplebase.util.NamedThreadFactory;
 /**
  * Acts as a place to request a connection from a local server, as an analogy to a remote servers {@link ServerSocket}. 
  */
-final class LocalConnectionManager {
+public final class LocalConnectionManager {
 	
 	private static final int SERVER_CHECK_INTERVAL = 50;
 	

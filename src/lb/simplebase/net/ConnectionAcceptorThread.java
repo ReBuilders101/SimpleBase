@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ConnectionAcceptorThread extends Thread{
+class ConnectionAcceptorThread extends Thread {
 
 	private static final AtomicInteger threadIds = new AtomicInteger(0);
 	
@@ -27,7 +27,7 @@ class ConnectionAcceptorThread extends Thread{
 			if(Thread.interrupted()) {
 				Thread.currentThread().interrupt();
 				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: Thread was interrupted");
-				break;
+				return;
 			}
 			if(!socket.isBound()) { //Just wait a bit
 				try {
@@ -35,7 +35,7 @@ class ConnectionAcceptorThread extends Thread{
 				} catch (InterruptedException e) { //Except when we should not wait
 					Thread.currentThread().interrupt();
 					NetworkManager.NET_LOG.info("Connection Acceptor: Closing: Thread was interrupted (wait for binding)");
-					break;
+					return;
 				}
 				continue;
 			}
@@ -44,15 +44,14 @@ class ConnectionAcceptorThread extends Thread{
 				server.acceptIncomingUnconfirmedConnection(newSocket);
 			} catch (SocketException e) {
 //				e.printStackTrace();
-				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: ServerSocket was closed");
-				break; //When another thread calls close
+				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: ServerSocket was closed", e);
+				return; //When another thread calls close
 			} catch (IOException e) {
-				e.printStackTrace();
 				NetworkManager.NET_LOG.error("Connection Acceptor: Closing: ServerSocket IO error", e);
-				break;
+				return;
 			}
 		}
-		server.stopServer();
+//		server.stopServer();
 	}
 	
 }

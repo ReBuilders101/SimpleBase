@@ -23,7 +23,7 @@ class SocketNetworkManagerServer extends CommonServer {
 
 		//Post the event
 		final EventResult result = bus.post(new AttemptedConnectionEvent(newConnectionSocket.getInetAddress(), this));
-		if(ExceptionUtils.wrapException(() -> result.wasCanceled(), true)) { //TODO move the method somewhere else
+		if(ExceptionUtils.wrapException(() -> result.wasCanceled(), true)) {
 			NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + newConnectionSocket.getRemoteSocketAddress() + ")");
 			try {
 				newConnectionSocket.close();

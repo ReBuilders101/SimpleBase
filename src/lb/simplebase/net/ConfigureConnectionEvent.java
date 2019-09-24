@@ -14,7 +14,7 @@ public final class ConfigureConnectionEvent extends Event{
 	
 	private Object data;
 	
-	protected ConfigureConnectionEvent(final Socket socket, final TargetIdentifier remoteTarget, final NetworkManagerServer server) {
+	public ConfigureConnectionEvent(final Socket socket, final TargetIdentifier remoteTarget, final NetworkManagerServer server) {
 		super(false);
 		this.data = null;
 		this.config = new SocketConfiguration(socket);
@@ -24,7 +24,7 @@ public final class ConfigureConnectionEvent extends Event{
 		this.local = false;
 	}
 
-	protected ConfigureConnectionEvent(final TargetIdentifier remoteTarget, final NetworkManagerServer server) {
+	public ConfigureConnectionEvent(final TargetIdentifier remoteTarget, final NetworkManagerServer server) {
 		super(false);
 		this.data = null;
 		this.config = null;

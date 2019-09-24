@@ -57,7 +57,7 @@ public class AsyncEventBus extends EventBus {
 					handler.checkAndPostEvent(event, this, true);	//This is in a separate method so we can have an async implemetation in a subclass
 				}
 			} catch(ConcurrentModificationException ex) {
-				//TODO log warning
+				System.err.println("Tried post an event on a HandlerSet that was being modified at the time"); //Should not happen
 			} finally {
 				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 				completionRelease.countDown();	//Make sure eventResult is completed
@@ -77,7 +77,9 @@ public class AsyncEventBus extends EventBus {
 						if(handler == null) continue; //HashSet allows a null value
 						handler.checkAndPostEvent(event, this, false);	//This is in a separate method so we can have an async implemetation in a subclass
 					}
-				} catch(ConcurrentModificationException ex) {}	//TODO log warning
+				} catch(ConcurrentModificationException ex) {
+					System.err.println("Tried post an event on a HandlerSet that was being modified at the time"); //Should not happen
+				}
 			} finally {
 				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
 				completionRelease.countDown();	//Make sure eventResult is completed

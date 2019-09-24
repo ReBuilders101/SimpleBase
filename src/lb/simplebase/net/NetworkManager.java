@@ -1,5 +1,7 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,7 +101,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static NetworkManagerServer createServer(TargetIdentifier localId) {
-		return createServer(localId, ServerConfig.createForServer(localId));
+		return createServer(localId, NetworkManager.createServerConfig(localId));
 	}
 	
 	public static NetworkManagerServer createServer(TargetIdentifier localId, ServerConfig config) {
@@ -111,8 +113,8 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 			return new LocalNetworkManagerServer(localId, config.getThreadCount());
 		} else {
 			if(config.configuredSocket() == null) {
-				NetworkManager.NET_LOG.warn("Error while creating ServerSocket");
-				return null;
+				NetworkManager.NET_LOG.warn("Error while creating ServerSocket. Using local server.");
+				return new LocalNetworkManagerServer(localId, config.getThreadCount());
 			} else {
 				return new SocketNetworkManagerServer(localId, config.configuredSocket(), config.getThreadCount());
 			}
@@ -137,6 +139,20 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	
 	public static Set<TargetIdentifier> getLocalServerIds() {
 		return Collections.unmodifiableSet(LocalConnectionManager.getServers().keySet());
+	}
+	
+	public static ServerConfig createServerConfig(TargetIdentifier serverId) {
+		try {
+			return new ServerConfig(serverId.isLocalOnly() ? null : new ServerSocket());
+		} catch (IOException e) {
+			NetworkManager.NET_LOG.error("ServerConfig: Could not create ServerSocket");
+			try {
+				return new ServerConfig(null); //With false, it can't throw the exception
+			} catch (IOException e1) {
+				e1.printStackTrace(); //So this will not happen
+				throw new RuntimeException(e1);
+			}
+		}
 	}
 	
 	

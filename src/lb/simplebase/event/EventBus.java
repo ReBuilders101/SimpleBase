@@ -21,7 +21,6 @@ import lb.simplebase.event.EventHandlerImpl.EventHandlerInvoke;
  */
 public class EventBus implements EventBusRegistry{
 	
-	//TODO: A WeakHashMap could be used, but that could lead to ConcurrentModificationExceptions
 //	private final Map<WeakReference<Class<? extends Event>>, Set<EventHandlerImpl>> handlersMap;
 	private final Map<Class<? extends Event>, HandlerList> handlersMap;
 	private boolean isActive;
@@ -138,7 +137,6 @@ public class EventBus implements EventBusRegistry{
 	 * @return An {@link EventResult} object containing information about how the event was handled
 	 * @see #isSynchronous()
 	 */
-	//TODO can we just sync the whole method and get rid of the map / set syncs?
 	public synchronized EventResult post(final Event event) {
 		if(event == null || !isActive() || isHandlerThread()) return EventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();

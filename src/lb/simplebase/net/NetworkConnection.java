@@ -23,6 +23,7 @@ public abstract class NetworkConnection {
 	//No receiver, because receivers do not depend on specific connections (entityupdate from any client etc)
 	private final NetworkManager packetHandler; //This is the Networkmanager
 	protected volatile ConnectionState state; //Threadsafe for socket listener
+	private final PacketContext context;
 //	private final PacketFactory factory;
 	
 	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
@@ -30,7 +31,7 @@ public abstract class NetworkConnection {
 		this.remote = remote;
 		this.packetHandler = packetHandler;
 		this.state = initialState;
-		
+		this.context = new PacketContext(isServer, packetHandler, this, payload);
 		
 //		this.factory = new PacketFactory(packetHandler, this);
 	}
@@ -148,6 +149,8 @@ public abstract class NetworkConnection {
 		return packetHandler;
 	}
 	
-	protected abstract PacketContext getContext();
+	protected PacketContext getContext() {
+		return context;
+	}
 	
 }

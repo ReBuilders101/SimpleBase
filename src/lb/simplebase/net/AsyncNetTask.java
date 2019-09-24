@@ -48,14 +48,15 @@ public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 	protected static volatile boolean RUN_ASYNC = true;
 	
 	public static AsyncResult submitTask(Consumer<Accessor> task) {
-		return createTask(task).run();
+		return new AsyncNetTask(false, task, null, null, false).run();
 	}
 	
+	@Deprecated
 	protected static AsyncNetTask createTask(Consumer<Accessor> task) {
 		return new AsyncNetTask(false, task, null, null, false);
 	}
 	
-	protected static AsyncNetTask createFailed(Exception ex, String message) {
+	public static AsyncNetTask createFailed(Exception ex, String message) {
 		return new AsyncNetTask(true, null, ex, message, true);
 	}
 	

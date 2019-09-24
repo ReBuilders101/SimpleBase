@@ -9,7 +9,7 @@ public final class AttemptedConnectionEvent extends Event{
 	private final InetAddress address;
 	private final NetworkManagerServer server;
 	
-	protected AttemptedConnectionEvent(InetAddress address, NetworkManagerServer server) {
+	public AttemptedConnectionEvent(InetAddress address, NetworkManagerServer server) {
 		super(true);
 		this.address = address;
 		this.server = server;
