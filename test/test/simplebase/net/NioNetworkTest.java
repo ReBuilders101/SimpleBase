@@ -51,7 +51,7 @@ class NioNetworkTest {
 	void setUp() throws Exception {
 		serverManager = NioNetworkManager.createServer(server);
 		serverManager.addIncomingPacketHandler(this::getPacket);
-		clientManager = NioNetworkManager.createClient(clientFromClient, server);
+		clientManager = NetworkManager.createClient(clientFromClient, server);
 		clientManager.addIncomingPacketHandler(this::getPacket);
 		serverManager.startServer();
 	}

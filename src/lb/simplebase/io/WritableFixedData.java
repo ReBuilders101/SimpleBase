@@ -109,6 +109,7 @@ public abstract class WritableFixedData implements WritableByteData {
 		@Override
 		public void write(byte[] toWrite) {
 			System.arraycopy(toWrite, 0, data, writePointer, toWrite.length);
+			writePointer += toWrite.length;
 		}
 		
 		@Override

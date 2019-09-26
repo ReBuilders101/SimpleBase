@@ -16,6 +16,7 @@ public class NioNetworkManagerServer extends CommonServer {
 	private final ServerSocketChannel channel;
 	private final NioConnectionAcceptorThread acceptor;
 	private final Selector dataReceiverSelector;
+	private final NioDataSelectorThread selectorThread;
 	
 	protected NioNetworkManagerServer(TargetIdentifier localId, ServerSocketChannel channel, int threads) throws IOException {
 		super(localId, threads);
@@ -23,6 +24,7 @@ public class NioNetworkManagerServer extends CommonServer {
 		
 		this.acceptor = new NioConnectionAcceptorThread(this, channel);
 		this.dataReceiverSelector = Selector.open();
+		this.selectorThread = new NioDataSelectorThread(this, dataReceiverSelector);
 	}
 
 	protected void acceptIncomingUnconfirmedConnection(SocketChannel socketChannel) { //channel will be in blocking mode
@@ -63,6 +65,7 @@ public class NioNetworkManagerServer extends CommonServer {
 				NetworkManager.NET_LOG.error("Server Manager: Error while binding socket", e);
 				return;
 			}
+			selectorThread.start();
 			acceptor.start();
 			state = ServerState.STARTED;
 			NetworkManager.NET_LOG.info("Server Manager: Server start complete.");

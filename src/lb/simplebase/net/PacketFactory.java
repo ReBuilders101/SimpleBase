@@ -51,7 +51,6 @@ public class PacketFactory {
 	 */
 	//Sync -> everybody has to wait their turn to give a byte
 	public synchronized void feed(byte data) throws PacketMappingNotFoundException { //I hate decoding bytes
-		
 		//First save data and increase accumulation counter
 		tempData[accStep] = data; //save data in current step
 		if(mode == Mode.SEARCH_HEADER) { //Special case for header, because ti doesnt accept any data

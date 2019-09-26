@@ -41,7 +41,7 @@ class DataReceiverThread extends Thread {
 					threadEndCause = Cause.REMOTE;
 					break;
 				}
-				byte b = (byte) i;
+				byte b = (byte) (i & 0xFF);
 				factory.feed(b);
 			} catch (SocketException e) {
 				NetworkManager.NET_LOG.info("Data Receiver: Closing: Socket was closed");

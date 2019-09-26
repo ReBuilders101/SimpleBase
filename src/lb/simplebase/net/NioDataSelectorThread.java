@@ -53,6 +53,7 @@ public class NioDataSelectorThread extends Thread {
 						} while(received > 0);
 					}
 				}
+				keys.clear();
 			} catch (PacketMappingNotFoundException e) {
 				NetworkManager.NET_LOG.warn("Data Receiver: Packet mapping not found for received packet", e);
 			} catch (IOException e) {
