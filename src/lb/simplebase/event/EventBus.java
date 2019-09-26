@@ -201,7 +201,7 @@ public class EventBus implements EventBusRegistry{
 	}
 	
 	//Overridable for concurrent implementation: post on another thread
-	protected EventResult postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
+	protected final EventResult postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
 		isHandlingEvents.set(true);//Moved this here so it can be overridden to set in different threads
 		try {
 			try {	//Protection against bad sync (should not be necessary)
