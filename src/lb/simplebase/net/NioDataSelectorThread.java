@@ -7,6 +7,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
@@ -18,16 +20,25 @@ public class NioDataSelectorThread extends Thread {
 //	private final NioNetworkManagerServer server;
 	private final Selector selector;
 	private final ByteBuffer tempBuffer;
+	private final Lock selectorRegisterLock;
 	
 	public NioDataSelectorThread(NioNetworkManagerServer server, Selector selector) {
 		super("Selector-DataReceiver-" + threadIds.getAndIncrement());
 		setDaemon(true);
 		
 		this.selector = selector;
-//		this.server = server;
+		this.selectorRegisterLock = new ReentrantLock(true);
 		this.tempBuffer = ByteBuffer.allocate(BULK_READ_BUFFER_SIZE);
 	}
 
+	protected Lock getSelectorRegisterLock() {
+		return selectorRegisterLock;
+	}
+	
+	protected Selector getSelector() {
+		return selector;
+	}
+	
 	@Override
 	public void run() {
 		NetworkManager.NET_LOG.info("Started Selector Data Receiver");
@@ -39,6 +50,10 @@ public class NioDataSelectorThread extends Thread {
 				return;
 			}
 			try {
+				//Lock checkpoint before select() call
+				//Do we need try/finally here? (On one line to be compact)
+				try {selectorRegisterLock.lock();} finally {selectorRegisterLock.unlock();}
+				//Select all readable keys
 				if(selector.select() == 0) continue; //Skip empty selected sets
 				final Set<SelectionKey> keys = selector.selectedKeys();
 				for(SelectionKey key : keys) {

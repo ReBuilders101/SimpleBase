@@ -102,12 +102,17 @@ public class NioNetworkManagerServer extends CommonServer {
 	
 	protected SelectionKey registerConnectionChannel(NioNetworkConnection createdConnection) {
 		try {
+			//Manually synchronize on connection lock, because NIO is just that way
+			selectorThread.getSelectorRegisterLock().lock();
+			selectorThread.getSelector().wakeup(); //Exit the select() method that may prevent registration of selector
 			SelectionKey key = createdConnection.getChannel().register(dataReceiverSelector, SelectionKey.OP_READ);
 			key.attach(new NioPacketFactory(this, (p) -> this.processPacket(p, createdConnection.getContext()), createdConnection));
 			return key;
 		} catch (ClosedChannelException e) {
 			NetworkManager.NET_LOG.error("[Server Manager]: Tried to regsiter a closed channel. Channel data will not be read by server", e);
 			return null;
+		} finally {
+			selectorThread.getSelectorRegisterLock().unlock();
 		}
 	}
 

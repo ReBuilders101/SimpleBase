@@ -71,6 +71,16 @@ class NioNetworkTest {
 		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
 	}
 	
+	@SuppressWarnings("static-access")
+	public static void main(String[] args) throws Exception {
+		NioNetworkTest nnt = new NioNetworkTest();
+		nnt.setUpBeforeClass();
+		nnt.setUp();
+		nnt.sendTest();
+		nnt.tearDown();
+		nnt.tearDownAfterClass();
+	}
+	
 	@Test
 	void sendTest() throws InterruptedException, BrokenBarrierException {
 		System.out.println("test0");
@@ -80,6 +90,8 @@ class NioNetworkTest {
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
 		clientManager.openConnectionToServer();
 		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
+		
+		Thread.sleep(500); //Wait until the server has accepted the connection
 		
 		byte[] dataArray = new byte[50];
 		new Random().nextBytes(dataArray);
@@ -91,11 +103,13 @@ class NioNetworkTest {
 		System.out.println(clientManager.getConnectionState());
 		System.out.println(serverManager.getCurrentClientCount());
 		System.out.println("Here!!!!!");
-		assertEquals(serverManager.getCurrentClientCount(), 1, "More or less than one client");
+		Thread.sleep(1000);
+		assertEquals(serverManager.getCurrentClients().size(), 1, "More or less than one client");
 		clientFromServer = serverManager.getCurrentClients().iterator().next(); //Get the only connection
 		assertNotNull(clientFromServer, "Client connection from server side not found");
 		
 		barrier.await(); //Wait for packet to be received
+		System.out.println("Passed Barrier 1");
 		assertEquals(data, assertionPacket, "Packets are not equal");
 		
 		//Now try the other dircetion
@@ -109,6 +123,7 @@ class NioNetworkTest {
 		assertTrue(serverManager.sendPacketToClient(data, clientFromServer).sync().isSuccess(), "Could not send Packet");
 		
 		barrier.await(); //wait for received packet
+		System.out.println("Passed Barrier 2");
 		assertEquals(data, assertionPacket, "Packets are not equal (2)");
 		System.out.println("test");
 	}
