@@ -1,13 +1,10 @@
 package test.simplebase.event;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import lb.simplebase.event.AsyncEventBus;
-import lb.simplebase.event.AwaitableEventResult;
 import lb.simplebase.event.EventHandler;
 import lb.simplebase.event.EventPriority;
 
@@ -26,18 +23,18 @@ public class AwaitTest {
 
 	@Test
 	void test() throws InterruptedException {
-		assertEquals(2, BUS.register(this.getClass()));
-		AwaitableEventResult res = BUS.postAwaitable(new TestEvent2(3), EventPriority.DEFAULT);
-		System.out.println("Anytime before");
-		res.awaitPriority();
-		if(!res.isCanceled()) System.out.println("Default");
-		res.getCurrentEvent().tryCancel();
-		res.allowCompletion();
-		System.out.println("Anytime after");
-		
-		System.out.println();
-		BUS.post(new TestEvent2(4));
-		System.out.println("AfterPost");
+//		assertEquals(2, BUS.register(this.getClass()));
+//		AwaitableEventResult res = BUS.postAwaitable(new TestEvent2(3), EventPriority.DEFAULT);
+//		System.out.println("Anytime before");
+//		res.awaitPriority();
+//		if(!res.isCanceled()) System.out.println("Default");
+//		res.getCurrentEvent().tryCancel();
+//		res.allowCompletion();
+//		System.out.println("Anytime after");
+//		
+//		System.out.println();
+//		BUS.post(new TestEvent2(4));
+//		System.out.println("AfterPost");
 	}
 	
 	

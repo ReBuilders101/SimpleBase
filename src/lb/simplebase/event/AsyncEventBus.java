@@ -7,8 +7,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import lb.simplebase.event.EventHandlerImpl.EventHandlerAwaitable;
-import lb.simplebase.event.HandlerList.HandlerListAwaitable;
 import lb.simplebase.util.NamedThreadFactory;
 
 /**
@@ -32,27 +30,23 @@ public class AsyncEventBus extends EventBus {
 		taskRunner = service;
 	}
 	
-	@Deprecated //Needs rework
-	public synchronized AwaitableEventResult postAwaitable(Event event, EventPriority priority) {
-		if(event == null || !isActive() || isHandlerThread()) return AwaitableEventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
+	public synchronized AsyncEventResult postAsync(Event event) {
+		if(event == null || !isActive() || isHandlerThread()) return AsyncEventResult.createFailed(event, this);; //Can't post an event from an event handler (at least for single-thread busses) 
 		final Class<? extends Event> eventClass = event.getClass();
 		//Find the key. We cant use e.getClass() as a key because we need the exact WeakReference instance in the map / key set
-		if(!ensureKeyExists(eventClass, false, null)) return AwaitableEventResult.createFailed(event, this);
+		if(!ensureKeyExists(eventClass, false, null)) return AsyncEventResult.createFailed(event, this);
 		//Next, get all Handlers
 		final HandlerList handlerSet = getHandlersMap().get(eventClass);
-		if(handlerSet == null || handlerSet.isEmpty()) return AwaitableEventResult.createFailed(event, this);; //Just to be safe
-		return postAwaitableImpl(handlerSet, event, priority);
+		if(handlerSet == null || handlerSet.isEmpty()) return AsyncEventResult.createFailed(event, this);; //Just to be safe
+		return postAsyncImpl(handlerSet, event);
 	}
 	
-	private AwaitableEventResult postAwaitableImpl(final HandlerList handlerSet, final Event event, EventPriority priority) {
+	private synchronized AsyncEventResult postAsyncImpl(HandlerList handlerSet, Event event) {
 		final CountDownLatch completionRelease = new CountDownLatch(1);
-		final HandlerListAwaitable localSet = handlerSet.awaitable(event.getClass(), priority);
-		final EventHandlerAwaitable syncHandler = localSet.getWaiter();
-		syncHandler.init(); //setup cyclicBarrier
 		taskRunner.execute(() -> {
 			isHandlingEvents.set(true);//Set inside lambda, so the worker thread is blocked from posting
 			try {	//Protection against bad sync (should not be necessary)
-				for(EventHandlerImpl handler : localSet) { //Now iterate over the handlers from local set
+				for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers from local set
 					if(handler == null) continue; //HashSet allows a null value
 					handler.checkAndPostEvent(event, this, true);	//This is in a separate method so we can have an async implemetation in a subclass
 				}
@@ -63,31 +57,8 @@ public class AsyncEventBus extends EventBus {
 				completionRelease.countDown();	//Make sure eventResult is completed
 			}
 		});
-		return AwaitableEventResult.createAwaitable(event, completionRelease, syncHandler, this);
+		return AsyncEventResult.createAsync(event, completionRelease, this);
 	}
-	
-	@Override
-	protected EventResult postImpl(final Iterable<EventHandlerImpl> handlerSet, final Event event) {
-		final CountDownLatch completionRelease = new CountDownLatch(1);
-		taskRunner.execute(() -> {
-			isHandlingEvents.set(true);//Set inside lambda, so the worker thread is blocked from posting
-			try {
-				try {	//Protection against bad sync (should not be necessary)
-					for(EventHandlerImpl handler : handlerSet) { //Now iterate over the handlers
-						if(handler == null) continue; //HashSet allows a null value
-						handler.checkAndPostEvent(event, this, false);	//This is in a separate method so we can have an async implemetation in a subclass
-					}
-				} catch(ConcurrentModificationException ex) {
-					System.err.println("Tried post an event on a HandlerSet that was being modified at the time"); //Should not happen
-				}
-			} finally {
-				isHandlingEvents.set(false); //Event handling is done, either throung normal code path or through exception, so make sure it is reset
-				completionRelease.countDown();	//Make sure eventResult is completed
-			}
-		});
-		return EventResult.createAsynchronous(event, this, completionRelease);
-	}
-	
 	
 	/**
 	 * Creates a new event bus that calls handlers on a single thread. The handler thread
