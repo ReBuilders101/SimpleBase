@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.event.EventResult;
-import lb.simplebase.util.ExceptionUtils;
 
 /**
  * Implements common behavior and features of a {@link NetworkManagerServer}.<br>
@@ -58,7 +57,7 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	@Override
 	public LocalNetworkConnection attemptLocalConnection(LocalNetworkConnection connection) {
 		final EventResult result = bus.post(new ConfigureConnectionEvent(connection.getLocalTargetId(), this));
-		final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ExceptionUtils.wrapException(() -> result.getHandledEvent(), result.getCurrentEvent());
+		final ConfigureConnectionEvent handledEvent = result.getEvent(ConfigureConnectionEvent.class);
 		LocalNetworkConnection con = new LocalNetworkConnection(getLocalID(), connection.getLocalTargetId(), this, connection, true, handledEvent.getCustomObject());
 		try {
 			clientListLock.writeLock().lock();

@@ -32,6 +32,7 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return handlers.isEmpty();
 	}
 	
+	@Deprecated
 	public HandlerListAwaitable awaitable(Class<? extends Event> checkType, EventPriority priority) {
 		return new HandlerListAwaitable(new EventHandlerAwaitable(checkType, priority), this);
 	}
@@ -48,7 +49,7 @@ class HandlerList implements Iterable<EventHandlerImpl>{
 		return new HandlerList(new HashSet<>());
 	}
 	
-	
+	@Deprecated
 	static class HandlerListAwaitable implements Iterable<EventHandlerImpl> {
 
 		private final EventHandlerAwaitable waiter;

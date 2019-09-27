@@ -1,5 +1,7 @@
 package lb.simplebase.event;
 
+import lb.simplebase.action.ResultAction;
+
 /**
  * An EventResult stores information about an event after it has been posted.
  * This includes the event instance, whether it was successfully posted, whether all handlers have completed,
@@ -7,7 +9,7 @@ package lb.simplebase.event;
  * <p>
  * An EventResult is created whenever an event is posted and is retuned by the {@link EventBus#post(Event)} method
  */
-public class EventResult {
+public class EventResult implements ResultAction {
 	
 	private final Event currentObject;
 	private final EventBus handlingBus;
@@ -28,7 +30,7 @@ public class EventResult {
 	 * @return If the event was canceled by any handlers
 	 * @throws InterruptedException When the thread is interrupted while waiting for the handlers
 	 */
-	public boolean wasCanceled() {
+	public boolean isCanceled() {
 		return currentObject.isCanceled();
 	}
 	
@@ -42,47 +44,31 @@ public class EventResult {
 		return currentObject;
 	}
 	
-//	
-//	public void waitForHandlers() throws InterruptedException{
-//		if(getEventBus().isHandlingEvents.get()) throw new UnsupportedOperationException("Cannot wait for Handlers to complete while handler is still running on the same thread");
-//		if(isHandlingCompleted()) return;
-//		waiter.await();//Wait for completion
-//	}
-//	
-//	public boolean waitForHandlers(long timeout, TimeUnit unit) throws InterruptedException{
-//		if(getEventBus().isHandlingEvents.get()) throw new UnsupportedOperationException("Cannot wait for Handlers to complete while handler is still running on the same thread");
-//		if(isHandlingCompleted()) return true;
-//		return waiter.await(timeout, unit); //Wait for completion
-//	}
-//	
-//	public boolean isHandlingCompleted() {
-//		if(waiter == null) return true;
-//		return waiter.getCount() == 0L;
-//	}
+	@SuppressWarnings("unchecked")
+	public <T extends Event> T getEvent(Class<T> type) {
+		return (T) currentObject;
+	}
 	
 	public EventBus getEventBus() {
 		return handlingBus;
 	}
 	
-	public boolean wasPostedSuccessfully() {
+	@Override
+	public boolean isFailed() {
+		return !posted;
+	}
+
+	@Override
+	public boolean isSuccess() {
 		return posted;
 	}
 	
-	public boolean isHandledSynchronous() {
-		return true;
-	}
-	
-	public static EventResult createSynchronous(final Event event, final EventBus bus) {
+	protected static EventResult createSynchronous(final Event event, final EventBus bus) {
 		if(!bus.isSynchronous()) return null;
 		return new EventResult(true, event, bus);
 	}
 	
-	public static EventResult createFailed(final Event event, final EventBus bus) {
+	protected static EventResult createFailed(final Event event, final EventBus bus) {
 		return new EventResult(false, event, bus);
 	}
-
-	//Future methods
-	
-	
-	
 }

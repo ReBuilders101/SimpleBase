@@ -263,6 +263,7 @@ abstract class EventHandlerImpl implements Comparable<EventHandlerImpl>{
 	}
 
 
+	@Deprecated
 	static class EventHandlerAwaitable extends EventHandlerImpl {
 
 		private CyclicBarrier waiter;

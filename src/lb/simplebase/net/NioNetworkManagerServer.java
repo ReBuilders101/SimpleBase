@@ -9,7 +9,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import lb.simplebase.event.EventResult;
-import lb.simplebase.util.ExceptionUtils;
 
 public class NioNetworkManagerServer extends CommonServer {
 
@@ -32,7 +31,7 @@ public class NioNetworkManagerServer extends CommonServer {
 
 		//Post the event
 		final EventResult result = bus.post(new AttemptedConnectionEvent(socketChannel.socket().getInetAddress(), this));
-		if(ExceptionUtils.wrapException(() -> result.wasCanceled(), true)) {
+		if(result.isCanceled()) {
 			NetworkManager.NET_LOG.info("Server Manager: Remote connection rejected (" + socketChannel.socket().getRemoteSocketAddress() + ")");
 			try {
 				socketChannel.close();
@@ -42,7 +41,7 @@ public class NioNetworkManagerServer extends CommonServer {
 		} else {
 			TargetIdentifier remote = RemoteIDGenerator.generateID((InetSocketAddress) socketChannel.socket().getRemoteSocketAddress());
 			final EventResult result2 = bus.post(new ConfigureConnectionEvent(socketChannel.socket(), remote, this));
-			final ConfigureConnectionEvent handledEvent = (ConfigureConnectionEvent) ExceptionUtils.wrapException(() -> result2.getHandledEvent(), result2.getCurrentEvent());
+			final ConfigureConnectionEvent handledEvent = result2.getEvent(ConfigureConnectionEvent.class);
 			NetworkConnection newCon = new NioNetworkConnection(getLocalID(), remote, this, socketChannel, true, handledEvent.getCustomObject());
 			try {
 				clientListLock.writeLock().lock();

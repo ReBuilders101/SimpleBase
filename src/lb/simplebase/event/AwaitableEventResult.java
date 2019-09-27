@@ -4,6 +4,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import lb.simplebase.event.EventHandlerImpl.EventHandlerAwaitable;
 
+@Deprecated
 public class AwaitableEventResult extends EventResult{
 
 	private EventHandlerAwaitable syncHandler;
