@@ -52,7 +52,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 	public void close() {
 		super.close(); //Ignore result, it will always be a success
 		NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
-		if(state == ConnectionState.CLOSED) {
+		if(connection.isClosed()) { //Use this, because super.close() sets the state already.
 			NetworkManager.NET_LOG.info("Connection already closed");
 		} else {
 			try {

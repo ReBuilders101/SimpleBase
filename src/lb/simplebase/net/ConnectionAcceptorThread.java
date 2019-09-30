@@ -44,7 +44,7 @@ class ConnectionAcceptorThread extends Thread {
 				server.acceptIncomingUnconfirmedConnection(newSocket);
 			} catch (SocketException e) {
 //				e.printStackTrace();
-				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: ServerSocket was closed", e);
+				NetworkManager.NET_LOG.info("Connection Acceptor: Closing: ServerSocket was closed");
 				return; //When another thread calls close
 			} catch (IOException e) {
 				NetworkManager.NET_LOG.error("Connection Acceptor: Closing: ServerSocket IO error", e);
