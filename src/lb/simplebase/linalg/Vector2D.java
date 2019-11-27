@@ -3,17 +3,20 @@ package lb.simplebase.linalg;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 
 
 /**
  * This class represents an immutable vector in 2D space.
  */
-public class Vector2D {
+public class Vector2D implements Cloneable, Serializable {
+	
+	private static final long serialVersionUID = -8106758591973481935L;
 	
 	private final double x;
 	private final double y;
 	
-	//make transient?
+	//you can't have final and transient fields so these are also serialized
 	private final double length;
 	private final double angle;
 	
@@ -437,6 +440,8 @@ public class Vector2D {
 	public static Vector2D distance(double x1, double y1, double x2, double y2) {
 		return new Vector2D(x2 - x1, y2 - y1);
 	}
+	
+	//Object overrides and interfaces
 
 	/**
 	 * Calculates a unique and immutable value for every {@link Vector2D} instance, as specified in {@link Object#hashCode()}.
@@ -495,5 +500,15 @@ public class Vector2D {
 		return "Vector2D [x=" + x + ", y=" + y + ", length=" + length + ", angle=" + angle + "]";
 	}
 
-
+	@Override
+	public Vector2D clone() {
+		try {
+			return (Vector2D) super.clone();
+			//We throw errors if this doesn't work because if cloneables can't be cloned or return the wrong type, there is something seriously wrong.
+		} catch (CloneNotSupportedException e1) {
+			throw new Error("CloneNotSupportedException on Cloneable object", e1);
+		} catch (ClassCastException e2) {
+			throw new Error("Object.clone() returned an unexpected type", e2);
+		}
+	}
 }
