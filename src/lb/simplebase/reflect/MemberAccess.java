@@ -14,6 +14,7 @@ public abstract class MemberAccess implements Cloneable {
 		this.instance = instance;
 	}
 	
+	@Override
 	public abstract MemberAccess clone();
 	
 	public abstract MemberAccess bindToInstance(final Object instance);

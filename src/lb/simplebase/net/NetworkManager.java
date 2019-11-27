@@ -45,6 +45,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 
 	private final TargetIdentifier local; //every manager represents one party
 	
+	@Override
 	public TargetIdentifier getLocalID() {
 		return local;
 	}
@@ -122,6 +123,7 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static void setLogLevel(LogLevel level) {
+		Objects.requireNonNull(level, "Log Level can't be null");
 		QuickReflectionUtils.Fields.setField(Logger.class, "minimalLevel", NetworkManager.NET_LOG, level);
 	}
 	

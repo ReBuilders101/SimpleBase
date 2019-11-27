@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 import lb.simplebase.action.AsyncAction.DoneHandler;
 
-public class AsyncResultGroup extends DoneHandler implements AsyncAction, Iterable<AsyncResult> {
+public class AsyncResultGroup extends DoneHandler implements Iterable<AsyncResult> {
 
 	private final AsyncResult[] results;
 	

@@ -89,10 +89,12 @@ public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 		}
 	}
 	
+	@Override
 	public Exception getError() {
 		return error;
 	}
 	
+	@Override
 	public String getErrorMessage() {
 		return errorMessage;
 	}
@@ -140,10 +142,12 @@ public final class AsyncNetTask extends DoneHandler implements AsyncResult {
 		}
 	}
 	
+	@Override
 	public boolean isDone() {
 		return task.isDone();
 	}
 	
+	@Override
 	public AsyncResult syncOrError() throws InterruptedException {
 		if(state == State.FINISHED) return this;
 		try {

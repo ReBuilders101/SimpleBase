@@ -1,6 +1,8 @@
 package lb.simplebase.net;
 
 import java.net.InetAddress;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 import lb.simplebase.event.Event;
 
@@ -23,4 +25,9 @@ public final class AttemptedConnectionEvent extends Event{
 		return server;
 	}
 	
+	public static Consumer<AttemptedConnectionEvent> createHandler(BiPredicate<InetAddress, NetworkManagerServer> condition) {
+		return (e) -> {
+			if(!condition.test(e.address, e.server)) e.tryCancel();
+		};
+	}
 }

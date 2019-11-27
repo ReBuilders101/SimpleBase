@@ -46,6 +46,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 * @param packet The Packet that should be sent
 	 * @return Whether the {@link Packet} was sent successfully
 	 */
+	@Override
 	public AsyncResult sendPacketToServer(Packet packet) {
 		if(!serverConnection.isConnectionOpen()) return AsyncNetTask.createFailed(null, "Connection to server is not open");
 		return serverConnection.sendPacketToTarget(packet);
@@ -56,6 +57,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 * If the connection is already open, or could not be made, <code>false</code> is returned.
 	 * @return Whether the connection was opened successfully
 	 */
+	@Override
 	public void openConnectionToServer() {
 		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.getConnectionAddress() +")");
 		serverConnection.connect();

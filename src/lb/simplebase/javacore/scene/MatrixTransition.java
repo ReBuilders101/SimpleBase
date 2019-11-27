@@ -20,10 +20,10 @@ public class MatrixTransition {
 	}
 	
 	public void startTransitionTo(Matrix2D mat, long milliseconds) {
-		m00 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElement00(), mat.getElement00(), 1);
-		m01 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElement01(), mat.getElement01(), 1);
-		m10 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElement10(), mat.getElement10(), 1);
-		m11 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElement11(), mat.getElement11(), 1);
+		m00 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElementA(), mat.getElementA(), 1);
+		m01 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElementB(), mat.getElementB(), 1);
+		m10 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElementC(), mat.getElementC(), 1);
+		m11 = new TransitionTask(Transition.EASE_IN_OUT_CUBIC, Framework.getTicks(milliseconds), last.getElementD(), mat.getElementD(), 1);
 		last = mat;
 		done = false;
 	}

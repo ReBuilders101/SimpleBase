@@ -60,6 +60,7 @@ public class EventBus implements EventBusRegistry{
 	 * @param handlerContainer The class that contains the Event handlers
 	 * @return The number of event handlers that were successfully registered
 	 */
+	@Override
 	public int register(final Class<?> handlerContainer) {
 		//returns the amount of registered methods
 		if(handlerContainer == null) return 0;
@@ -84,6 +85,7 @@ public class EventBus implements EventBusRegistry{
 	 * @param eventType The type of event that the handler is for
 	 * @return Whether the handler was registered successfully
 	 */
+	@Override
 	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType) {
 		return register(handler, eventType, EventPriority.DEFAULT, false);
 	}
@@ -95,6 +97,7 @@ public class EventBus implements EventBusRegistry{
 	 * @param receiveCancelled Whether the handler should be called for events that have been canceled
 	 * @return Whether the handler was registered successfully
 	 */
+	@Override
 	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final boolean receiveCanceled) {
 		return register(handler, eventType, EventPriority.DEFAULT, receiveCanceled);
 	}
@@ -106,6 +109,7 @@ public class EventBus implements EventBusRegistry{
 	 * @param priority An {@link EventPriority} that determines when this handler will be called
 	 * @return Whether the handler was registered successfully
 	 */
+	@Override
 	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final EventPriority priority) {
 		return register(handler, eventType, priority, false);
 	}
@@ -118,6 +122,7 @@ public class EventBus implements EventBusRegistry{
 	 * @param receiveCanceled Whether the handler should be called for events that have been canceled
 	 * @return Whether the handler was registered successfully
 	 */
+	@Override
 	public <T extends Event> boolean register(final Consumer<T> handler, final Class<T> eventType, final EventPriority priority, final boolean receiveCanceled) {
 		if(handler == null) return false;	//Handler can't be null (obv)
 		if(isHandlerThread()) return false; //If handlers can register new handlers, this would lead to a concurrent modification exception (this is the same thread, so synchronized doesn't prevent that
@@ -232,6 +237,7 @@ public class EventBus implements EventBusRegistry{
 	 * it is currently executing an event handler. The return value is different for every thread.
 	 * @return Whether the calling thread can currently use this event bus
 	 */
+	@Override
 	public boolean canThreadInteract() {
 		return !isHandlerThread();
 	}
@@ -252,6 +258,7 @@ public class EventBus implements EventBusRegistry{
 	 * New handlers can be registered on an inactive bus.
 	 * @return Whether this event bus is active
 	 */
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
@@ -264,6 +271,7 @@ public class EventBus implements EventBusRegistry{
 	 * method returns.
 	 * @return Whether this event bus implementation is executing handlers on the same thread as the post call
 	 */
+	@Override
 	public boolean isSynchronous() {
 		return true;
 	}

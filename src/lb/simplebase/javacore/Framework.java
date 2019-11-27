@@ -135,6 +135,11 @@ public final class Framework {
 	}
 	
 	@AnyState
+	public static JComponent getDrawComponent() {
+		return mainDcp;
+	}
+	
+	@AnyState
 	public static void stop() {
 		switch(getState()) {
 		case ENDED:

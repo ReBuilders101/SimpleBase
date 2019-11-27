@@ -9,7 +9,7 @@ public final class SimpleUtils {
 	
 	public static void setup() {
 		NetworkManager.setLogLevel(LogLevel.WARN);
-//		NetworkManager.setAsyncMode(false);
+		NetworkManager.setAsyncMode(false);
 	}
 	
 	public static void cleanup() {
