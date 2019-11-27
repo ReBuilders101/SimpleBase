@@ -25,19 +25,19 @@ public class Matrix2D {
 		m11 = bottomRight;
 	}
 	
-	public double getElement00() {
+	public double getElementA() {
 		return m00;
 	}
 	
-	public double getElement01() {
+	public double getElementB() {
 		return m01;
 	}
 	
-	public double getElement10() {
+	public double getElementC() {
 		return m10;
 	}
 	
-	public double getElement11() {
+	public double getElementD() {
 		return m11;
 	}
 	
@@ -171,6 +171,10 @@ public class Matrix2D {
 		return transform;
 	}
 	
+	public static Matrix2D of(AffineTransform partialTransform) {
+		return new Matrix2D(partialTransform.getScaleX(), partialTransform.getShearX(), partialTransform.getShearY(), partialTransform.getScaleY());
+	}
+	
 	public static Matrix2D of(double topLeft, double topRight, double bottomLeft, double bottomRight) {
 		return new Matrix2D(topLeft, topRight, bottomLeft, bottomRight);
 	}
@@ -241,6 +245,10 @@ public class Matrix2D {
 	@Override
 	public String toString() {
 		return "Matrix2D [m00=" + m00 + ", m01=" + m01 + ", m10=" + m10 + ", m11=" + m11 + "]";
+	}
+	
+	public static double columnDeterminant(Vector2D vec1, Vector2D vec2) {
+		return vec1.getX() * vec2.getY() - vec1.getY() * vec2.getX();
 	}
 	
 }

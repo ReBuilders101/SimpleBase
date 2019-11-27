@@ -28,31 +28,31 @@ public class Matrix3D {
 		this.m21 = m21;
 		this.m22 = m22;
 	}
-	public double getM00() {
+	public double getElementA() {
 		return m00;
 	}
-	public double getM01() {
+	public double getElementB() {
 		return m01;
 	}
-	public double getM02() {
+	public double getElementC() {
 		return m02;
 	}
-	public double getM10() {
+	public double getElementD() {
 		return m10;
 	}
-	public double getM11() {
+	public double getElementE() {
 		return m11;
 	}
-	public double getM12() {
+	public double getElementF() {
 		return m12;
 	}
-	public double getM20() {
+	public double getElementG() {
 		return m20;
 	}
-	public double getM21() {
+	public double getElementH() {
 		return m21;
 	}
-	public double getM22() {
+	public double getElementI() {
 		return m22;
 	}
 	

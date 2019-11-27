@@ -141,6 +141,21 @@ public class Vector3D {
 		return new Vector3D(values[0], values[1], values[2]);
 	}
 	
+	public static Vector3D of(double[] values, int offset) {
+		if(values.length < 3 + offset) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[offset], values[offset + 1], values[offset + 2]);
+	}
+	
+	public static Vector3D of(float[] values, int offset) {
+		if(values.length < 3 + offset) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[offset], values[offset + 1], values[offset + 2]);
+	}
+	
+	public static Vector3D of(int[] values, int offset) {
+		if(values.length < 3 + offset) throw new ArrayIndexOutOfBoundsException("The array must have at least 3 elements");
+		return new Vector3D(values[offset], values[offset + 1], values[offset + 2]);
+	}
+	
 	public static Vector3D distance(Vector3D first, Vector3D second) {
 		return second.subtract(first);
 	}
