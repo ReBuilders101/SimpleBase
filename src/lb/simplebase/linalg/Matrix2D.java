@@ -78,7 +78,7 @@ public class Matrix2D {
 	public Matrix2D inverse() {
 		final double det = determinant();
 		if(det == 0) return NULL;
-		return new Matrix2D(m11, -m01, -m10, m00).scale(1D / det);
+		return new Matrix2D(m11 / det, -m01 / det, -m10 / det, m00 / det);
 	}
 	
 	public Matrix2D negate() {
