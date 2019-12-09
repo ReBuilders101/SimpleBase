@@ -1,7 +1,5 @@
 package lb.simplebase.net;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,7 +101,13 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 	}
 	
 	public static NetworkManagerServer createServer(TargetIdentifier localId) {
-		return createServer(localId, NetworkManager.createServerConfig(localId));
+		return createServer(localId, NetworkManager.createServerConfig());
+	}
+	
+	public static NetworkManagerServer createServer(TargetIdentifier localId, LanServerDiscovery discovery) {
+		ServerConfig sc = createServerConfig();
+		sc.setDatagramDiscovery(discovery);
+		return createServer(localId, sc);
 	}
 	
 	public static NetworkManagerServer createServer(TargetIdentifier localId, ServerConfig config) {
@@ -154,18 +158,8 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 		return Collections.unmodifiableSet(LocalConnectionManager.getServers().keySet());
 	}
 	
-	public static ServerConfig createServerConfig(TargetIdentifier serverId) {
-		try {
-			return new ServerConfig(serverId.isLocalOnly() ? null : new ServerSocket());
-		} catch (IOException e) {
-			NetworkManager.NET_LOG.error("ServerConfig: Could not create ServerSocket");
-			try {
-				return new ServerConfig(null); //With false, it can't throw the exception
-			} catch (IOException e1) {
-				e1.printStackTrace(); //So this will not happen
-				throw new RuntimeException(e1);
-			}
-		}
+	public static ServerConfig createServerConfig() {
+		return new ServerConfig();
 	}
 	
 	

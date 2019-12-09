@@ -8,7 +8,6 @@ class NioServerConfig extends ServerConfig {
 	private final ServerSocketChannel channel;
 	
 	protected NioServerConfig(ServerSocketChannel soc) throws IOException {
-		super(soc == null ? null : soc.socket());
 		channel = soc;
 	}
 	

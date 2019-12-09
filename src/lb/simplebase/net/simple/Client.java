@@ -1,6 +1,5 @@
 package lb.simplebase.net.simple;
 
-import java.net.UnknownHostException;
 import java.util.function.Consumer;
 
 import lb.simplebase.net.ConnectionState;
@@ -13,14 +12,10 @@ public abstract class Client extends ReceiveSide {
 	private final NetworkManagerClient client;
 	
 	public Client(String remoteAddress, int port) {
-		try {
-			client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
-					TargetIdentifier.createNetwork("server", remoteAddress, port));
-			client.addMapping(StringMessagePacket.getMapping(1));
-			client.addIncomingPacketHandler(this::receive0);
-		} catch (UnknownHostException e) {
-			throw new RuntimeException("Remote Address not found", e);
-		}
+		client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
+				TargetIdentifier.createNetwork("server", remoteAddress, port));
+		client.addMapping(StringMessagePacket.getMapping(1));
+		client.addIncomingPacketHandler(this::receive0);
 	}
 	
 	public NetworkManagerClient getClientManager() {

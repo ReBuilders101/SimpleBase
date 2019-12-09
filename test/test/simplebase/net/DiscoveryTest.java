@@ -16,7 +16,6 @@ import lb.simplebase.net.AttemptedConnectionEvent;
 import lb.simplebase.net.LanServerDiscovery;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerServer;
-import lb.simplebase.net.ServerConfig;
 import lb.simplebase.net.TargetIdentifier;
 
 class DiscoveryTest {
@@ -82,16 +81,9 @@ class DiscoveryTest {
 		
 		LanServerDiscovery lsd = LanServerDiscovery.create(new byte[] {89, 45, 76, 23, 54, 77, 12}, DiscoveryTest::updates); // 7 random bytes
 		
-		ServerConfig config1 = NetworkManager.createServerConfig(serverTI1); //works for all servers, just a flag for the socket
-		ServerConfig config2 = NetworkManager.createServerConfig(serverTI2); //works for all servers, just a flag for the socket
-		ServerConfig config3 = NetworkManager.createServerConfig(serverTI3); //works for all servers, just a flag for the socket
-		config1.setDatagramDiscovery(lsd); //uses the sequence
-		config2.setDatagramDiscovery(lsd); //uses the sequence
-		config3.setDatagramDiscovery(lsd); //uses the sequence
-		
-		NetworkManagerServer server1 = NetworkManager.createServer(serverTI1, config1);
-		NetworkManagerServer server2 = NetworkManager.createServer(serverTI2, config2);
-		NetworkManagerServer server3 = NetworkManager.createServer(serverTI3, config3);
+		NetworkManagerServer server1 = NetworkManager.createServer(serverTI1, lsd);
+		NetworkManagerServer server2 = NetworkManager.createServer(serverTI2, lsd);
+		NetworkManagerServer server3 = NetworkManager.createServer(serverTI3, lsd);
 		
 		server1.getEventBus().register(DiscoveryTest::deny,    AttemptedConnectionEvent.class);
 		server2.getEventBus().register(DiscoveryTest::variant, AttemptedConnectionEvent.class);

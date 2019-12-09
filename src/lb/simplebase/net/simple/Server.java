@@ -1,6 +1,5 @@
 package lb.simplebase.net.simple;
 
-import java.net.UnknownHostException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -14,16 +13,12 @@ public abstract class Server extends ReceiveSide {
 	private final NetworkManagerServer server;
 
 	public Server(int port) {
-		try {
-			server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port));
-			server.addMapping(StringMessagePacket.getMapping(1));
-			server.addIncomingPacketHandler(this::receive0);
-			server.getEventBus().register((e) -> this.newConnection(e.getRemoteAddress().getHostString(), e.getRemoteAddress().getPort()), ConfigureConnectionEvent.class);
+		server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port));
+		server.addMapping(StringMessagePacket.getMapping(1));
+		server.addIncomingPacketHandler(this::receive0);
+		server.getEventBus().register((e) -> this.newConnection(e.getRemoteAddress().getHostString(), e.getRemoteAddress().getPort()), ConfigureConnectionEvent.class);
 //			server.addNewConnectionHandler((t) -> this.newConnection(t.getConnectionAddress().getHostString(), t.getConnectionAddress().getPort()));
-			server.startServer();
-		} catch (UnknownHostException e) {
-			throw new RuntimeException("Server Address not found", e);
-		}
+		server.startServer();
 	}
 	
 	public final NetworkManagerServer getServerManager() {
