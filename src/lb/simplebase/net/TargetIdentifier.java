@@ -45,8 +45,22 @@ public interface TargetIdentifier {
 		return new LocalTargetIdentifier(name);
 	}
 	
-	public static TargetIdentifier createNetwork(String name, String address, int port) throws UnknownHostException{
-		return new NetworkTargetIdentifier(name, address, port);
+	public static TargetIdentifier createNetwork(String name, String address, int port) {
+		try {
+			return new NetworkTargetIdentifier(name, address, port);
+		} catch (UnknownHostException e) {
+			NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
+			return null;
+		}
+	}
+	
+	public static TargetIdentifier createNetworkServer(String name, int port) {
+		try {
+			return new NetworkTargetIdentifier(name, InetAddress.getLocalHost(), port);
+		} catch (UnknownHostException e) {
+			NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
+			return null;
+		}
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetSocketAddress address) {

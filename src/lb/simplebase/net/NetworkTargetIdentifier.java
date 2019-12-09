@@ -23,9 +23,11 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 	 * @throws UnknownHostException When the IP-Address is invalid
 	 */
 	public NetworkTargetIdentifier(String id, String ipAddress, int port) throws UnknownHostException {
-			this.id = id;
-			InetAddress inet = InetAddress.getByName(ipAddress);
-			address = new InetSocketAddress(inet, port);
+		this(id, InetAddress.getByName(ipAddress), port);
+	}
+	
+	public NetworkTargetIdentifier(String id, InetAddress ipAddress, int port) throws UnknownHostException {
+		this(id, new InetSocketAddress(ipAddress, port));
 	}
 	
 	/**

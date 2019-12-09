@@ -33,4 +33,9 @@ public class LocalNetworkManagerServer extends CommonServer {
 		stopServer();
 	}
 
+	@Override
+	public boolean allowDatagramDiscovery() {
+		return false;
+	}
+
 }

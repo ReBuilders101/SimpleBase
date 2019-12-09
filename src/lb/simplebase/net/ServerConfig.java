@@ -8,10 +8,32 @@ public class ServerConfig {
 
 	private final ServerSocket socket;
 	private int threads;
+	private byte[] udpDiscovery;
 	
 	protected ServerConfig(ServerSocket soc) throws IOException {
 		socket = soc;
 		threads = 0; //Zero means unlimited threads
+		udpDiscovery = null;
+	}
+	
+	public void setDatagramDiscovery(byte[] headerSequence) {
+		udpDiscovery = headerSequence;
+	}
+	
+	public void setDatagramDiscovery(LanServerDiscovery headerSequence) {
+		udpDiscovery = headerSequence.getHeaderSequence();
+	}
+	
+	public void removeDatagramDiscovery() {
+		udpDiscovery = null;
+	}
+	
+	public boolean getDatagramDiscovery() {
+		return udpDiscovery != null;
+	}
+	
+	public byte[] getDatagramDiscoverySequence() {
+		return udpDiscovery;
 	}
 	
 	/**

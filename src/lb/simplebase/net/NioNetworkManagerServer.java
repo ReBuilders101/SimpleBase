@@ -120,4 +120,9 @@ public class NioNetworkManagerServer extends CommonServer {
 		stopServer();
 	}
 
+	@Override
+	public boolean allowDatagramDiscovery() {
+		return false;
+	}
+
 }

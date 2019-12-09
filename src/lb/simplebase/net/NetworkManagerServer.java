@@ -93,4 +93,6 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 * @return The state of the server
 	 */
 	public ServerState getServerState();
+	
+	public boolean allowDatagramDiscovery();
 }

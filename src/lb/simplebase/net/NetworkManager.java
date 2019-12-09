@@ -2,6 +2,7 @@ package lb.simplebase.net;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -117,7 +118,17 @@ public abstract class NetworkManager implements PacketReceiver, NetworkManagerCo
 				NetworkManager.NET_LOG.warn("Error while creating ServerSocket. Using local server.");
 				return new LocalNetworkManagerServer(localId, config.getThreadCount());
 			} else {
-				return new SocketNetworkManagerServer(localId, config.configuredSocket(), config.getThreadCount());
+				try {
+					return new SocketNetworkManagerServer(localId, config.configuredSocket(), config.getThreadCount(), config.getDatagramDiscovery(), config.getDatagramDiscoverySequence());
+				} catch (SocketException e) {
+					NetworkManager.NET_LOG.warn("Error while creating Server Datagram Socket. Continuing without Datagram Discovery Features");
+					try {
+						return new SocketNetworkManagerServer(localId, config.configuredSocket(), config.getThreadCount(), false, null); //Exc only happens when lat param is true
+					} catch (SocketException e1) {
+						NetworkManager.NET_LOG.fatal("Fatal error: Exception was thrown on a code path that it was not expected on", e1);
+						throw new Error("Invalid Codepath???", e);
+					}
+				}
 			}
 		}
 	}
