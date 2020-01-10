@@ -21,6 +21,7 @@ final class TargetIdentifierNameCache {
 			int i = 0;
 			while(usedNames.contains(tempName)) {
 				tempName = nameMapper.apply(i);
+				if(tempName == null) return null;
 				i++;
 			}
 			usedNames.add(tempName);

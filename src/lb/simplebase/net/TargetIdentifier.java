@@ -52,7 +52,7 @@ public interface TargetIdentifier {
 	
 	
 	public static TargetIdentifier createLocal(String name) {
-		return createLocal(name, TargetIdentifier::indexedName);
+		return createLocal(name, TargetIdentifier::abortNameBehavior);
 	}
 	
 	public static TargetIdentifier createLocal(String name, Function<String, IntFunction<String>> mapper) {
@@ -60,7 +60,7 @@ public interface TargetIdentifier {
 	}
 	
 	public static TargetIdentifier createNetwork(String name, String address, int port) {
-		return createNetwork(name, address, port, TargetIdentifier::indexedName);
+		return createNetwork(name, address, port, TargetIdentifier::abortNameBehavior);
 	}
 	
 	public static TargetIdentifier createNetwork(String name, String address, int port, Function<String, IntFunction<String>> mapper) {
@@ -75,7 +75,7 @@ public interface TargetIdentifier {
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetAddress address, int port) {
-		return createNetwork(name, address, port, TargetIdentifier::indexedName);
+		return createNetwork(name, address, port, TargetIdentifier::abortNameBehavior);
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetAddress address, int port, Function<String, IntFunction<String>> mapper) {
@@ -83,7 +83,7 @@ public interface TargetIdentifier {
 	}
 	
 	public static TargetIdentifier createNetworkServer(String name, int port) {
-		return createNetworkServer(name, port, TargetIdentifier::indexedName);
+		return createNetworkServer(name, port, TargetIdentifier::abortNameBehavior);
 	}
 	
 	public static TargetIdentifier createNetworkServer(String name, int port, Function<String, IntFunction<String>> mapper) {
@@ -98,14 +98,18 @@ public interface TargetIdentifier {
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetSocketAddress address) {
-		return createNetwork(name, address, TargetIdentifier::indexedName);
+		return createNetwork(name, address, TargetIdentifier::abortNameBehavior);
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetSocketAddress address, Function<String, IntFunction<String>> mapper) {
 		return TargetIdentifierNameCache.createImpl((name0) -> new NetworkTargetIdentifier(name0, address), name, mapper.apply(name));
 	}
 	
-	public static IntFunction<String> indexedName(String baseName) {
+	public static IntFunction<String> abortNameBehavior(String baseName) {
+		return null;
+	}
+	
+	public static IntFunction<String> appendIndexBehavior(String baseName) {
 		return (i) -> baseName + i;
 	}
 	
