@@ -1,11 +1,8 @@
 package lb.simplebase.net;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -34,10 +31,8 @@ public interface TargetIdentifier {
 	 * @param socket The socket that should be connected
 	 * @return The connected socket, if successful
 	 */
-	public <T extends Socket> Optional<T> connectSocket(Supplier<T> socket, int timeout) throws IOException, SocketTimeoutException, SocketException;
-	public <T extends DatagramSocket> Optional<T> connectDatagram(Supplier<T> socket, int timeout) throws IOException, SocketTimeoutException, SocketException;
-	public <T extends ServerSocket> Optional<T> bindSocket(Supplier<T> socket) throws IOException, SocketException;
-	public <T extends DatagramSocket> Optional<T> bindDatagram(Supplier<T> socket) throws IOException, SocketException;
+	public <T> Optional<T> connectSocket(Supplier<SocketActions<T>> socket, int timeout) throws IOException, SocketTimeoutException, SocketException;
+	public <T> Optional<T> bindSocket(Supplier<SocketActions<T>> socket) throws IOException, SocketException;
 	
 	public String createConnectionInformation(boolean name, boolean ipData);
 	

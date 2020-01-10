@@ -1,10 +1,8 @@
 package lb.simplebase.net;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -78,54 +76,30 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 	}
 
 	@Override
-	public <SocketType extends Socket> Optional<SocketType> connectSocket(Supplier<SocketType> socket, int timeout)
+	public <T> Optional<T> connectSocket(Supplier<SocketActions<T>> socket, int timeout)
 			throws IOException, SocketTimeoutException, SocketException {
-		Objects.requireNonNull(socket, "Socket supplier must not be null");
-		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
-		
+		Objects.requireNonNull(socket, "SocketActions supplier must not be null");
+		SocketActions<T> sock = Objects.requireNonNull(socket.get(), "SocketActions supplier must not return null");
+
 		if(sock.isConnected()) throw new SocketException("Socket is already connected");
+		if(sock.isClosed()) throw new SocketException("Socket is already closed");
 		
 		sock.connect(address, timeout);
-		
-		return Optional.of(sock);
+
+		return Optional.of(sock.getNetObject());
 	}
 
 	@Override
-	public <SocketType extends ServerSocket> Optional<SocketType> bindSocket(Supplier<SocketType> socket)
-			throws IOException, SocketException {
+	public <T> Optional<T> bindSocket(Supplier<SocketActions<T>> socket) throws IOException, SocketException {
 		Objects.requireNonNull(socket, "Socket supplier must not be null");
-		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
+		SocketActions<T> sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
 		
 		if(sock.isBound()) throw new SocketException("Socket is already bound");
+		if(sock.isClosed()) throw new SocketException("Socket is already closed");
 		
 		sock.bind(address);
 		
-		return Optional.of(sock);
-	}
-	
-	@Override
-	public <SocketType extends DatagramSocket> Optional<SocketType> connectDatagram(Supplier<SocketType> socket, int timeout)
-			throws IOException, SocketTimeoutException, SocketException {
-		Objects.requireNonNull(socket, "Socket supplier must not be null");
-		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
-		
-		if(sock.isBound()) throw new SocketException("Socket is already bound");
-		
-		sock.bind(address);
-		
-		return Optional.of(sock);
-	}
-
-	@Override
-	public <SocketType extends DatagramSocket> Optional<SocketType> bindDatagram(Supplier<SocketType> socket) throws IOException, SocketException {
-		Objects.requireNonNull(socket, "Socket supplier must not be null");
-		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
-		
-		if(sock.isBound()) throw new SocketException("Socket is already bound");
-		
-		sock.bind(address);
-		
-		return Optional.of(sock);
+		return Optional.of(sock.getNetObject());
 	}
 
 	@Override

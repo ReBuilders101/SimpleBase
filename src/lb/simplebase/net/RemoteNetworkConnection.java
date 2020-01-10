@@ -70,7 +70,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 	public void connect(int timeout) {
 		if(getState() == ConnectionState.UNCONNECTED) {
 			try {
-				getRemoteTargetId().connectSocket(() -> connection, timeout);
+				getRemoteTargetId().connectSocket(() -> SocketActions.of(connection), timeout);
 //				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
 				//After connecting successfully, start the listener thread
 				dataThread.start();
