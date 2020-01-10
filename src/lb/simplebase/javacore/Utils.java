@@ -14,6 +14,7 @@ import java.util.stream.Collector;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -206,4 +207,14 @@ public final class Utils {
 //		return outShiftVal + minOut;
 		return (((clampedValue - minIn) / (maxIn - minIn)) * (maxOut - minOut) ) + minOut;
 	}
+	
+	/**
+	 * For debugging only, should be replaced by regular Thread.sleep later
+	 * @throws InterruptedException 
+	 */
+	public static void safeSleep(long ms) throws InterruptedException {
+		if(SwingUtilities.isEventDispatchThread()) throw new RuntimeException("DON'T SLEEP ON EDT!!!");
+		Thread.sleep(ms);
+	}
+	
 }

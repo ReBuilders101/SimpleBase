@@ -26,7 +26,7 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 		this(id, InetAddress.getByName(ipAddress), port);
 	}
 	
-	public NetworkTargetIdentifier(String id, InetAddress ipAddress, int port) throws UnknownHostException {
+	public NetworkTargetIdentifier(String id, InetAddress ipAddress, int port) {
 		this(id, new InetSocketAddress(ipAddress, port));
 	}
 	

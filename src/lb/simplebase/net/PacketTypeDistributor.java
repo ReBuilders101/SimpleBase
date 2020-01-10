@@ -35,7 +35,7 @@ public class PacketTypeDistributor implements PacketReceiver{
 	 * @param handler The {@link PacketReceiver} that handles this type of packet
 	 * @return Whether the registration was successful or not
 	 */
-	public boolean registerTypeHandler(Class<? extends Packet> packetClass, PacketReceiver handler) {
+	public <T extends Packet> boolean registerTypeHandler(Class<T> packetClass, TypedPacketReceiver<T> handler) {
 		if(map.containsKey(packetClass)) {
 			return false; //Don't overwrite anything (including default handler)
 		} else {

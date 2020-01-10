@@ -78,7 +78,7 @@ class RemoteNetworkConnection extends NetworkConnection{
 			} catch (SocketTimeoutException e) {
 				NetworkManager.NET_LOG.warn("The timeout (" + timeout + "ms) expired before a connection could be made", e);
 			} catch (IOException e) {
-				NetworkManager.NET_LOG.error("An IO error occurred while trying to connect the Socket", e);
+				NetworkManager.NET_LOG.warn("An IO error occurred while trying to connect the Socket", e);
 			}
 		} else {
 			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")

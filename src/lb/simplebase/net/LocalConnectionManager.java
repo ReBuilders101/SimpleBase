@@ -1,6 +1,7 @@
 package lb.simplebase.net;
 
 import java.net.ServerSocket;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,10 @@ public final class LocalConnectionManager {
 		return servers;
 	}
 	
+	public static Collection<TargetIdentifier> getLocalServers() {
+		return Collections.unmodifiableSet(servers.keySet());
+	}
+	
 	/**
 	 * 
 	 * @param connection A {@link NetworkConnection} to the server that should be connected to
@@ -59,6 +64,10 @@ public final class LocalConnectionManager {
 	
 	protected static boolean canMakeConnectionTo(TargetIdentifier server) {
 		return servers.get(server) != null;
+	}
+	
+	public static boolean hasServer(TargetIdentifier serverToTest) {
+		return getLocalServers().contains(serverToTest);
 	}
 	
 	/**

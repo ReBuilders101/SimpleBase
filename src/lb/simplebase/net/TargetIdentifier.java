@@ -54,6 +54,10 @@ public interface TargetIdentifier {
 		}
 	}
 	
+	public static TargetIdentifier createNetwork(String name, InetAddress address, int port) {
+		return new NetworkTargetIdentifier(name, address, port);
+	}
+	
 	public static TargetIdentifier createNetworkServer(String name, int port) {
 		try {
 			return new NetworkTargetIdentifier(name, InetAddress.getLocalHost(), port);
@@ -65,5 +69,13 @@ public interface TargetIdentifier {
 	
 	public static TargetIdentifier createNetwork(String name, InetSocketAddress address) {
 		return new NetworkTargetIdentifier(name, address);
+	}
+	
+	public static String nameOrAddress(TargetIdentifier ti) {
+		if(ti instanceof LocalTargetIdentifier) {
+			return ti.getId();
+		} else {
+			return ti.getId() + "@" + ti.getConnectionAddress();
+		}
 	}
 }

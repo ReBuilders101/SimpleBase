@@ -34,7 +34,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 		allHandlers = new PacketDistributor();
 		handler = new InboundPacketThreadHandler(allHandlers, 0);
 		
-		if(serverId.isLocalOnly()) {
+		if(LocalConnectionManager.hasServer(serverId) || serverId.isLocalOnly()) { //If local is possible, then do it
 			serverConnection = new LocalNetworkConnection(localId, serverId, this, false, config.getCustomObject());
 		} else {
 			serverConnection = new RemoteNetworkConnection(localId, serverId, this, config.configuredSocket(), false, config.getCustomObject());
