@@ -1,10 +1,17 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * All objects implementing this interface can be used to identify a network target.
@@ -16,12 +23,21 @@ import java.util.HashMap;
 public interface TargetIdentifier {
 	
 	/**
-	 * An {@link InetSocketAddress} that con be used to open a {@link Socket}-based connection to this
-	 * network target. If {@link #isLocalOnly()} returns <code>true</code>, this {@link TargetIdentifier} cannot be
-	 * used for network traffic and may return <code>null</code>. Otherwise, a valid {@link InetAddress} must be returned.
-	 * @return The connection address for a {@link Socket} connection
+	 * Tries to connect a socket to this target.
+	 * If this target does not support network connections ({@link #isLocalOnly()}),
+	 * an empty {@link Optional} is returned and the supplier will not be called.
+	 * If the target supports network connections, it will be connected to this target.
+	 * If the socket is already connected, a {@link SocketException} is thrown
+	 * When this method returns with an exception, the connection state of the socket is undefined.
+	 * @param socket The socket that should be connected
+	 * @return The connected socket, if successful
 	 */
-	public InetSocketAddress getConnectionAddress();
+	public <T extends Socket> Optional<T> connectSocket(Supplier<T> socket, int timeout) throws IOException, SocketTimeoutException, SocketException;
+	public <T extends DatagramSocket> Optional<T> connectDatagram(Supplier<T> socket, int timeout) throws IOException, SocketTimeoutException, SocketException;
+	public <T extends ServerSocket> Optional<T> bindSocket(Supplier<T> socket) throws IOException, SocketException;
+	public <T extends DatagramSocket> Optional<T> bindDatagram(Supplier<T> socket) throws IOException, SocketException;
+	
+	public String createConnectionInformation(boolean name, boolean ipData);
 	
 	/**
 	 * Every {@link TargetIdentifier} holds a Sring ID that should be unique for every target in the program.
@@ -37,9 +53,6 @@ public interface TargetIdentifier {
 	 */
 	public boolean isLocalOnly();
 	
-	public boolean matches(String address, int port);
-	public boolean matches(InetAddress address, int port);
-	public boolean matches(InetSocketAddress address);
 	
 	public static TargetIdentifier createLocal(String name) {
 		return new LocalTargetIdentifier(name);
@@ -71,11 +84,17 @@ public interface TargetIdentifier {
 		return new NetworkTargetIdentifier(name, address);
 	}
 	
-	public static String nameOrAddress(TargetIdentifier ti) {
-		if(ti instanceof LocalTargetIdentifier) {
-			return ti.getId();
+	@Deprecated
+	public static Optional<InetSocketAddress> tryGetAddress(TargetIdentifier ti) {
+		if(ti instanceof NetworkTargetIdentifier) {
+			return Optional.of(((NetworkTargetIdentifier) ti).getAddress());
 		} else {
-			return ti.getId() + "@" + ti.getConnectionAddress();
+			return Optional.empty();
 		}
+	}
+	
+	@Deprecated
+	public static String nameOrAddress(TargetIdentifier ti) {
+		return ti.createConnectionInformation(true, true);
 	}
 }

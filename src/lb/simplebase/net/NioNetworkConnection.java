@@ -39,11 +39,12 @@ public class NioNetworkConnection extends NetworkConnection{
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void connect(int timeout) {
 		if(state == ConnectionState.UNCONNECTED) {
 			try {
-				channel.connect(getRemoteTargetId().getConnectionAddress());
+				channel.connect(TargetIdentifier.tryGetAddress(getRemoteTargetId()).orElseThrow(RuntimeException::new));
 				channel.configureBlocking(false); //Switch to non-blocking node for selector
 				channelServerSelection = ((NioNetworkManagerServer) getNetworkManager()).registerConnectionChannel(this);
 				NetworkManager.NET_LOG.info("Network Connection: Channel connected, switched to non-blocking mode");

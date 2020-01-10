@@ -1,7 +1,14 @@
 package lb.simplebase.net;
 
-import java.net.InetAddress;
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A {@link TargetIdentifier} that can <b>not</b> be used for Network communication. It does not store a
@@ -17,17 +24,6 @@ class LocalTargetIdentifier implements TargetIdentifier{
 	 */
 	public LocalTargetIdentifier(String localId) {
 		this.localId = localId;
-	}
-
-	/**
-	 * Because this implementation of {@link TargetIdentifier} does not support network communication,
-	 * this method always returns <code>null</code>.
-	 * @return Always <code>null</code>
-	 * @see TargetIdentifier#getConnectionAddress()
-	 */
-	@Override
-	public InetSocketAddress getConnectionAddress() {
-		return null;
 	}
 
 	/**
@@ -49,6 +45,34 @@ class LocalTargetIdentifier implements TargetIdentifier{
 		return localId;
 	}
 
+	@Override
+	public <T extends Socket> Optional<T> connectSocket(Supplier<T> socket, int timeout)
+			throws IOException, SocketTimeoutException, SocketException {
+		return Optional.empty();
+	}
+
+	@Override
+	public <T extends ServerSocket> Optional<T> bindSocket(Supplier<T> socket) 
+			throws IOException, SocketException {
+		return Optional.empty();
+	}
+
+	@Override
+	public <T extends DatagramSocket> Optional<T> connectDatagram(Supplier<T> socket, int timeout)
+			throws IOException, SocketTimeoutException, SocketException {
+		return Optional.empty();
+	}
+
+	@Override
+	public <T extends DatagramSocket> Optional<T> bindDatagram(Supplier<T> socket) throws IOException, SocketException {
+		return Optional.empty();
+	}
+	
+	@Override
+	public String createConnectionInformation(boolean name, boolean ipData) {
+		return name ? "Local Target: " + name : "Local Target";
+	}
+	
 	@Override
 	public String toString() {
 		return "LocalTargetIdentifier [localId=" + localId + "]";
@@ -77,22 +101,5 @@ class LocalTargetIdentifier implements TargetIdentifier{
 		} else if (!localId.equals(other.localId))
 			return false;
 		return true;
-	}
-
-	//Local implementation never matches network code
-	
-	@Override
-	public boolean matches(String address, int port) {
-		return false;
-	}
-
-	@Override
-	public boolean matches(InetAddress address, int port) {
-		return false;
-	}
-
-	@Override
-	public boolean matches(InetSocketAddress address) {
-		return false;
 	}
 }

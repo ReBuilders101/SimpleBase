@@ -2,6 +2,8 @@ package lb.simplebase.net;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Optional;
+
 import lb.simplebase.event.Event;
 
 public final class ConfigureConnectionEvent extends Event{
@@ -38,8 +40,9 @@ public final class ConfigureConnectionEvent extends Event{
 		return remoteTarget;
 	}
 	
-	public InetSocketAddress getRemoteAddress() {
-		return remoteTarget.getConnectionAddress();
+	@Deprecated
+	public Optional<InetSocketAddress> getRemoteAddress() {
+		return TargetIdentifier.tryGetAddress(remoteTarget);
 	}
 	
 	public TargetIdentifier getLocalTargetId() {

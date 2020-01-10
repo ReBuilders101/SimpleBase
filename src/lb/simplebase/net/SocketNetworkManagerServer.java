@@ -95,8 +95,10 @@ class SocketNetworkManagerServer extends CommonServer {
 			NetworkManager.NET_LOG.info("Server Manager: Starting server...");
 			LocalConnectionManager.addServer(this);
 			try {
-				serverSocket.bind(getLocalID().getConnectionAddress());
-				if(allowDatagramDiscovery) receiverSocket.bind(getLocalID().getConnectionAddress());
+				getLocalID().bindSocket(() -> serverSocket);
+//				serverSocket.bind(getLocalID().getConnectionAddress());
+				if(allowDatagramDiscovery) getLocalID().bindDatagram(() -> receiverSocket);
+//					receiverSocket.bind(getLocalID().getConnectionAddress());
 			} catch (IOException e) {
 				NetworkManager.NET_LOG.error("Server Manager: Error while binding socket", e);
 				return;

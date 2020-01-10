@@ -1,6 +1,5 @@
 package lb.simplebase.net.simple;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import lb.simplebase.net.ConfigureConnectionEvent;
@@ -16,7 +15,7 @@ public abstract class Server extends ReceiveSide {
 		server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port));
 		server.addMapping(StringMessagePacket.getMapping(1));
 		server.addIncomingPacketHandler(this::receive0);
-		server.getEventBus().register((e) -> this.newConnection(e.getRemoteAddress().getHostString(), e.getRemoteAddress().getPort()), ConfigureConnectionEvent.class);
+		server.getEventBus().register((e) -> this.newConnection(e.getRemoteTargetId().getId()), ConfigureConnectionEvent.class);
 //			server.addNewConnectionHandler((t) -> this.newConnection(t.getConnectionAddress().getHostString(), t.getConnectionAddress().getPort()));
 		server.startServer();
 	}
@@ -25,15 +24,15 @@ public abstract class Server extends ReceiveSide {
 		return server;
 	}
 	
-	protected abstract void newConnection(String hostname, int port);
+	protected abstract void newConnection(String name);
 	
 	public final void sendToAll(String message) {
 		server.sendPacketToAllClients(new StringMessagePacket(message)).sync();
 	}
 	
-	public final void sendTo(String address, int port, String message) {
+	public final void sendTo(String name, String message) {
 		for(TargetIdentifier client : server.getCurrentClients()) {
-			if(client.matches(address, port)) {
+			if(client.getId().equals(name)) {
 				server.sendPacketToClient(new StringMessagePacket(message), client).sync();
 				return;
 			}
@@ -46,7 +45,7 @@ public abstract class Server extends ReceiveSide {
 	}
 	
 	
-	public static Server create(final int port, final Consumer<String> handler, final BiConsumer<String, Integer> conHandler) {
+	public static Server create(final int port, final Consumer<String> handler, final Consumer<String> conHandler) {
 		return new Server(port) {
 			@Override
 			public void receive(String message) {
@@ -54,8 +53,8 @@ public abstract class Server extends ReceiveSide {
 			}
 
 			@Override
-			protected void newConnection(String hostname, int port) {
-				conHandler.accept(hostname, port);
+			protected void newConnection(String name) {
+				conHandler.accept(name);
 			}
 		};
 	}

@@ -59,7 +59,7 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 */
 	@Override
 	public void openConnectionToServer() {
-		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.getConnectionAddress() +")");
+		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.createConnectionInformation(false, true) +")");
 		serverConnection.connect();
 	}
 	

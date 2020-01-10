@@ -1,9 +1,17 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A {@link TargetIdentifier} that can be used for Network communication. It contais a valid
@@ -42,15 +50,6 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 	}
 	
 	/**
-	 * Returns the {@link InetSocketAddress} that can be used to connect a socket to this target.
-	 * @return The {@link InetSocketAddress} for this target
-	 */
-	@Override
-	public InetSocketAddress getConnectionAddress() {
-		return address;
-	}
-
-	/**
 	 * Because this implementation of {@link TargetIdentifier} can be used for network connections, this method
 	 * always returns <code>false</code>.
 	 * @return Always <code>false</code>
@@ -58,6 +57,10 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 	@Override
 	public boolean isLocalOnly() {
 		return false;
+	}
+	
+	protected InetSocketAddress getAddress() {
+		return address;
 	}
 
 	/**
@@ -74,6 +77,66 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 		return "NetworkTargetIdentifier [id=" + id + ", address=" + address + "]";
 	}
 
+	@Override
+	public <SocketType extends Socket> Optional<SocketType> connectSocket(Supplier<SocketType> socket, int timeout)
+			throws IOException, SocketTimeoutException, SocketException {
+		Objects.requireNonNull(socket, "Socket supplier must not be null");
+		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
+		
+		if(sock.isConnected()) throw new SocketException("Socket is already connected");
+		
+		sock.connect(address, timeout);
+		
+		return Optional.of(sock);
+	}
+
+	@Override
+	public <SocketType extends ServerSocket> Optional<SocketType> bindSocket(Supplier<SocketType> socket)
+			throws IOException, SocketException {
+		Objects.requireNonNull(socket, "Socket supplier must not be null");
+		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
+		
+		if(sock.isBound()) throw new SocketException("Socket is already bound");
+		
+		sock.bind(address);
+		
+		return Optional.of(sock);
+	}
+	
+	@Override
+	public <SocketType extends DatagramSocket> Optional<SocketType> connectDatagram(Supplier<SocketType> socket, int timeout)
+			throws IOException, SocketTimeoutException, SocketException {
+		Objects.requireNonNull(socket, "Socket supplier must not be null");
+		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
+		
+		if(sock.isBound()) throw new SocketException("Socket is already bound");
+		
+		sock.bind(address);
+		
+		return Optional.of(sock);
+	}
+
+	@Override
+	public <SocketType extends DatagramSocket> Optional<SocketType> bindDatagram(Supplier<SocketType> socket) throws IOException, SocketException {
+		Objects.requireNonNull(socket, "Socket supplier must not be null");
+		SocketType sock = Objects.requireNonNull(socket.get(), "Socket supplier must not return null");
+		
+		if(sock.isBound()) throw new SocketException("Socket is already bound");
+		
+		sock.bind(address);
+		
+		return Optional.of(sock);
+	}
+
+	@Override
+	public String createConnectionInformation(boolean name, boolean ipData) {
+		String text = "Network Target";
+		if(name || ipData) text += ": ";
+		if(name) text += name;
+		if(ipData) text += "Ip/Port: " + address.toString();
+		return text;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -103,24 +166,5 @@ class NetworkTargetIdentifier implements TargetIdentifier{
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
-	}
-
-	@Override
-	public boolean matches(String hostname, int port) {
-		if(hostname == null) return false;
-		InetSocketAddress testAddress = new InetSocketAddress(hostname, port);
-		return testAddress.equals(address);
-	}
-
-	@Override
-	public boolean matches(InetAddress address2, int port) {
-		if(address2 == null) return false;
-		InetSocketAddress testAddress = new InetSocketAddress(address2, port);
-		return testAddress.equals(address);
-	}
-
-	@Override
-	public boolean matches(InetSocketAddress address2) {
-		return address.equals(address2);
 	}
 }

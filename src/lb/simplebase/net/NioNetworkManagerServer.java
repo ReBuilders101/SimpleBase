@@ -54,12 +54,13 @@ public class NioNetworkManagerServer extends CommonServer {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void startServer() {
 		if(state == ServerState.INITIALIZED) {
 			NetworkManager.NET_LOG.info("Server Manager: Starting server...");
 			try {
-				channel.bind(getLocalID().getConnectionAddress());
+				channel.bind(TargetIdentifier.tryGetAddress(getLocalID()).orElseThrow(RuntimeException::new));
 			} catch (IOException e) {
 				NetworkManager.NET_LOG.error("Server Manager: Error while binding socket", e);
 				return;
