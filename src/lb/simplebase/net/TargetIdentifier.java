@@ -11,6 +11,8 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -55,33 +57,69 @@ public interface TargetIdentifier {
 	
 	
 	public static TargetIdentifier createLocal(String name) {
-		return new LocalTargetIdentifier(name);
+		return createLocal(name, TargetIdentifier::indexedName);
+	}
+	
+	public static TargetIdentifier createLocal(String name, Function<String, IntFunction<String>> mapper) {
+		return TargetIdentifierNameCache.createImpl(LocalTargetIdentifier::new, name, mapper.apply(name));
 	}
 	
 	public static TargetIdentifier createNetwork(String name, String address, int port) {
-		try {
-			return new NetworkTargetIdentifier(name, address, port);
-		} catch (UnknownHostException e) {
-			NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
-			return null;
-		}
+		return createNetwork(name, address, port, TargetIdentifier::indexedName);
+	}
+	
+	public static TargetIdentifier createNetwork(String name, String address, int port, Function<String, IntFunction<String>> mapper) {
+		return TargetIdentifierNameCache.createImpl((name0) -> {
+			try {
+				return new NetworkTargetIdentifier(name0, address, port);
+			} catch (UnknownHostException e) {
+				NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
+				return null;
+			}
+		}, name, mapper.apply(name));
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetAddress address, int port) {
-		return new NetworkTargetIdentifier(name, address, port);
+		return createNetwork(name, address, port, TargetIdentifier::indexedName);
+	}
+	
+	public static TargetIdentifier createNetwork(String name, InetAddress address, int port, Function<String, IntFunction<String>> mapper) {
+		return TargetIdentifierNameCache.createImpl((name0) -> new NetworkTargetIdentifier(name0, address, port), name, mapper.apply(name));
 	}
 	
 	public static TargetIdentifier createNetworkServer(String name, int port) {
-		try {
-			return new NetworkTargetIdentifier(name, InetAddress.getLocalHost(), port);
-		} catch (UnknownHostException e) {
-			NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
-			return null;
-		}
+		return createNetworkServer(name, port, TargetIdentifier::indexedName);
+	}
+	
+	public static TargetIdentifier createNetworkServer(String name, int port, Function<String, IntFunction<String>> mapper) {
+		return TargetIdentifierNameCache.createImpl((name0) -> {
+			try {
+				return new NetworkTargetIdentifier(name0, InetAddress.getLocalHost(), port);
+			} catch (UnknownHostException e) {
+				NetworkManager.NET_LOG.error("Error while creating Network Target Identifier:", e);
+				return null;
+			}
+		}, name, mapper.apply(name));
 	}
 	
 	public static TargetIdentifier createNetwork(String name, InetSocketAddress address) {
-		return new NetworkTargetIdentifier(name, address);
+		return createNetwork(name, address, TargetIdentifier::indexedName);
+	}
+	
+	public static TargetIdentifier createNetwork(String name, InetSocketAddress address, Function<String, IntFunction<String>> mapper) {
+		return TargetIdentifierNameCache.createImpl((name0) -> new NetworkTargetIdentifier(name0, address), name, mapper.apply(name));
+	}
+	
+	public static IntFunction<String> indexedName(String baseName) {
+		return (i) -> baseName + i;
+	}
+	
+	public static boolean isNameUsed(String name) {
+		return TargetIdentifierNameCache.getCache().contains(name);
+	}
+	
+	public static Object getNameCacheLock() {
+		return TargetIdentifierNameCache.getLock();
 	}
 	
 	@Deprecated
