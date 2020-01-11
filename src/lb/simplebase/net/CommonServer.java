@@ -20,7 +20,7 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	protected final ReadWriteLock clientListLock;
 	
 	protected final InboundPacketThreadHandler handler;
-	protected final PacketDistributor toAllHandlers;
+	protected PacketReceiver toAllHandlers;
 	
 	protected volatile ServerState state;
 	
@@ -32,7 +32,7 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 		this.clientList = new HashSet<>();
 		this.clientListLock = new ReentrantReadWriteLock(true);
 		
-		this.toAllHandlers = new PacketDistributor();
+		this.toAllHandlers = PacketReceiver.createEmptyReceiver();
 		this.handler = new InboundPacketThreadHandler(toAllHandlers, threads);
 	}
 	
@@ -178,6 +178,12 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	 */
 	@Override
 	public void addIncomingPacketHandler(PacketReceiver handler) {
-		toAllHandlers.addPacketReceiver(handler);
+		if(toAllHandlers instanceof PacketDistributor) { //If we already distribute, add to the list
+			((PacketDistributor) toAllHandlers).addPacketReceiver(handler);
+		} else if(toAllHandlers instanceof PacketReceiverEmptyImpl) {
+			toAllHandlers = handler; //If the current impl does nothing, replace it
+		} else { //Some functioning impl already exits -> make distributor
+			toAllHandlers = new PacketDistributor(toAllHandlers, handler);
+		}
 	}
 }

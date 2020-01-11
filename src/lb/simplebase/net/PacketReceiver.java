@@ -32,7 +32,16 @@ public interface PacketReceiver extends BiConsumer<Packet, PacketContext>{
 	 * @return The empty packet receiver
 	 */
 	public static PacketReceiver createEmptyReceiver() {
-		return (r, s) -> {};
-		//return new PacketReceiverEmptyImpl();
+		return new PacketReceiverEmptyImpl();
+	}
+	
+	public static final class PacketReceiverEmptyImpl implements PacketReceiver {
+		private PacketReceiverEmptyImpl() {}
+		
+		@Override
+		public void processPacket(Packet received, PacketContext source) {
+			return;
+		}
+		
 	}
 }
