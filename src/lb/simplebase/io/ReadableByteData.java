@@ -2,6 +2,8 @@ package lb.simplebase.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.util.Optional;
 
 /**
  * This interface provides additional methods for reading primitives and strings directly. All methods
@@ -176,6 +178,30 @@ public interface ReadableByteData {
 	 */
 	public default String readShortStringWithLength() {
 		return readString(readByte() & 0xFF);
+	}
+	
+	public default Object readObject() {
+		try (ObjectInputStream ois = new ObjectInputStream(getInStream())) {
+			return ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace(); 
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public default <T> T readObject(Class<T> clazz) {
+		return (T) readObject();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public default <T> Optional<T> readObjectOptional(Class<T> clazz) {
+		try (ObjectInputStream ois = new ObjectInputStream(getInStream())) {
+			return Optional.of((T) ois.readObject());
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace(); 
+			return Optional.empty();
+		}
 	}
 	
 	/**

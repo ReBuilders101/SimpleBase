@@ -2,7 +2,9 @@ package lb.simplebase.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * This interface provides additional methods for writing primitives and strings. All methods
@@ -156,6 +158,16 @@ public interface WritableByteData {
 			writeString(cs.subSequence(0, 255));
 		} else {
 			writeString(cs);
+		}
+	}
+	
+	public default boolean writeObject(Serializable object) {
+		try(ObjectOutputStream oos = new ObjectOutputStream(getOutStream())) {
+			oos.writeObject(object);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
