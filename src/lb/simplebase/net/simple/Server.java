@@ -31,13 +31,15 @@ public abstract class Server extends ReceiveSide {
 	}
 	
 	public final void sendTo(String name, String message) {
-		for(TargetIdentifier client : server.getCurrentClients()) {
-			if(client.getId().equals(name)) {
-				server.sendPacketToClient(new StringMessagePacket(message), client).sync();
-				return;
+		server.getClients().withStateDo((clients) -> {
+			for(TargetIdentifier client : clients) {
+				if(client.getId().equals(name)) {
+					server.sendPacketToClient(new StringMessagePacket(message), client).sync();
+					return;
+				}
 			}
-		}
-		System.err.println("Client not found");
+			System.err.println("Client not found");
+		});
 	}
 	
 	public final void close() {
