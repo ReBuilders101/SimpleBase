@@ -13,7 +13,7 @@ public abstract class Client extends ReceiveSide {
 	
 	public Client(String remoteAddress, int port) {
 		client = NetworkManager.createClient(TargetIdentifier.createLocal("client"),
-				TargetIdentifier.createNetwork("server", remoteAddress, port));
+				TargetIdentifier.createNetwork("server", remoteAddress, port).getValue());
 		client.addMapping(StringMessagePacket.getMapping(1));
 		client.addIncomingPacketHandler(this::receive0);
 	}

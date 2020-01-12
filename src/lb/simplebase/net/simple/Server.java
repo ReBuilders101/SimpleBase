@@ -12,7 +12,7 @@ public abstract class Server extends ReceiveSide {
 	private final NetworkManagerServer server;
 
 	public Server(int port) {
-		server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port));
+		server = NetworkManager.createServer(TargetIdentifier.createNetwork("server-internal", "localhost", port).getValue());
 		server.addMapping(StringMessagePacket.getMapping(1));
 		server.addIncomingPacketHandler(this::receive0);
 		server.getEventBus().register((e) -> this.newConnection(e.getRemoteTargetId().getId()), ConfigureConnectionEvent.class);
