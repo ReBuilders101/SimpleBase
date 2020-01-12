@@ -16,6 +16,7 @@ class LanServerDiscoveryReceiverThread extends Thread {
 	
 	protected LanServerDiscoveryReceiverThread(LanServerDiscovery discovery) {
 		super("LanServerDiscoveryReceiverThread-" + threadIds.getAndIncrement());
+		setDaemon(true);
 		this.discovery = discovery;
 		this.killThread = false;
 	}

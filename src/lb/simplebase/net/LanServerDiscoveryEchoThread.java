@@ -17,6 +17,7 @@ class LanServerDiscoveryEchoThread extends Thread {
 	
 	public LanServerDiscoveryEchoThread(SocketNetworkManagerServer server, byte[] sequence) {
 		super("LanServerDiscoveryEchoThread-" + threadIds.getAndIncrement());
+		setDaemon(true);
 		this.server = server;
 		this.sequence = sequence;
 		this.socket = server.getDatagramSocket();
