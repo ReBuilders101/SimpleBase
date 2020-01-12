@@ -10,10 +10,15 @@ import java.util.function.Supplier;
 public abstract class OptionalError<T, E extends Throwable> implements Supplier<T>{
 	
 	public abstract boolean isValue();
-	public abstract boolean isException();
+	
+	public boolean isException() {
+		return !isValue();
+	}
+	
 	public Optional<T> getValueOptional() {
 		return isValue() ? Optional.of(getValue()) : Optional.empty();
 	}
+	
 	public Optional<E> getExceptionOptional() {
 		return isException() ? Optional.of(getException()) : Optional.empty();
 	}
@@ -26,6 +31,14 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 			return condition.test(getValue());
 		} else {
 			return false;
+		}
+	}
+	
+	public boolean hasValueOrErrorWith(Predicate<T> valueCondition, Predicate<E> errorCondition) {
+		if(isValue()) {
+			return valueCondition.test(getValue());
+		} else {
+			return errorCondition.test(getException());
 		}
 	}
 	
@@ -140,11 +153,6 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 		}
 
 		@Override
-		public boolean isException() {
-			return true;
-		}
-
-		@Override
 		public T getValue() throws NoSuchElementException {
 			throw new NoSuchElementException("OptionalError: no value present");
 		}
@@ -182,11 +190,6 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 		@Override
 		public boolean isValue() {
 			return true;
-		}
-
-		@Override
-		public boolean isException() {
-			return false;
 		}
 
 		@Override

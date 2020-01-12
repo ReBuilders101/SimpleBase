@@ -9,9 +9,10 @@ import java.util.function.Function;
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.action.AsyncResultGroup;
 import lb.simplebase.util.OptionalError;
+import lb.simplebase.util.SynchronizedStateProvider;
 
 @ServerSide
-public interface NetworkManagerServer extends NetworkManagerCommon{
+public interface NetworkManagerServer extends NetworkManagerCommon {
 	
 	/**
 	 * Sends a packet to one client.<br>
@@ -39,7 +40,7 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
 	public default AsyncResultGroup sendPacketToAllClients(Packet packet) {
-		return sendPacketToClients(packet, getCurrentClients());
+		return getClients().withStateReturn((set) -> sendPacketToClients(packet, set));
 	}
 	
 	public default AsyncResultGroup sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, TargetIdentifier...clients) {
@@ -58,15 +59,9 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
 	public default AsyncResultGroup sendCustomPacketToAllClients(Function<TargetIdentifier, Packet> mapper) {
-		return sendCustomPacketToClients(mapper, getCurrentClients());
+		return getClients().withStateReturn((set) -> sendCustomPacketToClients(mapper, set));
 	}
 	
-	/**
-	 * Creates a set of all remote {@link TargetIdentifier}s of the active connections.
-	 * @return All clients connected to the server
-	 */
-	public Set<TargetIdentifier> getCurrentClients();
-
 	/**
 	 * Checks whether this server has a connection to the client.
 	 * @param The remote {@link TargetIdentifier} of the client to search for
@@ -89,6 +84,8 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	
 	public void startServer();
 	public void stopServer();
+	
+	public SynchronizedStateProvider<Set<TargetIdentifier>> getClients();
 	
 	/**
 	 * The state of the server

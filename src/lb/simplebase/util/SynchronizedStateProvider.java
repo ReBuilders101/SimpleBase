@@ -14,8 +14,8 @@ public interface SynchronizedStateProvider<T> extends Supplier<T>{
 	
 	public T getState();
 	
-	public void withState(Consumer<T> action);
+	public void withStateDo(Consumer<T> action);
 	
-	public <R> R withState(Function<T, R> action);
+	public <R> R withStateReturn(Function<T, R> action);
 	
 }

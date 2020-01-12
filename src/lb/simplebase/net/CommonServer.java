@@ -1,16 +1,18 @@
 package lb.simplebase.net;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.event.EventResult;
 import lb.simplebase.util.OptionalError;
+import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
  * Implements common behavior and features of a {@link NetworkManagerServer}.<br>
@@ -81,22 +83,12 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	 */
 	@Override
 	public synchronized AsyncResult sendPacketToClient(Packet packet, TargetIdentifier client) {
-		NetworkConnection con = getCurrentClient(client);
-		if(con == null) return AsyncNetTask.createFailed(null, "Target ID is not a client on this server");
-		if(!con.isConnectionOpen()) return AsyncNetTask.createFailed(null, "Connection to client is not open");
-		return con.sendPacketToTarget(packet);
-	}
-
-	/**
-	 * Creates a set of all remote {@link TargetIdentifier}s of the active connections.
-	 * @return All clients connected to the server
-	 */
-	@Override
-	public Set<TargetIdentifier> getCurrentClients() {
 		try {
 			clientListLock.readLock().lock();
-			final Set<TargetIdentifier> set = clientList.stream().map((anc) -> anc.getRemoteTargetId()).collect(Collectors.toSet());
-			return Collections.unmodifiableSet(set);
+			NetworkConnection con = getCurrentClient(client);
+			if(con == null) return AsyncNetTask.createFailed(null, "Target ID is not a client on this server");
+			if(!con.isConnectionOpen()) return AsyncNetTask.createFailed(null, "Connection to client is not open");
+			return con.sendPacketToTarget(packet);
 		} finally {
 			clientListLock.readLock().unlock();
 		}
@@ -188,5 +180,42 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 		} else { //Some functioning impl already exits -> make distributor
 			toAllHandlers = new PacketDistributor(toAllHandlers, handler);
 		}
+	}
+
+
+	@Override
+	public SynchronizedStateProvider<Set<TargetIdentifier>> getClients() {
+		return new SynchronizedStateProvider<Set<TargetIdentifier>>() {
+
+			@Override
+			public Set<TargetIdentifier> getState() {
+				try {
+					clientListLock.readLock().lock();
+					return clientList.stream().map((c) -> c.getLocalTargetId()).collect(Collectors.toSet());
+				} finally {
+					clientListLock.readLock().unlock();
+				}
+			}
+
+			@Override
+			public void withStateDo(Consumer<Set<TargetIdentifier>> action) {
+				try {
+					clientListLock.readLock().lock();
+					action.accept(getState());
+				} finally {
+					clientListLock.readLock().unlock();
+				}
+			}
+
+			@Override
+			public <R> R withStateReturn(Function<Set<TargetIdentifier>, R> action) {
+				try {
+					clientListLock.readLock().lock();
+					return action.apply(getState());
+				} finally {
+					clientListLock.readLock().unlock();
+				}
+			}
+		};
 	}
 }

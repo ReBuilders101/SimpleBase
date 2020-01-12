@@ -180,7 +180,7 @@ public abstract class NetworkConnection implements SynchronizedStateProvider<Con
 	}
 	
 	@Override
-	public void withState(Consumer<ConnectionState> action) {
+	public void withStateDo(Consumer<ConnectionState> action) {
 		try {
 			stateRW.readLock().lock();
 			action.accept(state);
@@ -190,7 +190,7 @@ public abstract class NetworkConnection implements SynchronizedStateProvider<Con
 	}
 	
 	@Override
-	public <T> T withState(Function<ConnectionState, T> action) {
+	public <T> T withStateReturn(Function<ConnectionState, T> action) {
 		try {
 			stateRW.readLock().lock();
 			return action.apply(state);
