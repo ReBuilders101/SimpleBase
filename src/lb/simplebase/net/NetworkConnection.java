@@ -156,6 +156,7 @@ public abstract class NetworkConnection implements SynchronizedStateProvider<Con
 	 * Some actions can throw {@link ConnectionStateException}s if the current state does not match the required state.
 	 * @return The current {@link ConnectionState} of this {@link NetworkConnection}
 	 */
+	@Override
 	public ConnectionState getState() {
 		try {
 			stateRW.readLock().lock();

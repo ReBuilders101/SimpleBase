@@ -1,5 +1,6 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.event.EventResult;
+import lb.simplebase.util.OptionalError;
 
 /**
  * Implements common behavior and features of a {@link NetworkManagerServer}.<br>
@@ -128,13 +130,14 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	 * @return A {@link ConnectionStateFuture} containing information about progress, success and errors
 	 */
 	@Override
-	public void disconnectClient(TargetIdentifier client) {
+	public OptionalError<Boolean, IOException> disconnectClient(TargetIdentifier client) {
 		NetworkConnection con = getCurrentClient(client);
 		if(con == null) {
 			NetworkManager.NET_LOG.warn("Server Manager: Disconnecting client: No client with this ID was found: " + client);
+			return OptionalError.ofValue(Boolean.FALSE, IOException.class);
 		} else {
 			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + client + ")");
-			con.close();
+			return OptionalError.ofOptionalException(con.close(), () -> Boolean.FALSE);
 		}
 	}
 

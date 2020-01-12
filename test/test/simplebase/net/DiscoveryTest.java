@@ -75,9 +75,9 @@ class DiscoveryTest {
 	void test() throws InterruptedException {
 		NetworkManager.setLogLevel(LogLevel.DEBUG);
 		
-		TargetIdentifier serverTI1 = TargetIdentifier.createNetworkServer("server1", 12345);
-		TargetIdentifier serverTI2 = TargetIdentifier.createNetworkServer("server2", 12346);
-		TargetIdentifier serverTI3 = TargetIdentifier.createNetworkServer("server3", 12347);
+		TargetIdentifier serverTI1 = TargetIdentifier.createNetworkServer("server1", 12345).getValue();
+		TargetIdentifier serverTI2 = TargetIdentifier.createNetworkServer("server2", 12346).getValue();
+		TargetIdentifier serverTI3 = TargetIdentifier.createNetworkServer("server3", 12347).getValue();
 		
 		LanServerDiscovery lsd = LanServerDiscovery.create(new byte[] {89, 45, 76, 23, 54, 77, 12}, DiscoveryTest::updates); // 7 random bytes
 		

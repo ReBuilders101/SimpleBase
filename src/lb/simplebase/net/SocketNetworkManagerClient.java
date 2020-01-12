@@ -1,8 +1,11 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 import lb.simplebase.action.AsyncResult;
+import lb.simplebase.util.OptionalError;
 import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
@@ -59,9 +62,9 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	 * @return Whether the connection was opened successfully
 	 */
 	@Override
-	public void openConnectionToServer() {
+	public OptionalError<Boolean, IOException> openConnectionToServer() {
 		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.createConnectionInformation(false, true) +")");
-		serverConnection.connect();
+		return serverConnection.connect();
 	}
 
 	@Override
@@ -70,10 +73,10 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 	}
 
 	@Override
-	public void closeConnectionToServer() {
-		if(serverConnection.state == ConnectionState.CLOSED) return;
+	public Optional<IOException> closeConnectionToServer() {
+		if(serverConnection.state == ConnectionState.CLOSED) return Optional.empty();
 		NetworkManager.NET_LOG.info("Client Manager: Closing server connection");
-		serverConnection.close();
+		return serverConnection.close();
 	}
 
 	@Override

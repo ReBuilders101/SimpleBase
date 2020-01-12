@@ -40,8 +40,8 @@ class NetworkTest {
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		server = 			TargetIdentifier.createNetwork("server", "localhost", 1234);
-		clientFromClient =  TargetIdentifier.createNetwork("client", "localhost", 1234);
+		server = 			TargetIdentifier.createNetwork("server", "localhost", 1234).getValue();
+		clientFromClient =  TargetIdentifier.createNetwork("client", "localhost", 1234).getValue();
 	}
 
 	@BeforeEach

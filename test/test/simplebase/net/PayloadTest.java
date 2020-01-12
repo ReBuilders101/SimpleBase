@@ -20,7 +20,7 @@ class PayloadTest {
 	
 	@BeforeEach
 	void setUp() throws Exception {
-		TargetIdentifier serverId = TargetIdentifier.createNetwork("Server", "localhost", 12345);
+		TargetIdentifier serverId = TargetIdentifier.createNetwork("Server", "localhost", 12345).getValue();
 		TargetIdentifier clientId = TargetIdentifier.createLocal("Client");
 		server = NetworkManager.createServer(serverId);
 		client = NetworkManager.createClient(clientId, serverId);

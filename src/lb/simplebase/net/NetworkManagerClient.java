@@ -1,6 +1,10 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import lb.simplebase.action.AsyncResult;
+import lb.simplebase.util.OptionalError;
 import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
@@ -44,13 +48,13 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	 * Opens the connection to the server. No data can be sent or received before the connection has been opened
 	 * @return Information about the connection.
 	 */
-	public void openConnectionToServer();
+	public OptionalError<Boolean, IOException> openConnectionToServer();
 	
 	/**
 	 * Closes the connection to the server. No data can be sent or received after the connection has been closed
 	 * @return Information about the connection.
 	 */
-	public void closeConnectionToServer();
+	public Optional<IOException> closeConnectionToServer();
 	
 	
 	/**

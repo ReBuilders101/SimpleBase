@@ -109,6 +109,15 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 		return ofOptional(value, () -> exceptionFactory.apply(exceptionMessage));
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T, E extends Throwable> OptionalError<T, E> ofOptionalException(Optional<E> optionalException, Supplier<T> value) {
+		if(optionalException.isPresent()) {
+			return (OptionalError<T, E>) errorImpl(optionalException.get());
+		} else {
+			return (OptionalError<T, E>) valueImpl(value.get());
+		}
+	}
+	
 	private static <T> OptionalError<T, ? extends Throwable> valueImpl(T value) {
 		return new ValueImpl<>(value);
 	}

@@ -12,7 +12,7 @@ public final class RemoteIDGenerator implements Function<InetSocketAddress, Targ
 	
 	public static TargetIdentifier generateID(final InetSocketAddress address) {
 		if(genFunc == null) {
-			return TargetIdentifier.createNetwork("RemoteTarget-" + counter.getAndIncrement(), address);
+			return TargetIdentifier.createNetwork("RemoteTarget@" + address + "-" + counter.getAndIncrement(), address);
 		} else {
 			return genFunc.apply(address, counter.getAndIncrement());
 		}

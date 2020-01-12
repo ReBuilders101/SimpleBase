@@ -1,5 +1,6 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.function.Function;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.action.AsyncResultGroup;
+import lb.simplebase.util.OptionalError;
 
 @ServerSide
 public interface NetworkManagerServer extends NetworkManagerCommon{
@@ -77,7 +79,7 @@ public interface NetworkManagerServer extends NetworkManagerCommon{
 	 * @param client The {@link TargetIdentifier} of the client to remove
 	 * @return A {@link ConnectionStateFuture} containing information about progress, success and errors
 	 */
-	public void disconnectClient(TargetIdentifier client);
+	public OptionalError<Boolean, IOException> disconnectClient(TargetIdentifier client);
 	
 	/**
 	 * Returns the number of client connections that this server has active. 
