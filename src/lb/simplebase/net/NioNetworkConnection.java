@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Optional;
+
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.io.WritableStreamData;
+import lb.simplebase.util.OptionalError;
 import lb.simplebase.io.WritableFixedData.WritableBufferData;
+import lb.simplebase.net.ClosedConnectionEvent.Cause;
 
 public class NioNetworkConnection extends NetworkConnection{
 
@@ -39,12 +43,11 @@ public class NioNetworkConnection extends NetworkConnection{
 	}
 
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public void connect(int timeout) {
+	public OptionalError<Boolean, IOException> connect(int timeout) {
 		if(state == ConnectionState.UNCONNECTED) {
 			try {
-				channel.connect(TargetIdentifier.tryGetAddress(getRemoteTargetId()).orElseThrow(RuntimeException::new));
+				getRemoteTargetId().connectSocket(() -> SocketActions.of(channel), 0);
 				channel.configureBlocking(false); //Switch to non-blocking node for selector
 				channelServerSelection = ((NioNetworkManagerServer) getNetworkManager()).registerConnectionChannel(this);
 				NetworkManager.NET_LOG.info("Network Connection: Channel connected, switched to non-blocking mode");
@@ -52,12 +55,15 @@ public class NioNetworkConnection extends NetworkConnection{
 					NetworkManager.NET_LOG.error("Network Connection: Could not register Channel at server manager. No data will be read from this channel");
 				}
 				state = ConnectionState.OPEN;
+				return OptionalError.ofValue(Boolean.FALSE, IOException.class);
 			} catch (IOException e) {
 				NetworkManager.NET_LOG.error("An IO error occurred while trying to connect the SocketChannel", e);
+				return OptionalError.ofException(e, Boolean.class);
 			}
 		} else {
 			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
 					+ " and cannot be connected again");
+			return OptionalError.ofValue(Boolean.FALSE, IOException.class);
 		}
 	}
 
@@ -92,19 +98,23 @@ public class NioNetworkConnection extends NetworkConnection{
 
 
 	@Override
-	public void close() {
-		super.close(); //Ignore result, it will always be a success
+	public Optional<IOException> close() {
 		NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
 		if(state == ConnectionState.CLOSED) {
 			NetworkManager.NET_LOG.info("Connection already closed");
+			return Optional.empty();
 		} else {
 			try {
 				channel.close();
 				channelServerSelection.cancel();
 				NetworkManager.NET_LOG.info("Closed Network connection to " + getRemoteTargetId());
+				closeWithReason(Cause.EXPECTED);
+				return Optional.empty();
 			} catch (IOException e) {
 				//If closing fails
 				NetworkManager.NET_LOG.error("Closing the Socket failed with exception", e);
+				closeWithReason(Cause.EXPECTED);
+				return Optional.of(e);
 			}
 		}
 	}

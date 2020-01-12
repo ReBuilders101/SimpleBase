@@ -1,9 +1,12 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 import lb.simplebase.action.AsyncResult;
 import lb.simplebase.net.ClosedConnectionEvent.Cause;
+import lb.simplebase.util.OptionalError;
 
 public class LocalNetworkConnection extends NetworkConnection{
 
@@ -31,22 +34,29 @@ public class LocalNetworkConnection extends NetworkConnection{
 	}
 
 	@Override
-	public void connect(int timeout) {
-		if(getState() == ConnectionState.UNCONNECTED) {
+	public OptionalError<Boolean, IOException> connect(int timeout) {
+		try {
+			stateRW.writeLock().lock();
+			if(getState() == ConnectionState.UNCONNECTED) {
 				try {
 					partner = LocalConnectionManager.waitForLocalConnectionServer(this, timeout);
 				} catch (TimeoutException e) {
 					NetworkManager.NET_LOG.warn("The timeout expired before a local connection could be made", e);
-					return;
+					return OptionalError.ofValue(Boolean.TRUE, IOException.class);
 				} catch (InterruptedException e) {
 					NetworkManager.NET_LOG.warn("The thread was interrupted while waiting for the connection", e);
-					return;
+					return OptionalError.ofValue(Boolean.TRUE, IOException.class);
 				}
 				setConnectionState(ConnectionState.OPEN);
-			
-		} else {
-			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
-					+ " and cannot be connected again");
+
+				return OptionalError.ofValue(Boolean.FALSE, IOException.class);
+			} else {
+				NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+						+ " and cannot be connected again");
+				return OptionalError.ofValue(Boolean.FALSE, IOException.class);
+			}
+		} finally {
+			stateRW.writeLock().unlock();
 		}
 	}
 
@@ -60,10 +70,18 @@ public class LocalNetworkConnection extends NetworkConnection{
 	}
 
 	@Override
-	public void close() {
-		super.close(); //Uses EXPECTED reason
-		if(partner != null) //If it was even connected
-			partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
+	public Optional<IOException> close() {
+		try {
+			stateRW.writeLock().lock();
+			if(state != ConnectionState.CLOSED) {
+				closeWithReason(Cause.EXPECTED);
+				if(partner != null) //If it was even connected
+					partner.closeNoNotify(); //Close partner too, but he should not close his partner (this) to avoid infinite recursion
+			}
+			return Optional.empty();
+		} finally {
+			stateRW.writeLock().unlock();
+		}
 	}
 	
 	/**

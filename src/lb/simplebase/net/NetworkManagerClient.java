@@ -1,6 +1,7 @@
 package lb.simplebase.net;
 
 import lb.simplebase.action.AsyncResult;
+import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
  * A client side manager for a single network session.
@@ -33,7 +34,11 @@ public interface NetworkManagerClient extends NetworkManagerCommon{
 	/**
 	 * @return {@link ConnectionState} of the connection to the server
 	 */
-	public ConnectionState getConnectionState();
+	public SynchronizedStateProvider<ConnectionState> getConnection();
+	
+	public default boolean isConnectionOpen() {
+		return getConnection().getState().canSendData();
+	}
 	
 	/**
 	 * Opens the connection to the server. No data can be sent or received before the connection has been opened

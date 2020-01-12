@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
-import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
@@ -69,7 +68,7 @@ class LocalNetworkTest {
 	@Test
 	void connectTest() throws InterruptedException {
 		clientManager.openConnectionToServer();
-		Assertions.assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN);
+		Assertions.assertTrue(clientManager.isConnectionOpen());
 	}
 	
 	@Test

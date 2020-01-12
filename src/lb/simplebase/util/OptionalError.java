@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public abstract class OptionalError<T, E extends Throwable> implements Supplier<T>{
@@ -19,6 +20,14 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 	
 	public abstract T getValue() throws NoSuchElementException;
 	public abstract E getException() throws NoSuchElementException;
+	
+	public boolean hasValueWith(Predicate<T> condition) {
+		if(isValue()) {
+			return condition.test(getValue());
+		} else {
+			return false;
+		}
+	}
 	
 	public void ifValue(Consumer<T> task) {
 		if(isValue()) task.accept(getValue());
@@ -46,6 +55,7 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 	}
 	
 	@Override
+	@Deprecated
 	public T get() {
 		return orElseNull();
 	}

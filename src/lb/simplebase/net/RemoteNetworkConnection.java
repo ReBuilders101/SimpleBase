@@ -3,8 +3,11 @@ package lb.simplebase.net;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Optional;
 
 import lb.simplebase.action.AsyncResult;
+import lb.simplebase.net.ClosedConnectionEvent.Cause;
+import lb.simplebase.util.OptionalError;
 
 class RemoteNetworkConnection extends NetworkConnection{
 
@@ -49,41 +52,58 @@ class RemoteNetworkConnection extends NetworkConnection{
 	}
 	
 	@Override
-	public void close() {
-		super.close(); //Ignore result, it will always be a success
-		NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
-		if(connection.isClosed()) { //Use this, because super.close() sets the state already.
-			NetworkManager.NET_LOG.info("Connection already closed");
-		} else {
-			try {
-				connection.shutdownOutput();
-				connection.close();
-				NetworkManager.NET_LOG.info("Closed Network connection to " + getRemoteTargetId());
-			} catch (IOException e) {
-				//If closing fails
-				NetworkManager.NET_LOG.error("Closing the Socket failed with exception", e);
+	public Optional<IOException> close() {
+		try { //The entire thing changes the state, so sync on write
+			stateRW.writeLock().lock();
+			NetworkManager.NET_LOG.debug("Closing connection, current state " + getState());
+			if(state == ConnectionState.CLOSED) {
+				NetworkManager.NET_LOG.info("Connection already closed");
+				return Optional.empty();
+			} else {
+				try {
+					connection.shutdownOutput();
+					connection.close();
+					NetworkManager.NET_LOG.info("Closed Network connection to " + getRemoteTargetId());
+					closeWithReason(Cause.EXPECTED);
+					return Optional.empty();
+				} catch (IOException e) {
+					NetworkManager.NET_LOG.error("Closing the Socket failed with exception", e);
+					closeWithReason(Cause.EXPECTED); //It is expected to close, this IOException did not CAUSE closing the socket
+					return Optional.of(e);
+				}
 			}
+		} finally {
+			stateRW.writeLock().unlock();
 		}
 	}
 
 	@Override
-	public void connect(int timeout) {
-		if(getState() == ConnectionState.UNCONNECTED) {
-			try {
-				getRemoteTargetId().connectSocket(() -> SocketActions.of(connection), timeout);
-//				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
-				//After connecting successfully, start the listener thread
-				dataThread.start();
-				//And lastly set the state
-				state = ConnectionState.OPEN;
-			} catch (SocketTimeoutException e) {
-				NetworkManager.NET_LOG.warn("The timeout (" + timeout + "ms) expired before a connection could be made", e);
-			} catch (IOException e) {
-				NetworkManager.NET_LOG.warn("An IO error occurred while trying to connect the Socket", e);
+	public synchronized OptionalError<Boolean, IOException> connect(int timeout) {
+		try {
+			stateRW.writeLock().lock();
+			if(getState() == ConnectionState.UNCONNECTED) {
+				try {
+					getRemoteTargetId().connectSocket(() -> SocketActions.of(connection), timeout);
+					//				connection.connect(getRemoteTargetId().getConnectionAddress(), timeout);
+					//After connecting successfully, start the listener thread
+					dataThread.start();
+					//And lastly set the state
+					state = ConnectionState.OPEN;
+					return OptionalError.ofValue(Boolean.FALSE, IOException.class);
+				} catch (SocketTimeoutException e) {
+					NetworkManager.NET_LOG.warn("The timeout (" + timeout + "ms) expired before a connection could be made", e);
+					return OptionalError.ofValue(Boolean.TRUE, IOException.class);
+				} catch (IOException e) {
+					NetworkManager.NET_LOG.warn("An IO error occurred while trying to connect the Socket", e);
+					return OptionalError.ofException(e, Boolean.class);
+				}
+			} else {
+				NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
+						+ " and cannot be connected again");
+				return OptionalError.ofValue(Boolean.FALSE, IOException.class);
 			}
-		} else {
-			NetworkManager.NET_LOG.warn("Connection is already " + (getState() == ConnectionState.CLOSED ? "closed" : "connected")
-					+ " and cannot be connected again");
+		} finally {
+			stateRW.writeLock().unlock();
 		}
 	}
 

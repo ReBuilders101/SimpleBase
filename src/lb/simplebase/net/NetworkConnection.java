@@ -1,10 +1,17 @@
 package lb.simplebase.net;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import lb.simplebase.action.AsyncResult;
-import lb.simplebase.net.ClosedConnectionEvent.Cause;
+import lb.simplebase.util.OptionalError;
+import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
  * An {@link NetworkConnection} represents the connection between two network targets, seen from one side.<br>
@@ -16,7 +23,7 @@ import lb.simplebase.net.ClosedConnectionEvent.Cause;
  * Now data can be sent through the connection. The connection remains open until either the {@link #close()} method is called,
  * or the connection is closed by the remote partner. After the connection has been closed, no more data can be sent through the connection.
  */
-public abstract class NetworkConnection {
+public abstract class NetworkConnection implements SynchronizedStateProvider<ConnectionState>{
 	
 	private final TargetIdentifier local; //is this even necessary?
 	private final TargetIdentifier remote;
@@ -24,6 +31,8 @@ public abstract class NetworkConnection {
 	private final NetworkManager packetHandler; //This is the Networkmanager
 	protected volatile ConnectionState state; //Threadsafe for socket listener
 	private final PacketContext context;
+	
+	protected final ReadWriteLock stateRW;
 //	private final PacketFactory factory;
 	
 	protected NetworkConnection(TargetIdentifier local, TargetIdentifier remote, NetworkManager packetHandler, ConnectionState initialState, boolean isServer, Object payload) {
@@ -32,6 +41,7 @@ public abstract class NetworkConnection {
 		this.packetHandler = packetHandler;
 		this.state = initialState;
 		this.context = new PacketContext(isServer, packetHandler, this, payload);
+		this.stateRW = new ReentrantReadWriteLock();
 		
 //		this.factory = new PacketFactory(packetHandler, this);
 	}
@@ -62,8 +72,13 @@ public abstract class NetworkConnection {
 	 * Equal to testing {@link #getState()}<code> == </code>{@link ConnectionState#OPEN}
 	 * @return Whether the connection is open
 	 */
-	public synchronized boolean isConnectionOpen() {
-		return state == ConnectionState.OPEN;
+	public boolean isConnectionOpen() {
+		try {
+			stateRW.readLock().lock();
+			return state == ConnectionState.OPEN;
+		} finally {
+			stateRW.readLock().unlock();
+		}
 	}
 	
 	/**
@@ -72,20 +87,24 @@ public abstract class NetworkConnection {
 	 * in case of a {@link NetworkManagerServer}, this connection will be removed from the list of active connections.<br>
 	 * The {@link ConnectionState} will be changed to {@link ConnectionState#CLOSED}.
 	 */
-	public void close() {
-		closeWithReason(Cause.EXPECTED);
-	}
+	public abstract Optional<IOException> close();
 	
-	protected synchronized void closeWithReason(ClosedConnectionEvent.Cause cause) {
-		state = ConnectionState.CLOSED;
+	protected void closeWithReason(ClosedConnectionEvent.Cause cause) {
+		setConnectionState(ConnectionState.CLOSED);
+		//Outside the lock, so the event handler can access it without waiting
 		packetHandler.notifyConnectionClosed(this, cause);
 	}
 	
 	/**
 	 * Set the connection state
 	 */
-	protected synchronized void setConnectionState(ConnectionState state) {
-		this.state = state;
+	protected void setConnectionState(ConnectionState state) {
+		try {
+			stateRW.writeLock().lock();
+			this.state = state;
+		} finally {
+			stateRW.writeLock().unlock();
+		}
 	}
 	
 	/**
@@ -105,16 +124,17 @@ public abstract class NetworkConnection {
 	 * @throws ConnectionStateException When the connection could not be made
 	 * @see #connect(int)
 	 */
-	public void connect() {
-		connect(30000); //Default timeout 30s = 30,000 ms
+	public OptionalError<Boolean, IOException> connect() {
+		return connect(30000); //Default timeout 30s = 30,000 ms
 	}
 	
 	/**
 	 * Tries to make a network connection to the remote target, using the connection information
 	 * that this instance was created with.
-	 * @param timeout The maximal timeout in milliseconds
+	 * @param timeout The time in ms that the thread should wait for a connection
+	 * @return True when timeout, IOEx when exception, false in all other cases
 	 */
-	public abstract void connect(int timeout);
+	public abstract OptionalError<Boolean, IOException> connect(int timeout);
 	
 	/**
 	 * Sends the {@link Packet} to the connected network target. 
@@ -136,8 +156,13 @@ public abstract class NetworkConnection {
 	 * Some actions can throw {@link ConnectionStateException}s if the current state does not match the required state.
 	 * @return The current {@link ConnectionState} of this {@link NetworkConnection}
 	 */
-	public synchronized ConnectionState getState() {
-		return state;
+	public ConnectionState getState() {
+		try {
+			stateRW.readLock().lock();
+			return state;
+		} finally {
+			stateRW.readLock().unlock();
+		}
 	}
 
 	/**
@@ -153,4 +178,23 @@ public abstract class NetworkConnection {
 		return context;
 	}
 	
+	@Override
+	public void withState(Consumer<ConnectionState> action) {
+		try {
+			stateRW.readLock().lock();
+			action.accept(state);
+		} finally {
+			stateRW.readLock().unlock();
+		}
+	}
+	
+	@Override
+	public <T> T withState(Function<ConnectionState, T> action) {
+		try {
+			stateRW.readLock().lock();
+			return action.apply(state);
+		} finally {
+			stateRW.readLock().unlock();
+		}
+	}
 }

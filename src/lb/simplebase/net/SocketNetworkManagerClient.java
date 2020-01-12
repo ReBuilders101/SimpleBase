@@ -3,6 +3,7 @@ package lb.simplebase.net;
 import java.util.Objects;
 
 import lb.simplebase.action.AsyncResult;
+import lb.simplebase.util.SynchronizedStateProvider;
 
 /**
  * A {@link NetworkManager} that  represents the client side of the application. It only
@@ -62,18 +63,10 @@ class SocketNetworkManagerClient extends NetworkManager implements NetworkManage
 		NetworkManager.NET_LOG.info("Client Manager: Connecting to server (" + serverId.createConnectionInformation(false, true) +")");
 		serverConnection.connect();
 	}
-	
-	/**
-	 * The {@link NetworkConnection} to the server that is used to send packets.
-	 * @return The {@link NetworkConnection} to the server
-	 */
-	public NetworkConnection getServerConnection() {
-		return serverConnection;
-	}
 
 	@Override
-	public ConnectionState getConnectionState() {
-		return serverConnection.getState();
+	public SynchronizedStateProvider<ConnectionState> getConnection() {
+		return serverConnection;
 	}
 
 	@Override

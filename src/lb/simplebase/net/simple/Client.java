@@ -23,10 +23,10 @@ public abstract class Client extends ReceiveSide {
 	}
 	
 	public void send(String message) {
-		if(client.getConnectionState() == ConnectionState.UNCONNECTED) {
+		if(client.getConnection().getState() == ConnectionState.UNCONNECTED) {
 			client.openConnectionToServer();
 			client.sendPacketToServer(new StringMessagePacket(message)).sync();
-		} else if(client.getConnectionState() == ConnectionState.CLOSED) {
+		} else if(client.getConnection().getState() == ConnectionState.CLOSED) {
 			throw new RuntimeException("Connection to server is closed");
 		} else {
 			client.sendPacketToServer(new StringMessagePacket(message)).sync();
@@ -38,11 +38,11 @@ public abstract class Client extends ReceiveSide {
 	}
 	
 	public boolean isClosed() {
-		return client.getConnectionState() == ConnectionState.CLOSED;
+		return client.getConnection().getState() == ConnectionState.CLOSED;
 	}
 	
 	public boolean isOpen() {
-		return client.getConnectionState() == ConnectionState.OPEN;
+		return client.getConnection().getState() == ConnectionState.OPEN;
 	}
 	
 	public static Client create(final String remoteAddress, final int port, final Consumer<String> handler) {

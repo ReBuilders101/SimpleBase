@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
@@ -68,7 +67,7 @@ class NioNetworkTest {
 	void connectTest() throws InterruptedException {
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
 		clientManager.openConnectionToServer();
-		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
+		assertTrue(clientManager.isConnectionOpen(), "Connection not open");
 	}
 	
 	@SuppressWarnings("static-access")
@@ -89,7 +88,7 @@ class NioNetworkTest {
 		
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
 		clientManager.openConnectionToServer();
-		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
+		assertTrue(clientManager.isConnectionOpen(), "Connection not open");
 		
 		Thread.sleep(500); //Wait until the server has accepted the connection
 		
@@ -100,7 +99,7 @@ class NioNetworkTest {
 		System.out.println("sent!");
 		
 		//Now try the other dircetion
-		System.out.println(clientManager.getConnectionState());
+		System.out.println(clientManager.getConnection());
 		System.out.println(serverManager.getCurrentClientCount());
 		System.out.println("Here!!!!!");
 		Thread.sleep(1000);

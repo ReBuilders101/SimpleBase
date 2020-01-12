@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import lb.simplebase.net.ConnectionState;
 import lb.simplebase.net.NetworkManager;
 import lb.simplebase.net.NetworkManagerClient;
 import lb.simplebase.net.NetworkManagerServer;
@@ -66,7 +65,7 @@ class NetworkTest {
 	void connectTest() throws InterruptedException {
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
 		clientManager.openConnectionToServer();
-		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
+		assertTrue(clientManager.isConnectionOpen(), "Connection not open");
 	}
 	
 	@Test
@@ -77,7 +76,7 @@ class NetworkTest {
 		
 		assertTrue(serverManager.getServerState() == ServerState.STARTED);
 		clientManager.openConnectionToServer();
-		assertTrue(clientManager.getConnectionState() == ConnectionState.OPEN, "Connection not open");
+		assertTrue(clientManager.isConnectionOpen(), "Connection not open");
 		
 		byte[] dataArray = new byte[50];
 		new Random().nextBytes(dataArray);
@@ -86,7 +85,7 @@ class NetworkTest {
 		System.out.println("sent!");
 		
 		//Now try the other dircetion
-		System.out.println(clientManager.getConnectionState());
+		System.out.println(clientManager.getConnection());
 		System.out.println(serverManager.getCurrentClientCount());
 		System.out.println("Here!!!!!");
 		assertEquals(serverManager.getCurrentClientCount(), 1, "More or less than one client");
