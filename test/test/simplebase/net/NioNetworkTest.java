@@ -103,8 +103,8 @@ class NioNetworkTest {
 		System.out.println(serverManager.getCurrentClientCount());
 		System.out.println("Here!!!!!");
 		Thread.sleep(1000);
-		assertEquals(serverManager.getCurrentClients().size(), 1, "More or less than one client");
-		clientFromServer = serverManager.getCurrentClients().iterator().next(); //Get the only connection
+		assertEquals(serverManager.getCurrentClientCount(), 1, "More or less than one client");
+		clientFromServer = serverManager.getClients().getState().iterator().next(); //Get the only connection
 		assertNotNull(clientFromServer, "Client connection from server side not found");
 		
 		barrier.await(); //Wait for packet to be received
@@ -112,8 +112,8 @@ class NioNetworkTest {
 		assertEquals(data, assertionPacket, "Packets are not equal");
 		
 		//Now try the other dircetion
-		assertEquals(serverManager.getCurrentClients().size(), 1, "More or less than one client");
-		clientFromServer = serverManager.getCurrentClients().iterator().next(); //Get the only connection
+		assertEquals(serverManager.getCurrentClientCount(), 1, "More or less than one client");
+		clientFromServer = serverManager.getClients().getState().iterator().next(); //Get the only connection
 		assertNotNull(clientFromServer, "Client connection from server side not found");
 		
 		new Random().nextBytes(dataArray);
