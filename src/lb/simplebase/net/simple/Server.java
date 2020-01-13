@@ -39,7 +39,7 @@ public abstract class Server extends ReceiveSide {
 				}
 			}
 			System.err.println("Client not found");
-		});
+		}, false);
 	}
 	
 	public final void close() {
