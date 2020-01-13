@@ -1,5 +1,7 @@
 package lb.simplebase.javacore.scene;
 
+import lb.simplebase.javacore.transitions.Transition;
+
 public class LoopingTransitionTask extends ReversableTransitionTask{
 
 	public LoopingTransitionTask(Transition trans, double totalTime, double startValue, double endValue,
