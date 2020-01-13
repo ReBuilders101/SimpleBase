@@ -3,6 +3,7 @@ package lb.simplebase.net;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -123,14 +124,16 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	 */
 	@Override
 	public OptionalError<Boolean, IOException> disconnectClient(TargetIdentifier client) {
-		NetworkConnection con = getCurrentClient(client);
-		if(con == null) {
-			NetworkManager.NET_LOG.warn("Server Manager: Disconnecting client: No client with this ID was found: " + client);
-			return OptionalError.ofValue(Boolean.FALSE, IOException.class);
-		} else {
-			NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + client + ")");
-			return OptionalError.ofOptionalException(con.close(), () -> Boolean.FALSE);
-		}
+		return getClients().withStateReturn((s) -> {
+			NetworkConnection con = getCurrentClient(client);
+			if(con == null) {
+				NetworkManager.NET_LOG.warn("Server Manager: Disconnecting client: No client with this ID was found: " + client);
+				return OptionalError.ofValue(Boolean.FALSE, IOException.class);
+			} else {
+				NetworkManager.NET_LOG.info("Server Manager: Disconnecting client (" + client + ")");
+				return OptionalError.ofOptionalException(con.close(), () -> Boolean.FALSE);
+			}
+		}, true); //We need write access to disconnect a client
 	}
 
 	/**
@@ -198,22 +201,24 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 			}
 
 			@Override
-			public void withStateDo(Consumer<Set<TargetIdentifier>> action) {
+			public void withStateDo(Consumer<Set<TargetIdentifier>> action, boolean requireWriteAccess) {
+				final Lock lock = requireWriteAccess ? clientListLock.writeLock() : clientListLock.readLock();
 				try {
-					clientListLock.readLock().lock();
+					lock.lock();
 					action.accept(getState());
 				} finally {
-					clientListLock.readLock().unlock();
+					lock.unlock();
 				}
 			}
 
 			@Override
-			public <R> R withStateReturn(Function<Set<TargetIdentifier>, R> action) {
+			public <R> R withStateReturn(Function<Set<TargetIdentifier>, R> action, boolean requireWriteAccess) {
+				final Lock lock = requireWriteAccess ? clientListLock.writeLock() : clientListLock.readLock();
 				try {
-					clientListLock.readLock().lock();
+					lock.lock();
 					return action.apply(getState());
 				} finally {
-					clientListLock.readLock().unlock();
+					lock.unlock();
 				}
 			}
 		};

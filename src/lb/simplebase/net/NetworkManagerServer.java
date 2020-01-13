@@ -40,7 +40,7 @@ public interface NetworkManagerServer extends NetworkManagerCommon {
 		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
 	public default AsyncResultGroup sendPacketToAllClients(Packet packet) {
-		return getClients().withStateReturn((set) -> sendPacketToClients(packet, set));
+		return getClients().withStateReturn((set) -> sendPacketToClients(packet, set), false);
 	}
 	
 	public default AsyncResultGroup sendCustomPacketToClients(Function<TargetIdentifier, Packet> mapper, TargetIdentifier...clients) {
@@ -59,7 +59,7 @@ public interface NetworkManagerServer extends NetworkManagerCommon {
 		return new AsyncResultGroup((AsyncResult[]) results.toArray());
 	}
 	public default AsyncResultGroup sendCustomPacketToAllClients(Function<TargetIdentifier, Packet> mapper) {
-		return getClients().withStateReturn((set) -> sendCustomPacketToClients(mapper, set));
+		return getClients().withStateReturn((set) -> sendCustomPacketToClients(mapper, set), false);
 	}
 	
 	/**

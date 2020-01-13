@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -180,22 +181,24 @@ public abstract class NetworkConnection implements SynchronizedStateProvider<Con
 	}
 	
 	@Override
-	public void withStateDo(Consumer<ConnectionState> action) {
+	public void withStateDo(Consumer<ConnectionState> action, boolean requireWriteAccess) {
+		final Lock lock = requireWriteAccess ? stateRW.writeLock() : stateRW.readLock();
 		try {
-			stateRW.readLock().lock();
+			lock.lock();
 			action.accept(state);
 		} finally {
-			stateRW.readLock().unlock();
+			lock.unlock();
 		}
 	}
 	
 	@Override
-	public <T> T withStateReturn(Function<ConnectionState, T> action) {
+	public <T> T withStateReturn(Function<ConnectionState, T> action, boolean requireWriteAccess) {
+		final Lock lock = requireWriteAccess ? stateRW.writeLock() : stateRW.readLock();
 		try {
-			stateRW.readLock().lock();
+			lock.lock();
 			return action.apply(state);
 		} finally {
-			stateRW.readLock().unlock();
+			lock.unlock();
 		}
 	}
 }
