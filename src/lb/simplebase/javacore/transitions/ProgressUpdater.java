@@ -1,26 +1,47 @@
 package lb.simplebase.javacore.transitions;
 
-@FunctionalInterface
-public interface ProgressUpdater {
+import lb.simplebase.javacore.Framework;
 
-	public double updateProgress(double previous, boolean reverse);
+public abstract class ProgressUpdater {
+
+	public abstract double updateProgress(double previous, boolean reverse);
+	public void reset() {};
 	
 	public static ProgressUpdater fixedIncrement(final double increment) {
-		return (prev, rev) -> prev + (rev ? -increment : increment);
+		return new ProgressUpdater() {
+			private final double inc = increment;
+			@Override
+			public double updateProgress(double previous, boolean reverse) {
+				return previous + (reverse ? -inc : inc);
+			}
+		};
 	}
 	
 	public static ProgressUpdater fixedCount(final double amount) {
-		final double perTick = 1.0D / amount;
-		return (prev, rev) -> prev + (rev ? -perTick : perTick);
+		return new ProgressUpdater() {
+			private final double inc = 1.0D / amount;
+			@Override
+			public double updateProgress(double previous, boolean reverse) {
+				return previous + (reverse ? -inc : inc);
+			}
+		};
 	}
 	
-	@Deprecated
 	public static ProgressUpdater systemTime(final long totalTimeMs) {
-		final long startTime = System.currentTimeMillis();
-		final double timeScale = 1.0D / ((double) totalTimeMs);
-		return (prev, rev) -> rev 
-				? (totalTimeMs - ((double) (System.currentTimeMillis() - startTime) % totalTimeMs)) * timeScale
-				: ((double) (System.currentTimeMillis() - startTime) % totalTimeMs) * timeScale;
+		return new ProgressUpdater() {
+			private final double timeScale = 1.0D / ((double) totalTimeMs);
+			private double resetTime;
+			@Override
+			public double updateProgress(double previous, boolean reverse) {
+				return reverse 
+				? (totalTimeMs - ((double) (Framework.getLastSystemTime() - resetTime) % totalTimeMs)) * timeScale
+				: ((double) (Framework.getLastSystemTime() - resetTime) % totalTimeMs) * timeScale;
+			}
+			@Override
+			public void reset() {
+				resetTime = Framework.getLastSystemTime();
+			}
+		};
 	}
 	
 }

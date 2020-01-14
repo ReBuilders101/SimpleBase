@@ -63,6 +63,8 @@ public final class Framework {
 	
 	private static boolean singleFrame;
 	
+	private static long lastSystemTime;
+	
 	@RequireState(FrameworkState.UNINITIALIZED)
 	public static void init() {
 		//Validate state
@@ -371,6 +373,7 @@ public final class Framework {
 	}
 	
 	private static void onUpdateTask() {
+		lastSystemTime = System.currentTimeMillis();
 		if(currentScene != null) {
 //			recalculateSizes();
 //			Graphics2D draw = canvas.createGraphics();
@@ -383,6 +386,10 @@ public final class Framework {
 			currentScene.update(tick);
 		}
 		tick++; //Increment for every update
+	}
+	
+	public static long getLastSystemTime() {
+		return lastSystemTime;
 	}
 	
 	private static class WindowListenerStopOnClose implements WindowListener {
