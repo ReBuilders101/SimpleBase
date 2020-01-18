@@ -25,7 +25,6 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	protected final ReadWriteLock clientListLock;
 	
 	protected final InboundPacketThreadHandler handler;
-	protected PacketReceiver toAllHandlers;
 	
 	protected volatile ServerState state;
 	
@@ -37,8 +36,7 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 		this.clientList = new HashSet<>();
 		this.clientListLock = new ReentrantReadWriteLock(true);
 		
-		this.toAllHandlers = PacketReceiver.createEmptyReceiver();
-		this.handler = new InboundPacketThreadHandler(toAllHandlers, threads);
+		this.handler = new InboundPacketThreadHandler(PacketReceiver.createEmptyReceiver(), threads);
 	}
 	
 	
@@ -167,21 +165,22 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 	 */
 	@Override
 	public void processPacket(Packet received, PacketContext source) {
-		handler.accept(received, source);
+		handler.processPacket(received, source);
 	}
 
 	/**
 	 * Adds a {@link PacketReceiver} that will be called when a packet is received by the network manager.
-	 * @param handler The new {@link PacketReceiver}
+	 * @param newHandler The new {@link PacketReceiver}
 	 */
 	@Override
-	public void addIncomingPacketHandler(PacketReceiver handler) {
+	public void addIncomingPacketHandler(PacketReceiver newHandler) {
+		final PacketReceiver toAllHandlers = handler.getDelegate();
 		if(toAllHandlers instanceof PacketDistributor) { //If we already distribute, add to the list
-			((PacketDistributor) toAllHandlers).addPacketReceiver(handler);
+			((PacketDistributor) toAllHandlers).addPacketReceiver(newHandler);
 		} else if(toAllHandlers instanceof PacketReceiverEmptyImpl) {
-			toAllHandlers = handler; //If the current impl does nothing, replace it
+			handler.setDelegate(newHandler); //If the current impl does nothing, replace it
 		} else { //Some functioning impl already exits -> make distributor
-			toAllHandlers = new PacketDistributor(toAllHandlers, handler);
+			handler.setDelegate(new PacketDistributor(toAllHandlers, newHandler));
 		}
 	}
 
@@ -194,7 +193,7 @@ public abstract class CommonServer extends NetworkManager implements LocalConnec
 			public Set<TargetIdentifier> getState() {
 				try {
 					clientListLock.readLock().lock();
-					return clientList.stream().map((c) -> c.getLocalTargetId()).collect(Collectors.toSet());
+					return clientList.stream().map((c) -> c.getRemoteTargetId()).collect(Collectors.toSet());
 				} finally {
 					clientListLock.readLock().unlock();
 				}

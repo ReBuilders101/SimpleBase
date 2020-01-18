@@ -11,7 +11,7 @@ public class InboundPacketThreadHandler implements PacketReceiver{
 
 	private static final AtomicInteger ibhID = new AtomicInteger(0);
 	
-	private final PacketReceiver delegateThreadReceiver;
+	private PacketReceiver delegateThreadReceiver;
 	private final ExecutorService threadExecutor;
 	private final NamedThreadFactory fac;
 	
@@ -34,8 +34,16 @@ public class InboundPacketThreadHandler implements PacketReceiver{
 		}
 	}
 	
+	protected void setDelegate(PacketReceiver delegate) {
+		delegateThreadReceiver = delegate;
+	}
+	
 	public void shutdownExecutor() {
 		threadExecutor.shutdown();
+	}
+
+	public PacketReceiver getDelegate() {
+		return delegateThreadReceiver;
 	}
 	
 }
