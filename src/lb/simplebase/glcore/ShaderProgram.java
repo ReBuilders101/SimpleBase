@@ -1,5 +1,7 @@
 package lb.simplebase.glcore;
 
+import static lb.simplebase.glcore.GLFramework.gfAddTerminateTask;
+
 import java.nio.IntBuffer;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -17,6 +19,7 @@ public final class ShaderProgram implements GLHandle {
 	private ShaderProgram(int handle, Runnable task) {
 		this.handle = handle;
 		this.task = task;
+		gfAddTerminateTask(task);
 	}
 	
 	public static ShaderProgram.Builder builder() {
