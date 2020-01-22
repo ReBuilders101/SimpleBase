@@ -69,6 +69,10 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 		if(isValue()) return getValue();
 		throw getException();
 	}
+	public T orElseThrowUnchecked() {
+		if(isValue()) return getValue();
+		throw new RuntimeException(getException());
+	}
 	
 	@Override
 	@Deprecated

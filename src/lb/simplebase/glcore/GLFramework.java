@@ -171,8 +171,8 @@ public final class GLFramework {
 		
 		while(!program.stopProgram() && !shouldStop && !windowClose()) {
 			if(autoClear) glClear(GL_COLOR_BUFFER_BIT);
-			program.render();
 			program.update();
+			program.render();
 			//Update window
 			GLFW.glfwPollEvents();
 			GLFW.glfwSwapBuffers(windowId);
@@ -433,5 +433,4 @@ public final class GLFramework {
 		}
 		GLFW.glfwSetInputMode(windowId, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 	}
-	
 }
