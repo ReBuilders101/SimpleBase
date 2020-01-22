@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 
-public final class ShaderProgram implements GLHandle {
+public final class ShaderProgram implements GLHandle, GLBindable {
 
 	private final int handle;
 	private final Runnable task;
@@ -26,10 +26,12 @@ public final class ShaderProgram implements GLHandle {
 		return new Builder();
 	}
 	
+	@Override
 	public void enable() {
 		GL20.glUseProgram(handle);
 	}
 	
+	@Override
 	public void disable() {
 		GL20.glUseProgram(0);
 	}
@@ -41,6 +43,15 @@ public final class ShaderProgram implements GLHandle {
 	
 	public Runnable getDetachTask() {
 		return task;
+	}
+	
+	public ShaderProgram use() {
+		this.enable();
+		return this;
+	}
+	
+	public static ShaderProgram emptyShader() {
+		return new ShaderProgram(0, () -> {});
 	}
 	
 	public static final class Builder {
