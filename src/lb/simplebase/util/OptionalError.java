@@ -51,7 +51,10 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 	
 	public abstract <R> OptionalError<R, E> mapValue(Function<T, R> mapper);
 	public abstract <R> OptionalError<R, E> flatMapValue(Function<T, Optional<R>> mapper, Supplier<E> exception);
+	public abstract <R> OptionalError<R, E> flatMapValue(Function<T, OptionalError<R, ? extends E>> mapper);
 	public abstract <R, E2 extends Throwable> OptionalError<R, E2> flatMapValue(Function<T, Optional<R>> mapper, Supplier<E2> exception, Function<E, E2> exceptionTransform);
+	public abstract <R, E2 extends Throwable> OptionalError<R, E2> flatMapValue(Function<T, OptionalError<R, E2>> mapper,  Function<E, E2> exceptionTransform);
+	public abstract <R, E2 extends Throwable> OptionalError<R, E> flatMapValueInv(Function<T, OptionalError<R, E2>> mapper,  Function<E2, E> exceptionTransformInverse);
 	
 	public T orElse(T value) {
 		return isValue() ? getValue() : value;
@@ -71,6 +74,21 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 	@Deprecated
 	public T get() {
 		return orElseNull();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T, E extends Throwable> OptionalError<T, E> ofTask(SupplierThrows<T, E> task) {
+		try {
+			T value = task.get();
+			return (OptionalError<T, E>) valueImpl(value);
+		} catch (Throwable e) {
+			try {
+				E ex = (E) e;
+				return (OptionalError<T, E>) errorImpl(ex);
+			} catch (ClassCastException e2) {
+				throw e2;
+			}
+		}
 	}
 	
 	public static <T> OptionalError<T, ? extends Throwable> ofValue(T value) {
@@ -177,6 +195,23 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 				Supplier<E2> exception, Function<E, E2> exceptionTransform) {
 			return new ErrorImpl<>(exceptionTransform.apply(this.exception));
 		}
+
+		@Override
+		public <R> OptionalError<R, E> flatMapValue(Function<T, OptionalError<R, ? extends E>> mapper) {
+			return new ErrorImpl<>(this.exception);
+		}
+
+		@Override
+		public <R, E2 extends Throwable> OptionalError<R, E2> flatMapValue(Function<T, OptionalError<R, E2>> mapper,
+				Function<E, E2> exceptionTransform) {
+			return new ErrorImpl<>(exceptionTransform.apply(this.exception));
+		}
+
+		@Override
+		public <R, E2 extends Throwable> OptionalError<R, E> flatMapValueInv(Function<T, OptionalError<R, E2>> mapper,
+				Function<E2, E> exceptionTransformInverse) {
+			return new ErrorImpl<>(this.exception);
+		}
 	}
 	
 	private static final class ValueImpl<T, E extends Throwable> extends OptionalError<T, E> {
@@ -218,6 +253,26 @@ public abstract class OptionalError<T, E extends Throwable> implements Supplier<
 				Supplier<E2> exception, Function<E, E2> exceptionTransform) {
 			final Optional<R> result = mapper.apply(value);
 			return result.isPresent() ? new ValueImpl<>(result.get()) : new ErrorImpl<>(exception.get());
+		}
+
+		@Override
+		public <R> OptionalError<R, E> flatMapValue(Function<T, OptionalError<R, ? extends E>> mapper) {
+			final OptionalError<R, ? extends E> result = mapper.apply(value);
+			return result.isValue() ? new ValueImpl<>(result.getValue()) : new ErrorImpl<>(result.getException());
+		}
+
+		@Override
+		public <R, E2 extends Throwable> OptionalError<R, E2> flatMapValue(Function<T, OptionalError<R, E2>> mapper,
+				Function<E, E2> exceptionTransform) {
+			final OptionalError<R, ? extends E2> result = mapper.apply(value);
+			return result.isValue() ? new ValueImpl<>(result.getValue()) : new ErrorImpl<>(result.getException());
+		}
+
+		@Override
+		public <R, E2 extends Throwable> OptionalError<R, E> flatMapValueInv(Function<T, OptionalError<R, E2>> mapper,
+				Function<E2, E> exceptionTransformInverse) {
+			final OptionalError<R, ? extends E2> result = mapper.apply(value);
+			return result.isValue() ? new ValueImpl<>(result.getValue()) : new ErrorImpl<>(exceptionTransformInverse.apply(result.getException()));
 		}
 	}
 }
