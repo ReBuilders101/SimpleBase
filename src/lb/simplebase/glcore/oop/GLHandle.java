@@ -1,4 +1,4 @@
-package lb.simplebase.glcore;
+package lb.simplebase.glcore.oop;
 
 public interface GLHandle {
 

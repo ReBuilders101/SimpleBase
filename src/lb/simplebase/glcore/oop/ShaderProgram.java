@@ -1,6 +1,4 @@
-package lb.simplebase.glcore;
-
-import static lb.simplebase.glcore.GLFramework.gfAddTerminateTask;
+package lb.simplebase.glcore.oop;
 
 import java.nio.IntBuffer;
 import java.util.Objects;
@@ -12,14 +10,16 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 
-public final class ShaderProgram implements GLHandle, GLBindable {
+import lb.simplebase.glcore.GLFramework;
+
+public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 
 	private final int handle;
 	private final Runnable task;
 	private ShaderProgram(int handle, Runnable task) {
 		this.handle = handle;
 		this.task = task;
-		gfAddTerminateTask(task);
+		GLDisposable.registerTask(this);
 	}
 	
 	public static ShaderProgram.Builder builder() {
@@ -41,13 +41,9 @@ public final class ShaderProgram implements GLHandle, GLBindable {
 		return handle;
 	}
 	
-	public Runnable getDetachTask() {
+	@Override
+	public Runnable getDisposeAction() {
 		return task;
-	}
-	
-	public ShaderProgram use() {
-		this.enable();
-		return this;
 	}
 	
 	public static ShaderProgram emptyShader() {
