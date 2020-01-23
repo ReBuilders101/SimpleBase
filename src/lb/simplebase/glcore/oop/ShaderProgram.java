@@ -41,20 +41,38 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 		GL20.glUseProgram(handle);
 	}
 	
-	public void setUniformValue_Int(String name, int value) {
-		GL20.glUniform1i(findUniformLocation(name), value);
+	public void setUniformValue_int(String name, int value) {
+		setUniformValue_int(findUniformLocation(name), value);
 	}
 	
-	public void setUniformValue_Int(int location, int value) {
+	public void setUniformValue_int(int location, int value) {
 		GL20.glUniform1i(location, value);
 	}
 	
-	public void setUniformValue_Float(String name, float value) {
-		GL20.glUniform1f(findUniformLocation(name), value);
+	public void setUniformValue_float(String name, float value) {
+		setUniformValue_float(findUniformLocation(name), value);
 	}
 	
-	public void setUniformValue_Float(int location, float value) {
+	public void setUniformValue_float(int location, float value) {
 		GL20.glUniform1f(location, value);
+	}
+	
+	public void setUniformValue_vec4f(String name, float...values) {
+		setUniformValue_vec4f(findUniformLocation(name), values);
+	}
+	
+	public void setUniformValue_vec4f(int location, float...values) {
+		assert values.length == 4;
+		GL20.glUniform4fv(location, values);
+	}
+	
+	public void setUniformValue_mat4f(String name, float...values) {
+		setUniformValue_mat4f(findUniformLocation(name), values);
+	}
+	
+	public void setUniformValue_mat4f(int location, float...values) {
+		assert values.length == 16;
+		GL20.glUniformMatrix4fv(location, false, values);
 	}
 	
 	public int findUniformLocation(String name) {
