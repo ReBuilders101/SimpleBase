@@ -106,7 +106,8 @@ public class BufferObject implements GLHandle, GLDisposable {
 	}
 	
 	public static enum BufferLocation implements GLHandle {
-		ARRAY_BUFFER(GL30.GL_ARRAY_BUFFER);
+		VERTEX_DATA(GL30.GL_ARRAY_BUFFER),
+		VERTEX_INDEX_DATA(GL15.GL_ELEMENT_ARRAY_BUFFER);
 
 		private final int handle;
 		private BufferLocation(int handle) {

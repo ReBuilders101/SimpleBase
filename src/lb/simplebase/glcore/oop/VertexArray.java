@@ -14,6 +14,7 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 	
 	private final int vaoHandle;
 	private final Set<Integer> layoutIds;
+	private int drawMode;
 	
 	public static VertexArray create() {
 		return new VertexArray(GL30.glGenVertexArrays());
@@ -22,6 +23,7 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 	private VertexArray(int handle) {
 		this.vaoHandle = handle;
 		this.layoutIds = new LinkedHashSet<>();
+		this.drawMode = GL11.GL_TRIANGLES;
 		GLDisposable.registerTask(this);
 	}
 	
@@ -45,7 +47,7 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 	}
 	
 	public void layoutVertexBuffer(BufferObject data, int layoutId, int valuesPerVertex, int stride, int offset) {
-		if(data.getLocation() != BufferLocation.ARRAY_BUFFER)
+		if(data.getLocation() != BufferLocation.VERTEX_DATA)
 			throw new IllegalArgumentException("Buffer must be bound to the vertex array (GL_ARRAY_BUFFER)");
 		GL20.glVertexAttribPointer(layoutId, valuesPerVertex, data.getDataType(), false, stride, offset);
 		layoutIds.add(layoutId);
@@ -65,13 +67,38 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 	}
 	
 	public void drawVertices(int count) {
-		drawVertices(0, count);
+		drawVertices(count, 0);
 	}
 	
-	public void drawVertices(int offset, int count) {
+	public void drawIndexedVertices(int count, BufferObject indexBuffer) {
 		layoutIds.forEach((i) -> GL20.glEnableVertexAttribArray(i));
-		GL11.glDrawArrays(GL11.GL_TRIANGLES, offset, count);
+		GL11.glDrawElements(drawMode, count, indexBuffer.getDataType(), 0);
 		layoutIds.forEach((i) -> GL20.glDisableVertexAttribArray(i));
 	}
+	
+	public void drawVertices(int count, int offset) {
+		layoutIds.forEach((i) -> GL20.glEnableVertexAttribArray(i));
+		GL11.glDrawArrays(drawMode, offset, count);
+		layoutIds.forEach((i) -> GL20.glDisableVertexAttribArray(i));
+	}
+	
+	public void setGLDrawMode(DrawMode mode) {
+		this.drawMode = mode.handle;
+	}
+	
+	public static enum DrawMode implements GLHandle {
+		TRIANGLES(GL11.GL_TRIANGLES),
+		LINES(GL11.GL_LINES);
 
+		private final int handle;
+		private DrawMode(int handle) {
+			this.handle = handle;
+		}
+		@Override
+		public int getGLHandle() {
+			return handle;
+		}
+		
+	}
+	
 }
