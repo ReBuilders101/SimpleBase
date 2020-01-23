@@ -77,6 +77,11 @@ public class BufferObject implements GLHandle, GLDisposable {
 		return internalDataType != 0;
 	}
 	
+	@RequireVAO
+	public void bindForRendering() {
+		GL15.glBindBuffer(type.handle, handle);
+	}
+	
 	@Override
 	public int getGLHandle() {
 		return handle;
