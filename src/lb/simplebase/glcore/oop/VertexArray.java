@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import lb.simplebase.glcore.RequireVAO;
 import lb.simplebase.glcore.oop.BufferObject.BufferLocation;
 
 public class VertexArray implements GLHandle, GLBindable, GLDisposable {
@@ -42,10 +43,12 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 		GL30.glBindVertexArray(0);
 	}
 	
+	@RequireVAO
 	public void layoutVertexBuffer(BufferObject data, int layoutId, int valuesPerVertex) {
 		layoutVertexBuffer(data, layoutId, valuesPerVertex, 0, 0);
 	}
 	
+	@RequireVAO
 	public void layoutVertexBuffer(BufferObject data, int layoutId, int valuesPerVertex, int stride, int offset) {
 		if(data.getLocation() != BufferLocation.VERTEX_DATA)
 			throw new IllegalArgumentException("Buffer must be bound to the vertex array (GL_ARRAY_BUFFER)");

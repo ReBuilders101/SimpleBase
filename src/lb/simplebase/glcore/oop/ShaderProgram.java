@@ -1,8 +1,15 @@
 package lb.simplebase.glcore.oop;
 
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -14,11 +21,14 @@ import lb.simplebase.glcore.GLFramework;
 
 public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 
+	private final Map<String, Integer> uniforms;
+	
 	private final int handle;
 	private final Runnable task;
-	private ShaderProgram(int handle, Runnable task) {
+	private ShaderProgram(int handle, Runnable task, Map<String, Integer> uniforms) {
 		this.handle = handle;
 		this.task = task;
+		this.uniforms = uniforms;
 		GLDisposable.registerTask(this);
 	}
 	
@@ -29,6 +39,34 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 	@Override
 	public void enable() {
 		GL20.glUseProgram(handle);
+	}
+	
+	public void setUniformValue_Int(String name, int value) {
+		GL20.glUniform1i(findUniformLocation(name), value);
+	}
+	
+	public void setUniformValue_Int(int location, int value) {
+		GL20.glUniform1i(location, value);
+	}
+	
+	public void setUniformValue_Float(String name, float value) {
+		GL20.glUniform1f(findUniformLocation(name), value);
+	}
+	
+	public void setUniformValue_Float(int location, float value) {
+		GL20.glUniform1f(location, value);
+	}
+	
+	public int findUniformLocation(String name) {
+		Integer id = uniforms.get(name);
+		if(id == null) throw new IllegalArgumentException("Invalid uniform name: " + name);
+		return id;
+	}
+	
+	public OptionalInt tryFindUniformLocation(String name) {
+		Integer id = uniforms.get(name);
+		if(id == null) return OptionalInt.empty();
+		return OptionalInt.of(id);
 	}
 	
 	@Override
@@ -47,7 +85,7 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 	}
 	
 	public static ShaderProgram emptyShader() {
-		return new ShaderProgram(0, () -> {});
+		return new ShaderProgram(0, () -> {}, new HashMap<>());
 	}
 	
 	public static final class Builder {
@@ -57,11 +95,13 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 		private final int programHandle;
 		private IntBuffer shaders;
 		private boolean locked;
+		private final Set<String> uniformNames;
 		
 		private Builder() {
 			this.programHandle = GL20.glCreateProgram();
 			this.shaders = IntBuffer.allocate(SHADER_BUFFER_SIZE); //There are 5 shader types, so 5 will be the default max
-			locked = false;
+			this.uniformNames = new HashSet<>();
+			this.locked = false;
 //			assert !shaders.isDirect(); //debug only
 		}
 		
@@ -100,6 +140,11 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 			return attachShader(shaderHandle);
 		}
 		
+		public Builder registerUniform(String name) {
+			uniformNames.add(name);
+			return this;
+		}
+		
 		public ShaderProgram build() {
 			if(locked) throw new IllegalStateException("This builder has already created a ShaderProgram");
 			
@@ -110,7 +155,8 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 					GL20.glDeleteShader(shaders.get(i));
 				}
 				GL20.glDeleteProgram(programHandle);
-			});
+			}, uniformNames.stream().collect(Collectors.toMap(Function.identity(),
+					name -> Integer.valueOf(GL20.glGetUniformLocation(programHandle, name)))));
 		}
 	}
 	
