@@ -53,7 +53,7 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 		if(data.getLocation() != BufferLocation.VERTEX_DATA)
 			throw new IllegalArgumentException("Buffer must be bound to the vertex array (GL_ARRAY_BUFFER)");
 		data.bindForRendering(); //In this case, to bind it to the vertex array
-		GL20.glVertexAttribPointer(layoutId, valuesPerVertex, data.getDataType(), false, stride, offset);
+		GL20.glVertexAttribPointer(layoutId, valuesPerVertex, data.getDataType(), false, stride * data.getDataFactor(), offset * data.getDataFactor());
 		layoutIds.add(layoutId);
 	}
 	

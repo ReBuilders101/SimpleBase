@@ -38,7 +38,7 @@ public final class GLShaderLoader {
 	 * @param name The name of the file or resource
 	 * @return The content as one single string
 	 */
-	public static String slReadFromResource(String name) throws IOException {
+	public static String slReadFromResource(String name) throws IOException, FileNotFoundException {
 		Objects.requireNonNull(name, "Resource name must not be null");
 		try (InputStream resource = GLShaderLoader.class.getClassLoader().getResourceAsStream(name)) {
 			if(resource == null) throw new FileNotFoundException("Error loading resource: " + name);
@@ -46,14 +46,14 @@ public final class GLShaderLoader {
 		}
 	}
 
-	public static String slReadFromFile(File file) throws IOException {
+	public static String slReadFromFile(File file) throws IOException, FileNotFoundException {
 		Objects.requireNonNull(file, "File name must not be null");
 		try (InputStream resource = new FileInputStream(file)) {
 			return slReadFromStream(resource);
 		}
 	}
 
-	public static String slReadFromPath(Path path) throws IOException {
+	public static String slReadFromPath(Path path) throws IOException, FileNotFoundException {
 		Objects.requireNonNull(path, "File path must not be null");
 		return slReadFromStream(Files.newInputStream(path, StandardOpenOption.READ));
 	}

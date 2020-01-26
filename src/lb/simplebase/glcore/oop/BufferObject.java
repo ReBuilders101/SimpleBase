@@ -10,9 +10,12 @@ import lb.simplebase.glcore.RequireVAO;
 
 public class BufferObject implements GLHandle, GLDisposable {
 
+	public static final BufferObject NULL = null; //Used for varargs
+	
 	private final int handle;
 	private final BufferLocation type;
 	private int internalDataType;
+	private int dataStrideFactor;
 	private final VertexArray context;
 	
 	protected BufferLocation getLocation() {
@@ -21,6 +24,10 @@ public class BufferObject implements GLHandle, GLDisposable {
 	
 	protected int getDataType() {
 		return internalDataType;
+	}
+	
+	protected int getDataFactor() {
+		return dataStrideFactor;
 	}
 	
 	protected VertexArray getContext() {
@@ -38,6 +45,7 @@ public class BufferObject implements GLHandle, GLDisposable {
 		this.type = nativePeer;
 		this.context = context;
 		this.internalDataType = 0;
+		this.dataStrideFactor = 0;
 		GLDisposable.registerTask(this);
 	}
 	
@@ -47,6 +55,7 @@ public class BufferObject implements GLHandle, GLDisposable {
 		GL15.glBindBuffer(type.handle, handle);
 		GL15.glBufferData(type.handle, data, dataUsage.handle);
 		internalDataType = GL11.GL_FLOAT;
+		dataStrideFactor = Float.BYTES;
 	}
 	
 	@RequireVAO
@@ -55,6 +64,7 @@ public class BufferObject implements GLHandle, GLDisposable {
 		GL15.glBindBuffer(type.handle, handle);
 		GL15.glBufferData(type.handle, data, dataUsage.handle);
 		internalDataType = GL11.GL_FLOAT;
+		dataStrideFactor = Float.BYTES;
 	}
 	
 	@RequireVAO
