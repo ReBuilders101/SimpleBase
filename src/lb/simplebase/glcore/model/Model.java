@@ -162,4 +162,45 @@ public class Model {
 		}
 	}
 	
+	protected FloatBuffer makeDataVN() {
+		synchronized (faces) {
+			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 18); //24 -> 3 vertices per face, 6 values per vertex
+			for(Face face : faces) {
+				data.put(face.getVertex1().data, 0, 3);
+				data.put(face.getVertex1().data, 5, 3);
+				
+				data.put(face.getVertex2().data, 0, 3);
+				data.put(face.getVertex2().data, 5, 3);
+				
+				data.put(face.getVertex3().data, 0, 3);
+				data.put(face.getVertex3().data, 5, 3);
+			}
+			return data;
+		}
+	}
+	
+	protected FloatBuffer makeDataVT() {
+		synchronized (faces) {
+			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 15); //24 -> 3 vertices per face, 5 values per vertex
+			for(Face face : faces) {
+				data.put(face.getVertex1().data, 0, 5);
+				data.put(face.getVertex2().data, 0, 5);
+				data.put(face.getVertex3().data, 0, 5);
+			}
+			return data;
+		}
+	}
+	
+	protected FloatBuffer makeDataV() {
+		synchronized (faces) {
+			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 9); //24 -> 3 vertices per face, 3 values per vertex
+			for(Face face : faces) {
+				data.put(face.getVertex1().data, 0, 3);
+				data.put(face.getVertex2().data, 0, 3);
+				data.put(face.getVertex3().data, 0, 3);
+			}
+			return data;
+		}
+	}
+	
 }

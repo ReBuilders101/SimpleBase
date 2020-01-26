@@ -31,11 +31,23 @@ class GLModelWithBuffer implements GLModel {
 	public void fillAndLayout(VertexArray array, boolean textures, boolean normal) {
 		array.enable();
 		buffer.bindForRendering();
-		buffer.putData(model.makeDataVTN(), usage);
-		
-		array.layoutVertexBuffer(buffer, 0, 3, 8, 0); //position
-		array.layoutVertexBuffer(buffer, 1, 2, 8, 3); //texture
-		array.layoutVertexBuffer(buffer, 2, 3, 8, 5); //normal
+		if(textures && normal) {
+			buffer.putData(model.makeDataVTN(), usage);
+			array.layoutVertexBuffer(buffer, 0, 3, 8, 0); //position
+			array.layoutVertexBuffer(buffer, 1, 2, 8, 3); //texture
+			array.layoutVertexBuffer(buffer, 2, 3, 8, 5); //normal
+		} else if(normal) {
+			buffer.putData(model.makeDataVN(), usage);
+			array.layoutVertexBuffer(buffer, 0, 3, 6, 0); //position
+			array.layoutVertexBuffer(buffer, 1, 3, 6, 3); //normal
+		} else if(textures) {
+			buffer.putData(model.makeDataVT(), usage);
+			array.layoutVertexBuffer(buffer, 0, 3, 5, 0); //position
+			array.layoutVertexBuffer(buffer, 1, 2, 5, 3); //texture
+		} else {
+			buffer.putData(model.makeDataV(), usage);
+			array.layoutVertexBuffer(buffer, 0, 3, 3, 0); //position
+		}
 	}
 
 	@Override
