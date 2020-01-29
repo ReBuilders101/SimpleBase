@@ -117,12 +117,13 @@ public class ModelBuilder {
 	}
 	
 	private Vertex makeVertex(int[] vertices, int line) throws ModelFormatException {
-		final int vtxPos = vertices[0];
-		final int vtxTex = vertices[1];
-		final int vtxNrm = vertices[2];
+		//Apparently the indices are 1-based
+		final int vtxPos = vertices[0] - 1;
+		final int vtxTex = vertices[1] - 1;
+		final int vtxNrm = vertices[2] - 1;
 
-		final boolean text = vtxTex != -1;
-		final boolean norm = vtxNrm != -1;
+		final boolean text = vertices[1] != -1;
+		final boolean norm = vertices[2] != -1;
 		
 		if(vtxPos < 0 || vtxPos >= vertexPosPrimers.size()) throw new ModelFormatException("Face vertex position index out of range @l" + line,
 				new ArrayIndexOutOfBoundsException(vtxPos), this);

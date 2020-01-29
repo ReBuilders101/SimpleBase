@@ -105,4 +105,8 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 		
 	}
 	
+	public static void disableAll() {
+		GL30.glBindVertexArray(0);
+	}
+	
 }

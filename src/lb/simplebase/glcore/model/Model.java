@@ -11,6 +11,7 @@ import org.lwjgl.BufferUtils;
 import lb.simplebase.glcore.oop.BufferObject.BufferUsage;
 import lb.simplebase.glcore.oop.VertexArray;
 
+@SuppressWarnings("unused") //For the BufferUtils import, in case I get that working again
 public class Model {
 	
 	private final String name;
@@ -150,21 +151,27 @@ public class Model {
 		return vertices.size();
 	}
 	
-	protected FloatBuffer makeDataVTN() {
+	protected int effectiveVertexCount() {
+		return faces.size() * 3;
+	}
+	
+	protected float[] makeDataVTN() {
 		synchronized (faces) {
-			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 24); //24 -> 3 vertices per face, 8 values per vertex
+//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 24); //24 -> 3 vertices per face, 8 values per vertex
+			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 24);
 			for(Face face : faces) {
 				data.put(face.getVertex1().data);
 				data.put(face.getVertex2().data);
 				data.put(face.getVertex3().data);
 			}
-			return data;
+			return data.array();
 		}
 	}
 	
-	protected FloatBuffer makeDataVN() {
+	protected float[] makeDataVN() {
 		synchronized (faces) {
-			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 18); //24 -> 3 vertices per face, 6 values per vertex
+//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 18); //24 -> 3 vertices per face, 6 values per vertex
+			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 18);
 			for(Face face : faces) {
 				data.put(face.getVertex1().data, 0, 3);
 				data.put(face.getVertex1().data, 5, 3);
@@ -175,32 +182,42 @@ public class Model {
 				data.put(face.getVertex3().data, 0, 3);
 				data.put(face.getVertex3().data, 5, 3);
 			}
-			return data;
+			return data.array();
 		}
 	}
 	
-	protected FloatBuffer makeDataVT() {
+	protected float[] makeDataVT() {
 		synchronized (faces) {
-			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 15); //24 -> 3 vertices per face, 5 values per vertex
+//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 15); //24 -> 3 vertices per face, 5 values per vertex
+			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 15);
 			for(Face face : faces) {
 				data.put(face.getVertex1().data, 0, 5);
 				data.put(face.getVertex2().data, 0, 5);
 				data.put(face.getVertex3().data, 0, 5);
 			}
-			return data;
+			return data.array();
 		}
 	}
 	
-	protected FloatBuffer makeDataV() {
+	protected float[] makeDataV() {
 		synchronized (faces) {
-			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 9); //24 -> 3 vertices per face, 3 values per vertex
+//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 9);
+			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 9);//BufferUtils.createFloatBuffer(faces.size() * 9); //24 -> 3 vertices per face, 3 values per vertex
 			for(Face face : faces) {
 				data.put(face.getVertex1().data, 0, 3);
 				data.put(face.getVertex2().data, 0, 3);
 				data.put(face.getVertex3().data, 0, 3);
 			}
-			return data;
+			return data.array();
 		}
 	}
+	
+//	private float[] array(FloatBuffer buf) {
+//		if(buf.hasArray()) return buf.array();
+//		buf.flip();
+//		float[] data = new float[buf.limit()];
+//		buf.get(data);
+//		return data;
+//	}
 	
 }

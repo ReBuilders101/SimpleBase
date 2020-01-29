@@ -2,7 +2,7 @@ package lb.simplebase.glcore.model;
 
 public class Material {
 
-	protected static final Material DISABLED = new Material("<loading disabled>");
+	public static final Material DISABLED = new Material("DisabledMaterial");
 	
 	private final String materialName;
 	

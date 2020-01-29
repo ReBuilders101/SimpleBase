@@ -121,7 +121,7 @@ public final class ModelLoader {
 						"No model name present after command 'o' @l" + lineNum + " (expected 1 string (no whitespace))"));
 				continue;
 			case "v":
-				if(split.length < 4) { //command + 3 floats (or less for error)
+				if(split.length <= 4) { //command + 3 floats (or less for error)
 					builder.appendVertex3(check3Float(split, builder,
 							"Invalid vertex data after command 'v' @l" + lineNum + " (expected 3 floats)", lineNum));
 				} else { //command + 4+ floats
@@ -181,8 +181,9 @@ public final class ModelLoader {
 					builder.appendFaceV(indices1, indices2, indices3, split[1], split[2], split[3], lineNum);
 				} else {
 					throw new ModelFormatException("This model parser only supports faces made of exactly 3 vertices (found face with " +
-							split.length + " vertices @l" + lineNum, builder);
+							(split.length-1) + " vertices @l" + lineNum, builder);
 				}
+				continue;
 			default:
 				System.err.println("Model loader: found unknown command '" + command + "', skipping and continuing");
 				continue;

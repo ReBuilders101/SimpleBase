@@ -24,7 +24,7 @@ class GLModelWithBuffer implements GLModel {
 
 	@Override
 	public int getVertexCount() {
-		return model.getVertexCount(); 
+		return model.effectiveVertexCount(); 
 	}
 
 	@Override
@@ -46,7 +46,7 @@ class GLModelWithBuffer implements GLModel {
 			array.layoutVertexBuffer(buffer, 1, 2, 5, 3); //texture
 		} else {
 			buffer.putData(model.makeDataV(), usage);
-			array.layoutVertexBuffer(buffer, 0, 3, 3, 0); //position
+			array.layoutVertexBuffer(buffer, 0, 3); //position
 		}
 	}
 
