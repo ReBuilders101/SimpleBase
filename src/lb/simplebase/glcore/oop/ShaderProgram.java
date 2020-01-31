@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.vecmath.Matrix4f;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
@@ -73,6 +75,18 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 	public void setUniformValue_mat4f(int location, float...values) {
 		assert values.length == 16;
 		GL20.glUniformMatrix4fv(location, false, values);
+	}
+	
+	public void setUniformValue_mat4f(String name, Matrix4f value) {
+		setUniformValue_mat4f(findUniformLocation(name), value);
+	}
+	
+	public void setUniformValue_mat4f(int location, Matrix4f value) {
+		GL20.glUniformMatrix4fv(location, true, new float[] {//OpenGL uses column-major -> transpose
+				value.m00, value.m01, value.m02, value.m03,
+				value.m10, value.m11, value.m12, value.m13,
+				value.m20, value.m21, value.m22, value.m23,
+				value.m30, value.m31, value.m32, value.m33,});
 	}
 	
 	public int findUniformLocation(String name) {
@@ -143,6 +157,7 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 		public Builder attachShaderFromSource(ShaderType type, String shaderSource) throws ShaderCompilationException {
 			Objects.requireNonNull(shaderSource, "The shader source code must not be null");
 			Objects.requireNonNull(type, "The shader type must not be null");
+			if(!type.isSupported()) throw new IllegalArgumentException("Shader type must be supported by the current GL context (use ShaderType.isSupported)");
 			if(locked) throw new IllegalStateException("This builder has already created a ShaderProgram");
 			
 			final int shaderHandle = GL20.glCreateShader(type.getGLHandle()); //Create the shader of a type
@@ -197,7 +212,7 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 			return handle;
 		}
 		
-		public boolean isValid() {
+		public boolean isSupported() {
 			return valid.test(GLFramework.gfGetGLCapabilities());
 		}
 	}

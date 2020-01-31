@@ -8,7 +8,7 @@ public class Vertex {
 	private final boolean hasTextures;
 	private final boolean hasNormals;
 	
-	public Vertex(float[] dataFinal, boolean text, boolean norm) {
+	protected Vertex(float[] dataFinal, boolean text, boolean norm) {
 		this.data = dataFinal;
 		this.hasTextures = text;
 		this.hasNormals = norm;

@@ -21,24 +21,23 @@ public final class ModelLoader {
 
 	private ModelLoader() {}
 
-	public static Model empty(String modelName) {
-		Objects.requireNonNull(modelName, "Model name cannot be null");
-		return new Model(modelName);
+	public static ModelPrefab empty() {
+		return new ModelPrefab(MaterialLibrary.DISABLED);
 	}
 
-	public static Model loadFromResource(String name) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromResource(String name) throws ModelFormatException, IOException, FileNotFoundException {
 		return loadFromResource(name, ModelLoader.class.getClassLoader(), null);
 	}
 
-	public static Model loadFromResource(String name, ClassLoader loader) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromResource(String name, ClassLoader loader) throws ModelFormatException, IOException, FileNotFoundException {
 		return loadFromResource(name, loader, null);
 	}
 	
-	public static Model loadFromResource(String name, LoadPath materialLookupPath) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromResource(String name, LoadPath materialLookupPath) throws ModelFormatException, IOException, FileNotFoundException {
 		return loadFromResource(name, ModelLoader.class.getClassLoader(), materialLookupPath);
 	}
 
-	public static Model loadFromResource(String name, ClassLoader loader, LoadPath materialLookupPath) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromResource(String name, ClassLoader loader, LoadPath materialLookupPath) throws ModelFormatException, IOException, FileNotFoundException {
 		Objects.requireNonNull(name, "Resource name must not be null");
 		Objects.requireNonNull(loader, "Class Loader name must not be null");
 		try (InputStream resource = loader.getResourceAsStream(name)) {
@@ -49,16 +48,16 @@ public final class ModelLoader {
 
 	
 	
-	public static Model loadFromFile(File file) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromFile(File file) throws ModelFormatException, IOException, FileNotFoundException {
 		Objects.requireNonNull(file, "File name must not be null");
 		try (InputStream resource = new FileInputStream(file)) {
-			return loadFromStreamImpl(resource).build(LoadPath.fromFile(file));
+			return loadFromStreamImpl(resource).build(LoadPath.fromFile(file.getParentFile()));
 		}
 	}
 
-	public static Model loadFromPath(Path path) throws ModelFormatException, IOException, FileNotFoundException {
+	public static ModelPrefab loadFromPath(Path path) throws ModelFormatException, IOException, FileNotFoundException {
 		Objects.requireNonNull(path, "File path must not be null");
-		return loadFromLinesIO(Files.lines(path, StandardCharsets.UTF_8)).build(LoadPath.fromPath(path)); //Use lazy IO safe version
+		return loadFromLinesIO(Files.lines(path, StandardCharsets.UTF_8)).build(LoadPath.fromPath(path.getParent())); //Use lazy IO safe version
 	}
 
 	private static ModelBuilder loadFromStreamImpl(InputStream stream) throws ModelFormatException, IOException {
@@ -67,12 +66,12 @@ public final class ModelLoader {
 		}
 	}
 	
-	public static Model loadFromStream(InputStream stream, LoadPath materialLookupPath) throws ModelFormatException, IOException {
+	public static ModelPrefab loadFromStream(InputStream stream, LoadPath materialLookupPath) throws ModelFormatException, IOException {
 		Objects.requireNonNull(stream, "Stream must not be null");
 		return loadFromStreamImpl(stream).build(materialLookupPath);
 	}
 	
-	public static Model loadFromStream(InputStream stream) throws ModelFormatException, IOException {
+	public static ModelPrefab loadFromStream(InputStream stream) throws ModelFormatException, IOException {
 		return loadFromStream(stream, null);
 	}
 
@@ -84,19 +83,19 @@ public final class ModelLoader {
 		}
 	}
 
-	public static Model loadFromLines(Stream<String> modelSource) throws ModelFormatException {
+	public static ModelPrefab loadFromLines(Stream<String> modelSource) throws ModelFormatException {
 		return loadFromLines(modelSource, null);
 	}
 	
-	public static Model loadFromLines(Stream<String> modelSource, LoadPath materialLookupPath) throws ModelFormatException {
+	public static ModelPrefab loadFromLines(Stream<String> modelSource, LoadPath materialLookupPath) throws ModelFormatException {
 		return loadIteratorImpl(modelSource.iterator()).build(materialLookupPath);
 	}
 
-	public static Model loadFromLines(Iterable<String> modelSource) throws ModelFormatException {
+	public static ModelPrefab loadFromLines(Iterable<String> modelSource) throws ModelFormatException {
 		return loadFromLines(modelSource, null);
 	}
 	
-	public static Model loadFromLines(Iterable<String> modelSource, LoadPath materialLookupPath) throws ModelFormatException {
+	public static ModelPrefab loadFromLines(Iterable<String> modelSource, LoadPath materialLookupPath) throws ModelFormatException {
 		return loadIteratorImpl(modelSource.iterator()).build(materialLookupPath);
 	}
 
@@ -117,7 +116,7 @@ public final class ModelLoader {
 						"No material library path present after command 'mtllib' @l" + lineNum + " (expecetd 1 string)"));
 				continue;
 			case "o":
-				builder.appendModelName(check1String(split, false, builder,
+				builder.beginMesh(check1String(split, false, builder,
 						"No model name present after command 'o' @l" + lineNum + " (expected 1 string (no whitespace))"));
 				continue;
 			case "v":

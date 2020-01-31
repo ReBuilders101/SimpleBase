@@ -1,223 +1,257 @@
 package lb.simplebase.glcore.model;
 
 import java.nio.FloatBuffer;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.lwjgl.BufferUtils;
+import javax.vecmath.Matrix4f;
 
-import lb.simplebase.glcore.oop.BufferObject.BufferUsage;
+import org.lwjgl.opengl.GL11;
+import lb.simplebase.glcore.MatrixUtils;
+import lb.simplebase.glcore.MatrixUtils.RotationOrder;
+import lb.simplebase.glcore.oop.BufferObject;
+import lb.simplebase.glcore.oop.GLDisposable;
 import lb.simplebase.glcore.oop.VertexArray;
+import lb.simplebase.glcore.oop.BufferObject.BufferLocation;
+import lb.simplebase.glcore.oop.BufferObject.BufferUsage;
+import lb.simplebase.glcore.scene.GLModel;
 
-@SuppressWarnings("unused") //For the BufferUtils import, in case I get that working again
 public class Model {
+	private final ModelPrefab prefab;
 	
-	private final String name;
-	private final Set<Vertex> vertices;
-	private final Set<Face> faces;
-	private final MaterialLibrary mtllib;
+	private float px;
+	private float py;
+	private float pz;
 	
-	protected Model(String name) {
-		this(name, new HashSet<>(), new HashSet<>(), MaterialLibrary.DISABLED);
+	private float roll;
+	private float pitch;
+	private float yaw;
+
+	private final Matrix4f objectToWorldSpace;
+	
+	protected Model(ModelPrefab pre, float x, float y, float z, float pitch, float yaw, float roll) {
+		this.prefab = pre;
+		this.objectToWorldSpace = new Matrix4f();
+		this.px = x;
+		this.py = y;
+		this.pz = z;
+		this.roll = roll;
+		this.pitch = pitch;
+		this.yaw = yaw;
+		updateTransforms();
 	}
 	
-	protected Model(String name, Set<Vertex> vertices, Set<Face> faces, MaterialLibrary materials) {
-		this.name = name;
-		this.vertices = vertices;
-		this.faces = faces;
-		this.mtllib = materials;
+	private void updateTransforms() {
+		//Everything is inverted, because we transform back to world space
+		final Matrix4f rotate = MatrixUtils.rotateEuler(RotationOrder.YXZ, -roll, -yaw, -pitch);
+		final Matrix4f translate = MatrixUtils.translate(-px, -py, -pz);
+		objectToWorldSpace.mul(translate, rotate);
 	}
 	
-	public String getModelName() {
-		return name;
+	public ModelPrefab getPrefab() {
+		return prefab;
 	}
 	
-	public Vertex getOrAddVertex(float x, float y, float z) {
-		for(Vertex v : vertices) {
-			if(!v.hasValidNormals() && !v.hasValidTextures() && //Correct state
-					v.getPositionX() == x && v.getPositionY() == y && v.getPositionZ() == z) { //Correct position
-				return v;
+	public float getPosX() {
+		return px;
+	}
+
+	public float getPosY() {
+		return py;
+	}
+	
+	public float getPosZ() {
+		return pz;
+	}
+	
+	public float getRoll() {
+		return roll;
+	}
+
+	public float getPitch() {
+		return pitch;
+	}
+	
+	public float getYaw() {
+		return yaw;
+	}
+	
+	public void setRoll(float roll) {
+		this.roll = roll;
+		updateTransforms();
+	}
+
+	public void setPitch(float pitch) {
+		this.pitch = pitch;
+		updateTransforms();
+	}
+	
+	public void setYaw(float yaw) {
+		this.yaw = yaw;
+		updateTransforms();
+	}
+	
+	public void setPosX(float x) {
+		this.px = x;
+		updateTransforms();
+	}
+	
+	public void setPosY(float y) {
+		this.py = y;
+		updateTransforms();
+	}
+	
+	public void setPosZ(float z) {
+		this.pz = z;
+		updateTransforms();
+	}
+	
+	public float[] getPos() {
+		return new float[] {px, py, pz};
+	}
+	
+	public void getPos(float[] fill) {
+		if(fill.length < 3) throw new ArrayIndexOutOfBoundsException("Array to fill must have a length of 3 or more");
+		fill[0] = px;
+		fill[1] = py;
+		fill[2] = pz;
+	}	
+	
+	public void getPos(float[] fill, int offset) {
+		if(fill.length < offset + 3) throw new ArrayIndexOutOfBoundsException("Array to fill must have a length of 3 or more ofter the offset index");
+		fill[0 + offset] = px;
+		fill[1 + offset] = py;
+		fill[2 + offset] = pz;
+	}
+	
+	public void getPos(FloatBuffer fill) {
+		fill.put(px).put(py).put(pz);
+	}	
+	
+	public void setPos(float[] pos) {
+		if(pos.length < 3) throw new ArrayIndexOutOfBoundsException("Array to read must have a length of 3 or more");
+		px = pos[0];
+		py = pos[1];
+		pz = pos[2];
+		updateTransforms();
+	}
+	
+	public void setPos(float x, float y, float z) {
+		px = x;
+		py = y;
+		pz = z;
+		updateTransforms();
+	}
+	
+	public void setPos(float[] pos, int offset) {
+		if(pos.length < 3) throw new ArrayIndexOutOfBoundsException("Array to read must have a length of 3 or more after the offset index");
+		px = pos[0 + offset];
+		py = pos[1 + offset];
+		pz = pos[2 + offset];
+		updateTransforms();
+	}
+	
+	private GLModelVAO glModel; 
+	
+	public void initGlModel(boolean textures, boolean normals) {
+		if(glModel != null) disposeGlModel();
+		glModel = new GLModelVAO(textures, normals);
+	}
+	
+	public void disposeGlModel() {
+		glModel.getDisposeAction().run();
+		glModel = null;
+	}
+	
+	public GLModel gl() {
+		if(glModel == null) throw new IllegalStateException("No GLModel present in model");
+		return glModel;
+	}
+	
+	private final class GLModelVAO implements GLModel, GLDisposable {
+
+		private final boolean textures;
+		private final boolean normals;
+		
+		private final List<GLMeshVBO> buffers;
+		
+		private final VertexArray vao;
+		
+		public GLModelVAO(boolean textures, boolean normals) {
+			this.textures = textures;
+			this.normals = normals;
+			
+			this.buffers = new ArrayList<>();
+			
+			this.vao = VertexArray.create();
+			updateModelData();
+		}
+		
+
+		@Override
+		public Matrix4f toWorldSpace() {
+			return objectToWorldSpace;
+		}
+		
+		private void layoutVAO() {
+			if(textures && normals) {
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 0, 3, 8, 0); //position
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 1, 2, 8, 3); //texture
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 2, 3, 8, 5); //normal
+			} else if(normals) {
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 0, 3, 6, 0); //position
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 2, 3, 6, 3); //normal
+			} else if(textures) {
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 0, 3, 5, 0); //position
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 1, 2, 5, 3); //texture
+			} else {
+				vao.layoutVertexBufferUnchecked(GL11.GL_FLOAT, Float.BYTES, 0, 3, 0, 0); //position
 			}
 		}
-		Vertex vtx = new Vertex(new float[] {x, y, z, 0, 0, 0, 0, 0}, false, false);
-		vertices.add(vtx);
-		return vtx;
-	}
+
+		@Override
+		public void render() {
+			vao.enable();
+			for(GLMeshVBO buf : buffers) {
+				buf.vbo.bindForRendering();
+				vao.drawVertices(buf.count);
+			}
+			vao.disable();
+		}
+
+		@Override
+		public void updateModelData() {
+			vao.enable();
+			buffers.forEach(GLMeshVBO::dispose);
+			buffers.clear();
+			
+			for(Mesh mesh : prefab.meshes.values()) {
+				GLMeshVBO glm = new GLMeshVBO(mesh);
+				glm.vbo.putData(mesh.makeData(textures, normals), BufferUsage.STATIC_DRAW);
+				layoutVAO();
+				buffers.add(glm);
+			}
+			vao.disable();
+		}
+
+		@Override
+		public Runnable getDisposeAction() {
+			return vao.getDisposeAction();
+		}
 	
-	public Vertex getOrAddVertex(float x, float y, float z, float u, float v) {
-		for(Vertex vtx : vertices) {
-			if(!vtx.hasValidNormals() && vtx.hasValidTextures() && //Correct state
-					vtx.getPositionX() == x && vtx.getPositionY() == y && vtx.getPositionZ() == z &&  //Correct position
-					vtx.getTextureU() == u && vtx.getTextureV() == v) { //Correct UVs
-				return vtx;
+		private final class GLMeshVBO implements GLDisposable {
+			public GLMeshVBO(Mesh mesh) {
+				this.vbo = vao.createBuffer(BufferLocation.VERTEX_DATA);
+				this.count = mesh.getFaceCount() * 3;
+			}
+			
+			private final BufferObject vbo;
+			private final int count;
+			
+			@Override
+			public Runnable getDisposeAction() {
+				return vbo.getDisposeAction();
 			}
 		}
-		Vertex vtx = new Vertex(new float[] {x, y, z, u, v, 0, 0, 0}, false, false);
-		vertices.add(vtx);
-		return vtx;
 	}
-	
-	public Vertex getOrAddVertex(float x, float y, float z, float nx, float ny, float nz) {
-		for(Vertex vtx : vertices) {
-			if(vtx.hasValidNormals() && !vtx.hasValidTextures() && //Correct state
-					vtx.getPositionX() == x && vtx.getPositionY() == y && vtx.getPositionZ() == z && //Correct position
-					vtx.getNormalX() == nx && vtx.getNormalY() == ny && vtx.getNormalZ() == nz) { //Correct normal
-				return vtx;
-			}
-		}
-		Vertex vtx = new Vertex(new float[] {x, y, z, 0, 0, nx, ny, nz}, false, false);
-		vertices.add(vtx);
-		return vtx;
-	}
-	
-	public Vertex getOrAddVertex(float x, float y, float z, float u, float v, float nx, float ny, float nz) {
-		for(Vertex vtx : vertices) {
-			if(vtx.hasValidNormals() && vtx.hasValidTextures() && //Correct state
-					vtx.getPositionX() == x && vtx.getPositionY() == y && vtx.getPositionZ() == z && //Correct position
-					vtx.getTextureU() == u && vtx.getTextureV() == v &&	//correct UVs
-					vtx.getNormalX() == nx && vtx.getNormalY() == ny && vtx.getNormalZ() == nz) { //Correct normal
-				return vtx;
-			}
-		}
-		Vertex vtx = new Vertex(new float[] {x, y, z, u, v, nx, ny, nz}, false, false);
-		vertices.add(vtx);
-		return vtx;
-	}
-	
-	public Vertex getOrAddVertex(Vertex vtx) {
-		Objects.requireNonNull(vtx, "Vertex to add or check cannot be null");
-		for(Vertex v : vertices) {
-			if(vtx.equals(v)) return v; //return the one from the set 
-		}
-		vertices.add(vtx);
-		return vtx;
-	}
-	
-	public Face addFace(Vertex v1, Vertex v2, Vertex v3, Material material) {
-		return addFace(v1, v2, v3, material, -1, null);
-	}
-	
-	public Face addFace(Vertex v1, Vertex v2, Vertex v3, Material material, int smoothingGroup) {
-		return addFace(v1, v2, v3, material, smoothingGroup, null);
-	}
-	
-	public Face addFace(Vertex v1, Vertex v2, Vertex v3, Material material, String groupName) {
-		return addFace(v1, v2, v3, material, -1, groupName);
-	}
-	
-	public Face addFace(Vertex v1, Vertex v2, Vertex v3, Material material, int smoothingGroup, String groupName) {
-		synchronized (faces) {
-			mtllib.addMaterial(material);
-			Face face = new Face(v1, v2, v3, smoothingGroup, material, groupName);
-			faces.add(face);
-			return face;
-		}
-	}
-	
-	public Set<Vertex> getVertices() {
-		return Collections.unmodifiableSet(vertices);
-	}
-	
-	public Set<Face> getFaces() {
-		return Collections.unmodifiableSet(faces);
-	}
-	
-	public MaterialLibrary getMaterials() {
-		return mtllib;
-	}
-	
-	/**
-	 * Makes model for rendering with OpenGL
-	 * Call {@link GLModel#fillAndLayout(lb.simplebase.glcore.oop.VertexArray, boolean, boolean)} with a {@link VertexArray}
-	 * to layout the loactions for the shader and put the data from the model into the GL Buffer.
-	 * The vertex array should not be modified after calling that method. It will be the active vertex array when that method retruns.
-	 * Afterwards, the {@link GLModel#render()} method can be called to send the model information to the shader.<p>
-	 * The shader must accept information in this format:<ul>
-	 * <li>location = 0: vec3 (position of vertex)</li>
-	 * <li>location = 1: vec2 (texture uv)</li>
-	 * <li>location = 2: vex3 (vertex normal vector)</li></ul>
-	 */
-	public GLModel makeRenderModel() {
-		return new GLModelWithBuffer(this, BufferUsage.STATIC_DRAW);
-	}
-	
-	public int getFaceCount() {
-		return faces.size();
-	}
-	
-	public int getVertexCount() {
-		return vertices.size();
-	}
-	
-	protected int effectiveVertexCount() {
-		return faces.size() * 3;
-	}
-	
-	protected float[] makeDataVTN() {
-		synchronized (faces) {
-//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 24); //24 -> 3 vertices per face, 8 values per vertex
-			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 24);
-			for(Face face : faces) {
-				data.put(face.getVertex1().data);
-				data.put(face.getVertex2().data);
-				data.put(face.getVertex3().data);
-			}
-			return data.array();
-		}
-	}
-	
-	protected float[] makeDataVN() {
-		synchronized (faces) {
-//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 18); //24 -> 3 vertices per face, 6 values per vertex
-			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 18);
-			for(Face face : faces) {
-				data.put(face.getVertex1().data, 0, 3);
-				data.put(face.getVertex1().data, 5, 3);
-				
-				data.put(face.getVertex2().data, 0, 3);
-				data.put(face.getVertex2().data, 5, 3);
-				
-				data.put(face.getVertex3().data, 0, 3);
-				data.put(face.getVertex3().data, 5, 3);
-			}
-			return data.array();
-		}
-	}
-	
-	protected float[] makeDataVT() {
-		synchronized (faces) {
-//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 15); //24 -> 3 vertices per face, 5 values per vertex
-			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 15);
-			for(Face face : faces) {
-				data.put(face.getVertex1().data, 0, 5);
-				data.put(face.getVertex2().data, 0, 5);
-				data.put(face.getVertex3().data, 0, 5);
-			}
-			return data.array();
-		}
-	}
-	
-	protected float[] makeDataV() {
-		synchronized (faces) {
-//			final FloatBuffer data = BufferUtils.createFloatBuffer(faces.size() * 9);
-			final FloatBuffer data = FloatBuffer.allocate(faces.size() * 9);//BufferUtils.createFloatBuffer(faces.size() * 9); //24 -> 3 vertices per face, 3 values per vertex
-			for(Face face : faces) {
-				data.put(face.getVertex1().data, 0, 3);
-				data.put(face.getVertex2().data, 0, 3);
-				data.put(face.getVertex3().data, 0, 3);
-			}
-			return data.array();
-		}
-	}
-	
-//	private float[] array(FloatBuffer buf) {
-//		if(buf.hasArray()) return buf.array();
-//		buf.flip();
-//		float[] data = new float[buf.limit()];
-//		buf.get(data);
-//		return data;
-//	}
-	
 }

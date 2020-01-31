@@ -8,6 +8,10 @@ public interface GLDisposable {
 	
 	public Runnable getDisposeAction();
 	
+	public default void dispose() {
+		getDisposeAction().run();
+	}
+	
 	public static void registerTask(GLDisposable task) {
 		if(AUTO_DISPOSE) {
 			GLFramework.gfAddTerminateTask(task.getDisposeAction());

@@ -112,6 +112,18 @@ public final class GLFramework {
 		GLFramework.program = program;
 	}
 	
+	@RequireState(FrameworkState.STARTED)
+	public static float gfAspectRatio() {
+		if(state != FrameworkState.STARTED) {
+			logger.warn("Aspect ratio only exist after the window has been created");
+			return 0;
+		}
+		int[] width = new int[1];
+		int[] height = new int[1];
+		GLFW.glfwGetWindowSize(windowId, width, height);
+		return (float) width[0] / (float) height[0];
+	}
+	
 	//Stop after loop has ended
 	private static void gfStopImpl() {
 		logger.info("Stopping from state " + state);

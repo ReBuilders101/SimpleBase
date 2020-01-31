@@ -57,6 +57,12 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 		layoutIds.add(layoutId);
 	}
 	
+	@RequireVAO
+	public void layoutVertexBufferUnchecked(int type, int factor, int layoutId, int valuesPerVertex, int stride, int offset) {
+		GL20.glVertexAttribPointer(layoutId, valuesPerVertex, type, false, stride * factor, offset * factor);
+		layoutIds.add(layoutId);
+	}
+	
 	public void disableLayoutId(int layoutId) {
 		layoutIds.remove(layoutId);
 	}
