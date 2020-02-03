@@ -87,7 +87,7 @@ public class ModelBuilder {
 	}
 	
 	public ModelPrefab build(LoadPath materialLookupPath) throws ModelFormatException {
-
+		if(currentMesh != null) meshes.add(currentMesh);
 		final MaterialLibrary mtllib;
 		try {
 			mtllib = materialLookupPath == null ? MaterialLibrary.DISABLED 

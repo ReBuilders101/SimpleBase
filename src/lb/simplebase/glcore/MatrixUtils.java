@@ -5,6 +5,9 @@ import javax.vecmath.Vector3f;
 
 public class MatrixUtils {
 	
+	public static final float PI = (float) Math.PI;
+	public static final float PI2 = (float) (Math.PI * 2d);
+	
 	public static float sin(double angleRad) {
 		return (float) Math.sin(angleRad);
 	}
@@ -100,6 +103,28 @@ public class MatrixUtils {
 		rz.m33 = 1;
 		
 		return order.produce(rx, ry, rz);
+	}
+	
+	public static Matrix4f perspective(float fovYradians, float aspectRatio, float nearPlane, float farPlane) {
+		final float yScale = 1f / MatrixUtils.tan(fovYradians / 2f);
+		final float xScale = yScale / aspectRatio;
+		final float frustrumLength = farPlane - nearPlane;
+		final Matrix4f mat4f = new Matrix4f();
+		mat4f.m00 = xScale;
+		mat4f.m11 = yScale;
+		mat4f.m22 = -((farPlane + nearPlane) / frustrumLength);
+		mat4f.m23 = -1;
+		mat4f.m32 = -((2f * nearPlane * farPlane) / frustrumLength);
+		mat4f.m33 = 0f;
+		return mat4f;
+	}
+
+	public static void print(Matrix4f value) {
+		System.out.println(value.m00 + " " + value.m01 + " " + value.m02 + " " + value.m03);
+		System.out.println(value.m10 + " " + value.m11 + " " + value.m12 + " " + value.m13);
+		System.out.println(value.m20 + " " + value.m21 + " " + value.m22 + " " + value.m23);
+		System.out.println(value.m30 + " " + value.m31 + " " + value.m32 + " " + value.m33);
+		System.out.println();
 	}
 	
 	public static enum RotationOrder {

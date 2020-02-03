@@ -1,6 +1,7 @@
 package lb.simplebase.glcore;
 
 import static org.lwjgl.opengl.GL11C.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11C.glClear;
 
 import java.awt.Dimension;
@@ -97,6 +98,7 @@ public final class GLFramework {
 		GLFW.glfwMakeContextCurrent(windowId);
 		capabilities = GL.createCapabilities();
 		GLFW.glfwSwapInterval(swapInterval);
+		GLFW.glfwSetKeyCallback(windowId, GLProgram.forProgram(program));
 		
 		state = FrameworkState.STARTED;
 		
@@ -182,7 +184,7 @@ public final class GLFramework {
 		program.init();
 		
 		while(!program.stopProgram() && !shouldStop && !windowClose()) {
-			if(autoClear) glClear(GL_COLOR_BUFFER_BIT);
+			if(autoClear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			program.update();
 			program.render();
 			//Update window
