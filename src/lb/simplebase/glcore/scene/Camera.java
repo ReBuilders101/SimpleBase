@@ -41,7 +41,7 @@ public class Camera {
 		final Matrix4f rotate = MatrixUtils.rotateEuler(RotationOrder.YXZ, roll, yaw, pitch);
 		final Matrix4f translate = MatrixUtils.translate(px, py, pz);
 		cameraSpace.mul(translate, rotate);
-		perspective.set(MatrixUtils.perspective(fovRadians, GLFramework.gfAspectRatio(), 0.1F, 100F));
+		perspective.set(MatrixUtils.perspective2(fovRadians, GLFramework.gfAspectRatio(), 0.1F, 100F, false));
 	}
 	
 	public float getPosX() {

@@ -181,9 +181,11 @@ public final class GLFramework {
 			gfStopImpl();
 			return;
 		}
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		program.init();
 		
 		while(!program.stopProgram() && !shouldStop && !windowClose()) {
+			GL11.glViewport(0, 0, width, height);
 			if(autoClear) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			program.update();
 			program.render();

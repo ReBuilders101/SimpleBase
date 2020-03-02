@@ -43,9 +43,15 @@ public class Model {
 	
 	private void updateTransforms() {
 		//Everything is inverted, because we transform back to world space
-		final Matrix4f rotate = MatrixUtils.rotateEuler(RotationOrder.YXZ, -roll, -yaw, -pitch);
+		final Matrix4f rotate = MatrixUtils.rotateEuler(RotationOrder.YXZ, -roll, -pitch, -yaw);
 		final Matrix4f translate = MatrixUtils.translate(-px, -py, -pz);
+//		System.out.println("Rotate:");
+//		MatrixUtils.print(rotate);
+//		System.out.println("Translate:");
+//		MatrixUtils.print(translate);
 		objectToWorldSpace.mul(translate, rotate);
+//		System.out.println("Result:");
+//		MatrixUtils.print(objectToWorldSpace);
 	}
 	
 	public ModelPrefab getPrefab() {

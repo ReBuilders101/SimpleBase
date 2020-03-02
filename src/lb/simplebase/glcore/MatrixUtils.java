@@ -79,28 +79,40 @@ public class MatrixUtils {
 	
 	public static Matrix4f rotateEuler(RotationOrder order, double rotXrad, double rotYrad, double rotZrad) {
 		final Matrix4f rx = new Matrix4f();
-		rx.m00 = 1;
-		rx.m11 = cos(rotXrad);
-		rx.m12 = -sin(rotXrad);
-		rx.m21 = sin(rotXrad);
-		rx.m22 = cos(rotXrad);
-		rx.m33 = 1;
+		if(rotXrad == 0) {
+			rx.setIdentity();
+		} else {
+			rx.m00 = 1;
+			rx.m11 = cos(rotXrad);
+			rx.m12 = -sin(rotXrad);
+			rx.m21 = sin(rotXrad);
+			rx.m22 = cos(rotXrad);
+			rx.m33 = 1;
+		}
 		
 		final Matrix4f ry = new Matrix4f();
-		ry.m00 = cos(rotYrad);
-		ry.m02 = sin(rotYrad);
-		ry.m11 = 1;
-		ry.m20 = -sin(rotYrad);
-		ry.m22 = cos(rotYrad);
-		ry.m33 = 1;
+		if(rotYrad == 0) {
+			ry.setIdentity();
+		} else {
+			ry.m00 = cos(rotYrad);
+			ry.m02 = sin(rotYrad);
+			ry.m11 = 1;
+			ry.m20 = -sin(rotYrad);
+			ry.m22 = cos(rotYrad);
+			ry.m33 = 1;
+		}
 		
 		final Matrix4f rz = new Matrix4f();
-		rz.m00 = cos(rotZrad);
-		rz.m01 = -sin(rotZrad);
-		rz.m10 = sin(rotZrad);
-		rz.m11 = cos(rotZrad);
-		rz.m22 = 1;
-		rz.m33 = 1;
+		if(rotZrad == 0) {
+			rz.setIdentity();
+		} else {
+			rz.m00 = cos(rotZrad);
+			rz.m01 = -sin(rotZrad);
+			rz.m10 = sin(rotZrad);
+			rz.m11 = cos(rotZrad);
+			rz.m22 = 1;
+			rz.m33 = 1;
+		}
 		
 		return order.produce(rx, ry, rz);
 	}
@@ -110,12 +122,25 @@ public class MatrixUtils {
 		final float xScale = yScale / aspectRatio;
 		final float frustrumLength = farPlane - nearPlane;
 		final Matrix4f mat4f = new Matrix4f();
-		mat4f.m00 = xScale;
+		mat4f.m00 = xScale; // 1/tan
 		mat4f.m11 = yScale;
 		mat4f.m22 = -((farPlane + nearPlane) / frustrumLength);
 		mat4f.m23 = -1;
 		mat4f.m32 = -((2f * nearPlane * farPlane) / frustrumLength);
 		mat4f.m33 = 0f;
+		return mat4f;
+	}
+	
+	public static Matrix4f perspective2(float fovYradians, float aspectRatio, float nearPlane, float farPlane, boolean flag) {
+		final Matrix4f mat4f = new Matrix4f();
+		final float h = tan(fovYradians * 0.5f);
+		mat4f.m00 = 1.0f / (h * aspectRatio);
+		mat4f.m11 = 1.0f / h;
+		
+		mat4f.m22 = (flag ? farPlane : farPlane + nearPlane) / (nearPlane - farPlane);
+		mat4f.m32 = (flag ? farPlane : farPlane + nearPlane) * nearPlane / (nearPlane - farPlane);
+		
+		mat4f.m23 = -1.0f;
 		return mat4f;
 	}
 
