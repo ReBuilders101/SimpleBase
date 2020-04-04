@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
  * {@code get(x +/- getSize()}. <br> The circular list is immutable.
  * @param <E> The content type for this list
  */
-public class CircularList<E> extends AbstractList<E> implements RandomAccess, Serializable{
+public class CircularList<E> extends AbstractList<E> implements RandomAccess, Serializable {
 	private static final long serialVersionUID = 8796781701598011494L;
 	
 	//The list that holds the elements. Always a unmodifiable view of an ArrayList (that can't be modified) -> effectively immutable
@@ -119,6 +119,11 @@ public class CircularList<E> extends AbstractList<E> implements RandomAccess, Se
 		@Override
 		protected int fixIndex(int index) {
 			return super.fixIndex(index) - offset;
+		}
+
+		@Override
+		public CircularList<E> withOffset(int offset) {
+			return super.withOffset(offset + this.offset);
 		}
 		
 	}
