@@ -19,6 +19,7 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 
+import lb.simplebase.gl.GLHandle;
 import lb.simplebase.glcore.GLFramework;
 
 public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {

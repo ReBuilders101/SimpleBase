@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import lb.simplebase.gl.GLHandle;
 import lb.simplebase.glcore.RequireVAO;
 import lb.simplebase.glcore.oop.BufferObject.BufferLocation;
 
