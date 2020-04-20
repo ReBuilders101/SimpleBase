@@ -1,6 +1,7 @@
 package lb.simplebase.gl;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWErrorCallback;
 
 public class GlUtils {
 
@@ -9,15 +10,17 @@ public class GlUtils {
 	public static boolean initializeGLFW() {
 		if(mainGlThread != null) return false;
 		mainGlThread = Thread.currentThread();
+		GLFW.glfwSetErrorCallback(GLFWErrorCallback.createPrint(System.err));
 		return GLFW.glfwInit();
+	}
+	
+	public static void terminateGLFW() {
+		GLFW.glfwTerminate();
+		GLFW.glfwSetErrorCallback(null).free();
 	}
 	
 	public static boolean isMainThread() {
 		return isMainThread(Thread.currentThread());
-	}
-	
-	public static void avoidTearing() {
-		GLFW.glfwSwapInterval(1);
 	}
 	
 	public static boolean isMainThread(Thread thread) {

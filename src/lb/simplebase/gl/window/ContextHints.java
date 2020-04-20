@@ -4,7 +4,7 @@ import org.lwjgl.glfw.GLFW;
 import lb.simplebase.gl.GlUtils;
 import lb.simplebase.gl.GLValue;
 
-public interface GlContextHints {
+public interface ContextHints {
 
 	public void apply();
 	public boolean hasAPI();
@@ -100,7 +100,7 @@ public interface GlContextHints {
 		
 	}
 	
-	public static class OpenGlESHints implements GlContextHints {
+	public static class OpenGlESHints implements ContextHints {
 		private OpenGlESHints() {}
 		
 		private int creationAPI = GLFW.GLFW_NATIVE_CONTEXT_API;
@@ -155,7 +155,7 @@ public interface GlContextHints {
 		
 	}
 
-	public static class NoContextHints implements GlContextHints {
+	public static class NoContextHints implements ContextHints {
 		private NoContextHints() {}
 		
 		@Override

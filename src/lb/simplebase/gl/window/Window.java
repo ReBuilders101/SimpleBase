@@ -533,7 +533,7 @@ public class Window implements GLHandle {
 	public static class Builder {
 		private CharSequence title = null;
 		private WindowHints windowHints = null;
-		private GlContextHints contextHints = null;
+		private ContextHints contextHints = null;
 		private int doubleBuffer = GLFW.GLFW_TRUE;
 		private int stereoscopic = GLFW.GLFW_FALSE;
 		
@@ -559,7 +559,7 @@ public class Window implements GLHandle {
 			return this;
 		}
 		
-		public Builder setContextHints(GlContextHints hints) {
+		public Builder setContextHints(ContextHints hints) {
 			this.contextHints = hints;
 			return this;
 		}
