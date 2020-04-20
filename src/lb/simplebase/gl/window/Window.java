@@ -7,23 +7,43 @@ import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowCloseCallback;
+import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
+import org.lwjgl.glfw.GLFWWindowFocusCallback;
+import org.lwjgl.glfw.GLFWWindowIconifyCallback;
+import org.lwjgl.glfw.GLFWWindowMaximizeCallback;
+import org.lwjgl.glfw.GLFWWindowPosCallback;
+import org.lwjgl.glfw.GLFWWindowRefreshCallback;
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import lb.simplebase.gl.GLHandle;
 import lb.simplebase.gl.GlUtils;
+import lb.simplebase.util.Consumer1B;
+import lb.simplebase.util.Consumer2F;
+import lb.simplebase.util.Consumer2I;
 
 public class Window implements GLHandle {
 
 	private final long handle;
 	
 	private Window(long handle) {
+		if(handle == 0) throw new RuntimeException("Window handle is 0: Error during window creation");
 		this.handle = handle;
+		this.framebuffer = new Framebuffer();
+		ids.put(handle, this);
 	}
 	
 	@Override
@@ -89,52 +109,57 @@ public class Window implements GLHandle {
 	}
 	
 	public int[] getSize() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowSize(handle, x, y);
-		return new int[] {x.get(0), y.get(0)};
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer x = stack.mallocInt(1);
+			final IntBuffer y = stack.mallocInt(1);
+			GLFW.glfwGetWindowSize(handle, x, y);
+			return new int[] {x.get(0), y.get(0)};
+		}
 	}
 	
 	public Dimension getSizeDim() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowSize(handle, x, y);
-		return new Dimension(x.get(0), y.get(0));
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer x = stack.mallocInt(1);
+			final IntBuffer y = stack.mallocInt(1);
+			GLFW.glfwGetWindowSize(handle, x, y);
+			return new Dimension(x.get(0), y.get(0));
+		}
 	}
 	
 	public int getWidth() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowSize(handle, x, null);
-		return x.get(0);
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer x = stack.mallocInt(1);
+			GLFW.glfwGetWindowSize(handle, x, null);
+			return x.get(0);
+		}
 	}
 	
 	public int getHeight() {
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowSize(handle, null, y);
-		return y.get(0);
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer y = stack.mallocInt(1);
+			GLFW.glfwGetWindowSize(handle, null, y);
+			return y.get(0);
+		}
 	}
 	
 	public int[] getWindowFrameSize() {
-		final IntBuffer left = BufferUtils.createIntBuffer(1);
-		final IntBuffer top = BufferUtils.createIntBuffer(1);
-		final IntBuffer right = BufferUtils.createIntBuffer(1);
-		final IntBuffer bottom = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowFrameSize(handle, left, top, right, bottom);
-		return new int[] {left.get(0), top.get(0), right.get(0), bottom.get(0)};
-	}
-	
-	public int[] getFramebufferSize() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetFramebufferSize(handle, x, y);
-		return new int[] {x.get(0), y.get(0)};
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer left = stack.mallocInt(1);
+			final IntBuffer top = stack.mallocInt(1);
+			final IntBuffer right = stack.mallocInt(1);
+			final IntBuffer bottom = stack.mallocInt(1);
+			GLFW.glfwGetWindowFrameSize(handle, left, top, right, bottom);
+			return new int[] {left.get(0), top.get(0), right.get(0), bottom.get(0)};
+		}
 	}
 	
 	public float[] getContentScale() {
-		final FloatBuffer x = BufferUtils.createFloatBuffer(1);
-		final FloatBuffer y = BufferUtils.createFloatBuffer(1);
-		GLFW.glfwGetWindowContentScale(handle, x, y);
-		return new float[] {x.get(0), y.get(0)};
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final FloatBuffer x = stack.mallocFloat(1);
+			final FloatBuffer y = stack.mallocFloat(1);
+			GLFW.glfwGetWindowContentScale(handle, x, y);
+			return new float[] {x.get(0), y.get(0)};
+		}
 	}
 	
 	public void setSizeLimits(int minWidth, int minHeight, int maxWidth, int maxHeight) {
@@ -171,17 +196,27 @@ public class Window implements GLHandle {
 	}
 	
 	public int[] getPosition() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowPos(handle, x, y);
-		return new int[] {x.get(0), y.get(0)};
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer x = stack.mallocInt(1);
+			final IntBuffer y = stack.mallocInt(1);
+			GLFW.glfwGetWindowPos(handle, x, y);
+			return new int[] {x.get(0), y.get(0)};
+		}
 	}
 	
 	public Point getPositionPoint() {
-		final IntBuffer x = BufferUtils.createIntBuffer(1);
-		final IntBuffer y = BufferUtils.createIntBuffer(1);
-		GLFW.glfwGetWindowPos(handle, x, y);
-		return new Point(x.get(0), y.get(0));
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer x = stack.mallocInt(1);
+			final IntBuffer y = stack.mallocInt(1);
+			GLFW.glfwGetWindowPos(handle, x, y);
+			return new Point(x.get(0), y.get(0));
+		}
+	}
+	
+	public void centerWindow(long monitorHandle) {
+		GLFWVidMode mode = GLFW.glfwGetVideoMode(monitorHandle);
+		Dimension size = getSizeDim();
+		setPosition((mode.width() - size.width) / 2, (mode.height() - size.height) / 2);
 	}
 	
 	public void setTitle(CharSequence title) {
@@ -337,8 +372,159 @@ public class Window implements GLHandle {
 		GLFW.glfwSwapBuffers(handle);
 	}
 	
+	public void setUserPointer(long pointer) {
+		GLFW.glfwSetWindowUserPointer(handle, pointer);
+	}
+	
+	public long getUserPointer() {
+		return GLFW.glfwGetWindowUserPointer(handle);
+	}
+	
+	//Callbacks
+	
+	public GLFWWindowCloseCallback setCloseCallback(Consumer<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowCloseCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowCloseCallback(handle, (w) -> callback.accept(this));
+		}
+	}
+	
+	public GLFWWindowSizeCallback setResizeCallback(Consumer2I<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowSizeCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowSizeCallback(handle, (w,x,y) -> callback.accept(this, x, y));
+		}
+	}
+	
+	public GLFWWindowContentScaleCallback setContentScaleCallback(Consumer2F<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowContentScaleCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowContentScaleCallback(handle, (w,x,y) -> callback.accept(this, x, y));
+		}
+	}
+	
+	public GLFWWindowPosCallback setMoveCallback(Consumer2I<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowPosCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowPosCallback(handle, (w,x,y) -> callback.accept(this, x, y));
+		}
+	}
+	
+	public GLFWWindowIconifyCallback setMinimizeCallback(Consumer1B<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowIconifyCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowIconifyCallback(handle, (w,v) -> callback.accept(this, v));
+		}
+	}
+	
+	public GLFWWindowMaximizeCallback setMaximizeCallback(Consumer1B<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowMaximizeCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowMaximizeCallback(handle, (w,v) -> callback.accept(this, v));
+		}
+	}
+	
+	public GLFWWindowFocusCallback setFocusCallback(Consumer1B<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowFocusCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowFocusCallback(handle, (w,v) -> callback.accept(this, v));
+		}
+	}
+	
+	public GLFWWindowRefreshCallback setRefreshCallback(Consumer<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetWindowRefreshCallback(handle, null);
+		} else {
+			return GLFW.glfwSetWindowRefreshCallback(handle, (w) -> callback.accept(this));
+		}
+	}
+	
+	public void resetAllCallbacks() {
+		Callbacks.glfwFreeCallbacks(handle);
+	}
+	
+	public void destroy() {
+		GlUtils.checkMainThread();
+		Callbacks.glfwFreeCallbacks(handle);
+		GLFW.glfwDestroyWindow(handle);
+	}
+	
+	public void setGlContext() {
+		GLFW.glfwMakeContextCurrent(handle);
+	}
+	
+	//////////////////// FRAMEBUFFER  /////////////////
+	
+	private final Framebuffer framebuffer;
+	
+	public Framebuffer getFramebuffer() {
+		return framebuffer;
+	}
+	
+	public class Framebuffer {
+		
+		public Window getWindow() {
+			return Window.this;
+		}
+		
+		public int[] getSize() {
+			try(MemoryStack stack = MemoryStack.stackPush()) {
+				final IntBuffer x = stack.mallocInt(1);
+				final IntBuffer y = stack.mallocInt(1);
+				GLFW.glfwGetFramebufferSize(handle, x, y);
+				return new int[] {x.get(0), y.get(0)};
+			}
+		}
+		
+		public int getWidth() {
+			try(MemoryStack stack = MemoryStack.stackPush()) {
+				final IntBuffer x = stack.mallocInt(1);
+				GLFW.glfwGetFramebufferSize(handle, x, null);
+				return x.get(0);
+			}
+		}
+		
+		public int getHeight() {
+			try(MemoryStack stack = MemoryStack.stackPush()) {
+				final IntBuffer y = stack.mallocInt(1);
+				GLFW.glfwGetFramebufferSize(handle, null, y);
+				return y.get(0);
+			}
+		}
+		
+		public GLFWFramebufferSizeCallback setResizeCallback(Consumer2I<Window.Framebuffer> callback) {
+			GlUtils.checkMainThread();
+			if(callback == null) {
+				return GLFW.glfwSetFramebufferSizeCallback(handle, null);
+			} else {
+				return GLFW.glfwSetFramebufferSizeCallback(handle, (w,x,y) -> callback.accept(this, x, y));
+			}
+		}
+		
+	}
+	
 	
 	//////////////////// BUILDER   ////////////////////
+	
+	public static void restoreBuilderDefaults() {
+		GlUtils.checkMainThread();
+		GLFW.glfwDefaultWindowHints();
+	}
 	
 	public static Builder builder() {
 		return new Builder();
@@ -367,8 +553,6 @@ public class Window implements GLHandle {
 			this.stereoscopic = GlUtils.glfwBool(value);
 			return this;
 		}
-		
-		//TODO FramebufferHints interface?
 		
 		public Builder setWindowHints(WindowHints hints) {
 			this.windowHints = hints;
@@ -400,13 +584,14 @@ public class Window implements GLHandle {
 			Objects.requireNonNull(contextHints, "GL Context hints must not be null");
 			GlUtils.checkMainThread();
 			
-			windowHints.apply();
-			contextHints.apply();
-			GLFW.glfwWindowHint(GLFW.GLFW_DOUBLEBUFFER, doubleBuffer);
-			GLFW.glfwWindowHint(GLFW.GLFW_STEREO, stereoscopic);
-			long handle = GLFW.glfwCreateWindow(windowHints.getWidthRes(), windowHints.getHeightRes(), title, windowHints.getMonitor(), sharedContext);
-			
-			return new Window(handle);
+			synchronized (ids) {
+				windowHints.apply();
+				contextHints.apply();
+				GLFW.glfwWindowHint(GLFW.GLFW_DOUBLEBUFFER, doubleBuffer);
+				GLFW.glfwWindowHint(GLFW.GLFW_STEREO, stereoscopic);
+				long handle = GLFW.glfwCreateWindow(windowHints.getWidthRes(), windowHints.getHeightRes(), title, windowHints.getMonitor(), sharedContext);
+				return new Window(handle);
+			}
 		}
 		
 	}	
@@ -420,4 +605,22 @@ public class Window implements GLHandle {
 		return GLFWImage.create().set(image.getWidth(), image.getHeight(), byteBuf);
 	}
 	
+	public static Window find(long handle) {
+		synchronized (ids) {
+			return ids.get(handle);
+		}
+	}
+	
+	public static Window findOrCreate(long handle) {
+		synchronized (ids) {
+			Window win = ids.get(handle);
+			if(win == null) {
+				return new Window(handle);
+			} else {
+				return win;
+			}
+		}
+	}
+	
+	private static final Map<Long, Window> ids = new HashMap<>();
 }
