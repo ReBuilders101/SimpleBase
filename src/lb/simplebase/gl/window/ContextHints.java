@@ -2,7 +2,7 @@ package lb.simplebase.gl.window;
 
 import org.lwjgl.glfw.GLFW;
 import lb.simplebase.gl.GlUtils;
-import lb.simplebase.gl.GLValue;
+import lb.simplebase.gl.GLHandle;
 
 public interface ContextHints {
 
@@ -70,7 +70,7 @@ public interface ContextHints {
 		}
 		
 		public OpenGlHints setProfile(OpenGlProfile profile) {
-			openGlProfile = profile.getGLValue();
+			openGlProfile = profile.getGLHandle();
 			return this;
 		}
 		
@@ -111,7 +111,7 @@ public interface ContextHints {
 		private int noError = GLFW.GLFW_FALSE;
 		
 		public OpenGlESHints setContextCreationAPI(ContextAPI api) {
-			this.creationAPI = api.getGLValue();
+			this.creationAPI = api.getGLHandle();
 			return this;
 		}
 		
@@ -127,12 +127,12 @@ public interface ContextHints {
 		}
 		
 		public OpenGlESHints setContextRobustness(ContextRobustness value) {
-			robustness = value.getGLValue();
+			robustness = value.getGLHandle();
 			return this;
 		}
 		
 		public OpenGlESHints setReleaseBehavior(ContextReleaseBehavior value) {
-			releaseBehavior = value.getGLValue();
+			releaseBehavior = value.getGLHandle();
 			return this;
 		}
 		
@@ -170,7 +170,7 @@ public interface ContextHints {
 	}
 	
 	
-	public static enum ContextAPI implements GLValue {
+	public static enum ContextAPI implements GLHandle {
 		NATIVE(GLFW.GLFW_NATIVE_CONTEXT_API),
 		EGL(GLFW.GLFW_EGL_CONTEXT_API),
 		OSMESA(GLFW.GLFW_OSMESA_CONTEXT_API);
@@ -182,12 +182,12 @@ public interface ContextHints {
 		}
 		
 		@Override
-		public int getGLValue() {
+		public int getGLHandle() {
 			return value;
 		}
 	}
 	
-	public static enum OpenGlProfile implements GLValue {
+	public static enum OpenGlProfile implements GLHandle {
 		CORE(GLFW.GLFW_OPENGL_CORE_PROFILE),
 		COMPAT(GLFW.GLFW_OPENGL_COMPAT_PROFILE),
 		ANY(GLFW.GLFW_OPENGL_ANY_PROFILE);
@@ -199,12 +199,12 @@ public interface ContextHints {
 		}
 		
 		@Override
-		public int getGLValue() {
+		public int getGLHandle() {
 			return value;
 		}
 	}
 	
-	public static enum ContextRobustness implements GLValue {
+	public static enum ContextRobustness implements GLHandle {
 		NO_ROBUSTNESS(GLFW.GLFW_NO_ROBUSTNESS),
 		NO_RESET_NOTIFICATION(GLFW.GLFW_NO_RESET_NOTIFICATION),
 		LOSE_CONTEXT_ON_RESET(GLFW.GLFW_LOSE_CONTEXT_ON_RESET);
@@ -216,12 +216,12 @@ public interface ContextHints {
 		}
 		
 		@Override
-		public int getGLValue() {
+		public int getGLHandle() {
 			return value;
 		}
 	}
 	
-	public static enum ContextReleaseBehavior implements GLValue {
+	public static enum ContextReleaseBehavior implements GLHandle {
 		ANY(GLFW.GLFW_ANY_RELEASE_BEHAVIOR),
 		FLUSH(GLFW.GLFW_RELEASE_BEHAVIOR_FLUSH),
 		NONE(GLFW.GLFW_RELEASE_BEHAVIOR_NONE);
@@ -233,7 +233,7 @@ public interface ContextHints {
 		}
 		
 		@Override
-		public int getGLValue() {
+		public int getGLHandle() {
 			return value;
 		}
 	}
