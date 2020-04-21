@@ -8,11 +8,11 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import lb.simplebase.gl.GLHandle;
+import lb.simplebase.gl.GLHandleLong;
 import lb.simplebase.glcore.RequireVAO;
 import lb.simplebase.glcore.oop.BufferObject.BufferLocation;
 
-public class VertexArray implements GLHandle, GLBindable, GLDisposable {
+public class VertexArray implements GLHandleLong, GLBindable, GLDisposable {
 	
 	private final int vaoHandle;
 	private final Set<Integer> layoutIds;
@@ -97,7 +97,7 @@ public class VertexArray implements GLHandle, GLBindable, GLDisposable {
 		this.drawMode = mode.handle;
 	}
 	
-	public static enum DrawMode implements GLHandle {
+	public static enum DrawMode implements GLHandleLong {
 		TRIANGLES(GL11.GL_TRIANGLES),
 		LINES(GL11.GL_LINES);
 

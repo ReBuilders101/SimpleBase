@@ -1,5 +1,6 @@
 package lb.simplebase.glcore.oop;
 
+@Deprecated
 public interface GLBindable extends AutoCloseable {
 
 	public void enable();

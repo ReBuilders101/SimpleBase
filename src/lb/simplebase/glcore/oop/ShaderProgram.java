@@ -19,10 +19,11 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 
-import lb.simplebase.gl.GLHandle;
+import lb.simplebase.gl.GLHandleLong;
 import lb.simplebase.glcore.GLFramework;
 
-public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
+@Deprecated
+public final class ShaderProgram implements GLHandleLong, GLBindable, GLDisposable {
 
 	private final Map<String, Integer> uniforms;
 	
@@ -194,7 +195,7 @@ public final class ShaderProgram implements GLHandle, GLBindable, GLDisposable {
 		}
 	}
 	
-	public static enum ShaderType implements GLHandle {
+	public static enum ShaderType implements GLHandleLong {
 		FRAGMENT(GL20.GL_FRAGMENT_SHADER, gl -> gl.OpenGL20),
 		VERTEX(GL20.GL_VERTEX_SHADER, gl -> gl.OpenGL20),
 		GEOMETRY(GL32.GL_GEOMETRY_SHADER, gl -> gl.OpenGL32),

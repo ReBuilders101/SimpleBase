@@ -2,9 +2,9 @@ package lb.simplebase.gl.window;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWImage;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowCloseCallback;
 import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
@@ -29,13 +29,14 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-import lb.simplebase.gl.GLHandle;
+import lb.simplebase.gl.GLHandleLong;
 import lb.simplebase.gl.GlUtils;
 import lb.simplebase.util.Consumer1B;
 import lb.simplebase.util.Consumer2F;
 import lb.simplebase.util.Consumer2I;
+import lb.simplebase.util.Consumer4I;
 
-public class Window implements GLHandle {
+public class Window implements GLHandleLong {
 
 	private final long handle;
 	
@@ -224,30 +225,32 @@ public class Window implements GLHandle {
 	}
 	
 	public void setIcon(BufferedImage image) {
-		setIcon(createImage(image));
+		setIcon(GlUtils.createImage(image));
 	}
 	
 	public void setIcon(BufferedImage image, BufferedImage...moreImages) {
 		GLFWImage[] images = new GLFWImage[moreImages.length];
 		for(int i = 0; i < moreImages.length; i++) {
-			images[i] = createImage(moreImages[i]);
+			images[i] = GlUtils.createImage(moreImages[i]);
 		}
-		setIcon(createImage(image), images);
+		setIcon(GlUtils.createImage(image), images);
 	}
 	
 	public void setIcon(GLFWImage image) {
-		GLFWImage.Buffer buffer = GLFWImage.create(1);
-		buffer.put(0, image);
-		setIcon(buffer);
+		try(GLFWImage.Buffer buffer = GLFWImage.mallocStack(1)) {
+			buffer.put(0, image);
+			setIcon(buffer);
+		}
 	}
 	
 	public void setIcon(GLFWImage image, GLFWImage...moreImages) {
-		GLFWImage.Buffer buffer = GLFWImage.create(moreImages.length + 1);
-		buffer.put(0, image);
-		for(int i = 0; i < moreImages.length; i++) {
-			buffer.put(i+1, moreImages[i]);
+		try(GLFWImage.Buffer buffer = GLFWImage.mallocStack(moreImages.length + 1)) {
+			buffer.put(0, image);
+			for(int i = 0; i < moreImages.length; i++) {
+				buffer.put(i+1, moreImages[i]);
+			}
+			setIcon(buffer);
 		}
-		setIcon(buffer);
 	}
 	
 	private void setIcon(GLFWImage.Buffer buffer) {
@@ -380,6 +383,80 @@ public class Window implements GLHandle {
 		return GLFW.glfwGetWindowUserPointer(handle);
 	}
 	
+	public double[] getCursorPosition() {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			DoubleBuffer x = stack.mallocDouble(1);
+			DoubleBuffer y = stack.mallocDouble(1);
+			GLFW.glfwGetCursorPos(handle, x, y);
+			return new double[] {x.get(0), y.get(0)};
+		}
+	}
+	
+	public Point2D getCursorPositionPoint() {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			DoubleBuffer x = stack.mallocDouble(1);
+			DoubleBuffer y = stack.mallocDouble(1);
+			GLFW.glfwGetCursorPos(handle, x, y);
+			return new Point2D.Double(x.get(0), y.get(0));
+		}
+	}
+	
+	public double getCursorPositionX() {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			DoubleBuffer x = stack.mallocDouble(1);
+			GLFW.glfwGetCursorPos(handle, x, null);
+			return x.get(0);
+		}
+	}
+	
+	public double getCursorPositionY() {
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			DoubleBuffer y = stack.mallocDouble(1);
+			GLFW.glfwGetCursorPos(handle, null, y);
+			return y.get(0);
+		}
+	}
+	
+	public void setCursorPosition(double x, double y) {
+		GLFW.glfwSetCursorPos(handle, x, y);
+	}
+	
+	public void setCursor(long pointer) {
+		GLFW.glfwSetCursor(handle, pointer);
+	}
+	
+	public void setStickyKeys(boolean value) {
+		GLFW.glfwSetInputMode(handle, GLFW.GLFW_STICKY_KEYS, GlUtils.glfwBool(value));
+	}
+	
+	public boolean getStickyKeys() {
+		return GlUtils.glfwBool(GLFW.glfwGetInputMode(handle, GLFW.GLFW_STICKY_KEYS));
+	}
+	
+	public void setStickyMouseButtons(boolean value) {
+		GLFW.glfwSetInputMode(handle, GLFW.GLFW_STICKY_MOUSE_BUTTONS, GlUtils.glfwBool(value));
+	}
+	
+	public void setLockKeyMods(boolean value) {
+		GLFW.glfwSetInputMode(handle, GLFW.GLFW_LOCK_KEY_MODS, GlUtils.glfwBool(value));
+	}
+	
+	public boolean getLockKeyMods() {
+		return GlUtils.glfwBool(GLFW.glfwGetInputMode(handle, GLFW.GLFW_LOCK_KEY_MODS));
+	}
+	
+	public boolean isKeyPressed(int key) {
+		return GLFW.glfwGetKey(handle, key) == GLFW.GLFW_PRESS;
+	}
+	
+	public boolean isMouseButtonPressed(int key) {
+		return GLFW.glfwGetMouseButton(handle, key) == GLFW.GLFW_PRESS;
+	}
+	
+	public boolean getStickyMouseButtons() {
+		return GlUtils.glfwBool(GLFW.glfwGetInputMode(handle, GLFW.GLFW_STICKY_MOUSE_BUTTONS));
+	}
+	
 	//Callbacks
 	
 	public GLFWWindowCloseCallback setCloseCallback(Consumer<Window> callback) {
@@ -454,6 +531,15 @@ public class Window implements GLHandle {
 		}
 	}
 	
+	public GLFWKeyCallback setKeyCallback(Consumer4I<Window> callback) {
+		GlUtils.checkMainThread();
+		if(callback == null) {
+			return GLFW.glfwSetKeyCallback(handle, null);
+		} else {
+			return GLFW.glfwSetKeyCallback(handle, (w, a, b, c, d) -> callback.accept(this, a, b, c, d));
+		}
+	}
+	
 	public void resetAllCallbacks() {
 		Callbacks.glfwFreeCallbacks(handle);
 	}
@@ -464,7 +550,7 @@ public class Window implements GLHandle {
 		GLFW.glfwDestroyWindow(handle);
 	}
 	
-	public void setGlContext() {
+	public void makeContextCurrent() {
 		GLFW.glfwMakeContextCurrent(handle);
 	}
 	
@@ -594,15 +680,6 @@ public class Window implements GLHandle {
 			}
 		}
 		
-	}	
-	
-	public static GLFWImage createImage(BufferedImage image) {
-		DataBufferByte dataBuf = (DataBufferByte) image.getRaster().getDataBuffer();
-		byte[] data = dataBuf.getData();
-		ByteBuffer byteBuf = BufferUtils.createByteBuffer(data.length);
-		byteBuf.put(data);
-		byteBuf.flip();
-		return GLFWImage.create().set(image.getWidth(), image.getHeight(), byteBuf);
 	}
 	
 	public static Window find(long handle) {

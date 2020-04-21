@@ -25,6 +25,7 @@ import static org.lwjgl.opengl.GL11.GL_FALSE;
 /**
  * This class provides utility methods to load shaders from files and add them to your OpenGL program
  */
+@Deprecated
 public final class GLShaderLoader {
 
 	public static final String DEFAULT_VERTEX_SHADER = "lb/simplebase/glcore/shaders/DefaultVertexShader.glsl";

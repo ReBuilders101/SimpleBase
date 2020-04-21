@@ -2,6 +2,7 @@ package lb.simplebase.glcore.oop;
 
 import lb.simplebase.glcore.GLFramework;
 
+@Deprecated
 public interface GLDisposable {
 
 	public static boolean AUTO_DISPOSE = true;
@@ -12,6 +13,7 @@ public interface GLDisposable {
 		getDisposeAction().run();
 	}
 	
+	@Deprecated
 	public static void registerTask(GLDisposable task) {
 		if(AUTO_DISPOSE) {
 			GLFramework.gfAddTerminateTask(task.getDisposeAction());

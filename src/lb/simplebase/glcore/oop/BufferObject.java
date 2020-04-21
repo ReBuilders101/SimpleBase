@@ -6,10 +6,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 
-import lb.simplebase.gl.GLHandle;
+import lb.simplebase.gl.GLHandleLong;
 import lb.simplebase.glcore.RequireVAO;
 
-public class BufferObject implements GLHandle, GLDisposable {
+public class BufferObject implements GLHandleLong, GLDisposable {
 
 	public static final BufferObject NULL = null; //Used for varargs
 	
@@ -107,7 +107,7 @@ public class BufferObject implements GLHandle, GLDisposable {
 		return new BufferObject(GL15.glGenBuffers(), nativePeer, null);
 	}
 	
-	public static enum BufferUsage implements GLHandle {
+	public static enum BufferUsage implements GLHandleLong {
 		STATIC_DRAW(GL15.GL_STATIC_DRAW);
 
 		private final int handle;
@@ -121,7 +121,7 @@ public class BufferObject implements GLHandle, GLDisposable {
 		}
 	}
 	
-	public static enum BufferLocation implements GLHandle {
+	public static enum BufferLocation implements GLHandleLong {
 		VERTEX_DATA(GL30.GL_ARRAY_BUFFER),
 		VERTEX_INDEX_DATA(GL15.GL_ELEMENT_ARRAY_BUFFER);
 
