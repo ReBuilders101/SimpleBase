@@ -16,7 +16,7 @@ public final class ShaderLoader {
 
 	public static String getDefaultVertexSource() {
 		try {
-			return TextFileLoader.slReadFromResource(DEFAULT_VERTEX_SHADER);
+			return TextFileLoader.readFromResource(DEFAULT_VERTEX_SHADER);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not load default Vertex Shader at " + DEFAULT_VERTEX_SHADER, e);
 		}
@@ -24,7 +24,7 @@ public final class ShaderLoader {
 
 	public static String getDefaultFragmentSource() {
 		try {
-			return TextFileLoader.slReadFromResource(DEFAULT_FRAGMENT_SHADER);
+			return TextFileLoader.readFromResource(DEFAULT_FRAGMENT_SHADER);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not load default Fragment Shader at " + DEFAULT_VERTEX_SHADER, e);
 		}
