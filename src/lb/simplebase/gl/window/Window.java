@@ -26,6 +26,7 @@ import org.lwjgl.glfw.GLFWWindowMaximizeCallback;
 import org.lwjgl.glfw.GLFWWindowPosCallback;
 import org.lwjgl.glfw.GLFWWindowRefreshCallback;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
@@ -554,6 +555,38 @@ public class Window implements GLHandleLong {
 		GLFW.glfwMakeContextCurrent(handle);
 	}
 	
+	public void updateGlViewport() {
+		int w, h;
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer width = stack.mallocInt(1);
+			final IntBuffer height = stack.mallocInt(1);
+			GLFW.glfwGetFramebufferSize(handle, width, height);
+			w = width.get(0);
+			h = height.get(0);
+		}
+		GL11.glViewport(0, 0, w, h);
+	}
+	
+	public void updateGlViewportSquared() {
+		int w, h;
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer width = stack.mallocInt(1);
+			final IntBuffer height = stack.mallocInt(1);
+			GLFW.glfwGetFramebufferSize(handle, width, height);
+			w = width.get(0);
+			h = height.get(0);
+		}
+		if(w == 0 || h == 0) { //effectively invisible, no need to calculate
+			GL11.glViewport(0, 0, w, h);
+		} if(w > h) {
+			int x = (w - h) / 2;
+			GL11.glViewport(x, 0, h, h);
+		} else {
+			int y = (h- w) / 2;
+			GL11.glViewport(0, y, w, w);
+		}
+	}
+	
 	//////////////////// FRAMEBUFFER  /////////////////
 	
 	private final Framebuffer framebuffer;
@@ -619,9 +652,12 @@ public class Window implements GLHandleLong {
 	public static class Builder {
 		private CharSequence title = null;
 		private WindowHints windowHints = null;
+		private WindowHints fullscreenHints = null;
 		private ContextHints contextHints = null;
 		private int doubleBuffer = GLFW.GLFW_TRUE;
 		private int stereoscopic = GLFW.GLFW_FALSE;
+		private int multisample = 0;
+		private boolean fullscreen = false;
 		
 		private Builder() {}
 		
@@ -640,8 +676,23 @@ public class Window implements GLHandleLong {
 			return this;
 		}
 		
-		public Builder setWindowHints(WindowHints hints) {
+		public Builder setFullscreen(boolean value) {
+			fullscreen = value;
+			return this;
+		}
+		
+		public Builder setMultisampleCount(int count) {
+			multisample = count;
+			return this;
+		}
+		
+		public Builder setWindowedHints(WindowHints.WindowedHints hints) {
 			this.windowHints = hints;
+			return this;
+		}
+		
+		public Builder setFullscreenHints(WindowHints.FullscreenHints hints) {
+			this.fullscreenHints = hints;
 			return this;
 		}
 		
@@ -666,16 +717,23 @@ public class Window implements GLHandleLong {
 		
 		private Window createWindow(long sharedContext) {
 			Objects.requireNonNull(title, "Window title must not be null");
-			Objects.requireNonNull(windowHints, "Window hints must not be null");
 			Objects.requireNonNull(contextHints, "GL Context hints must not be null");
 			GlUtils.checkMainThread();
 			
 			synchronized (ids) {
-				windowHints.apply();
+				if(windowHints != null) windowHints.apply();
+				if(fullscreenHints != null) fullscreenHints.apply();
 				contextHints.apply();
 				GLFW.glfwWindowHint(GLFW.GLFW_DOUBLEBUFFER, doubleBuffer);
 				GLFW.glfwWindowHint(GLFW.GLFW_STEREO, stereoscopic);
-				long handle = GLFW.glfwCreateWindow(windowHints.getWidthRes(), windowHints.getHeightRes(), title, windowHints.getMonitor(), sharedContext);
+				GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, multisample);
+				
+				final long handle;
+				if(fullscreen) {
+					handle = GLFW.glfwCreateWindow(fullscreenHints.getWidthRes(), fullscreenHints.getHeightRes(), title, fullscreenHints.getMonitor(), sharedContext);
+				} else {
+					handle = GLFW.glfwCreateWindow(windowHints.getWidthRes(), windowHints.getHeightRes(), title, windowHints.getMonitor(), sharedContext);
+				}
 				return new Window(handle);
 			}
 		}

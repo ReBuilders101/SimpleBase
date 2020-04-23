@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -28,6 +29,16 @@ public final class TextFileLoader {
 		try (InputStream resource = TextFileLoader.class.getClassLoader().getResourceAsStream(name)) {
 			if(resource == null) throw new FileNotFoundException("Error loading resource: " + name);
 			return readFromStream(resource);
+		}
+	}
+	
+	public static String safeReadFromResource(String name) {
+		Objects.requireNonNull(name, "Resource name must not be null");
+		try (InputStream resource = TextFileLoader.class.getClassLoader().getResourceAsStream(name)) {
+			if(resource == null) throw new UncheckedIOException(new FileNotFoundException("Error loading resource: " + name));
+			return readFromStream(resource);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 

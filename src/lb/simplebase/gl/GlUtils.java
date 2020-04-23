@@ -65,8 +65,6 @@ public class GlUtils {
 		} else {
 			throw new IllegalArgumentException("BufferedImage type must be TYPE_4BYTE_ABGR");
 		}
-		
-		
 	}
 	
 }

@@ -1,5 +1,6 @@
 package lb.simplebase.gl.shader;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import lb.simplebase.util.TextFileLoader;
 
@@ -14,6 +15,14 @@ public final class ShaderLoader {
 
 	private ShaderLoader() {}
 
+	public static String safeReadFromJarResource(String name) {
+		return TextFileLoader.safeReadFromResource(name);
+	}
+	
+	public static String readFromJarResource(String name) throws FileNotFoundException, IOException {
+		return TextFileLoader.readFromResource(name);
+	}
+	
 	public static String getDefaultVertexSource() {
 		try {
 			return TextFileLoader.readFromResource(DEFAULT_VERTEX_SHADER);

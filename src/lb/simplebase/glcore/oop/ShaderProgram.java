@@ -122,6 +122,7 @@ public final class ShaderProgram implements GLHandleLong, GLBindable, GLDisposab
 		return new ShaderProgram(0, () -> {}, new HashMap<>());
 	}
 	
+	@Deprecated
 	public static final class Builder {
 		
 		private static final int SHADER_BUFFER_SIZE = 5;
@@ -195,6 +196,7 @@ public final class ShaderProgram implements GLHandleLong, GLBindable, GLDisposab
 		}
 	}
 	
+	@Deprecated
 	public static enum ShaderType implements GLHandleLong {
 		FRAGMENT(GL20.GL_FRAGMENT_SHADER, gl -> gl.OpenGL20),
 		VERTEX(GL20.GL_VERTEX_SHADER, gl -> gl.OpenGL20),

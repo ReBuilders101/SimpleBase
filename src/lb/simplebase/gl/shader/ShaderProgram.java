@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.vecmath.Matrix4f;
 
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
@@ -20,19 +22,20 @@ import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GLCapabilities;
 
 import lb.simplebase.gl.GLHandle;
-import lb.simplebase.glcore.GLFramework;
 
 public final class ShaderProgram implements GLHandle {
 
 	private final Map<String, Integer> uniforms;
 	
 	private final int handle;
-	private final Runnable task;
+	private final int[] attribArrays;
+	private final int[] shaders;
 	
-	private ShaderProgram(int handle, Runnable task, Map<String, Integer> uniforms) {
+	private ShaderProgram(int handle, int[] shaders, Map<String, Integer> uniforms, int[] attribArrays) {
 		this.handle = handle;
-		this.task = task;
+		this.shaders = shaders;
 		this.uniforms = uniforms;
+		this.attribArrays = attribArrays;
 	}
 	
 	public static ShaderProgram.Builder builder() {
@@ -41,6 +44,11 @@ public final class ShaderProgram implements GLHandle {
 	
 	public void useProgram() {
 		GL20.glUseProgram(handle);
+		if(attribArrays != null) {
+			for(int i : attribArrays) {
+				GL20.glEnableVertexAttribArray(i);
+			}
+		}
 	}
 	
 	public void setUniformValue_int(String name, int value) {
@@ -110,17 +118,47 @@ public final class ShaderProgram implements GLHandle {
 		GL20.glUseProgram(0);
 	}
 	
+	public static void disableActiveProgram(int...attribsToDisable) {
+		for(int i : attribsToDisable) {
+			GL20.glDisableVertexAttribArray(i);
+		}
+		GL20.glUseProgram(0);
+	}
+	
+	public void disableProgram() {
+		if(attribArrays != null) {
+			for(int i : attribArrays) {
+				GL20.glDisableVertexAttribArray(i);
+			}
+		}
+		GL20.glUseProgram(0);
+	}
+	
 	@Override
 	public int getGLHandle() {
 		return handle;
 	}
 	
 	public void disposeProgram() {
-		task.run();
+		if(shaders != null) {
+			for(int shader : shaders) {
+				GL20.glDetachShader(handle, shader);
+				GL20.glDeleteShader(shader);
+			}
+		}
+		GL20.glDeleteProgram(handle);
+	}
+	
+	public static void disposeProgram(ShaderProgram...program) {
+		if(program != null) {
+			for(ShaderProgram s : program) {
+				if(s != null) s.disposeProgram();
+			}
+		}
 	}
 	
 	public static ShaderProgram emptyShader() {
-		return new ShaderProgram(0, () -> {}, new HashMap<>());
+		return new ShaderProgram(0, null, new HashMap<>(), null);
 	}
 	
 	public static final class Builder {
@@ -131,12 +169,14 @@ public final class ShaderProgram implements GLHandle {
 		private IntBuffer shaders;
 		private boolean locked;
 		private final Set<String> uniformNames;
+		private int[] activeLoc;
 		
 		private Builder() {
 			this.programHandle = GL20.glCreateProgram();
 			this.shaders = IntBuffer.allocate(SHADER_BUFFER_SIZE); //There are 5 shader types, so 5 will be the default max
 			this.uniformNames = new HashSet<>();
 			this.locked = false;
+			this.activeLoc = null;
 //			assert !shaders.isDirect(); //debug only
 		}
 		
@@ -181,18 +221,32 @@ public final class ShaderProgram implements GLHandle {
 			return this;
 		}
 		
+		public Builder setAttribArrays(int...activeLocations) {
+			this.activeLoc = activeLocations;
+			return this;
+		}
+		
 		public ShaderProgram build() {
 			if(locked) throw new IllegalStateException("This builder has already created a ShaderProgram");
 			
 			GL20.glLinkProgram(programHandle);
-			return new ShaderProgram(programHandle, () -> {
+			return new ShaderProgram(programHandle, shaders.array(), uniformNames.stream().collect(Collectors.toMap(Function.identity(),
+					name -> Integer.valueOf(GL20.glGetUniformLocation(programHandle, name)))), activeLoc);
+		}
+		
+		public long buildGL(Consumer<Runnable> disposeTask) {
+			if(locked) throw new IllegalStateException("This builder has already created a ShaderProgram");
+			GL20.glLinkProgram(programHandle);
+			
+			disposeTask.accept(() -> {
 				for(int i = 0; i < shaders.position(); i++) {
 					GL20.glDetachShader(programHandle, shaders.get(i));
 					GL20.glDeleteShader(shaders.get(i));
 				}
 				GL20.glDeleteProgram(programHandle);
-			}, uniformNames.stream().collect(Collectors.toMap(Function.identity(),
-					name -> Integer.valueOf(GL20.glGetUniformLocation(programHandle, name)))));
+			});
+			
+			return programHandle;
 		}
 	}
 	
@@ -216,7 +270,7 @@ public final class ShaderProgram implements GLHandle {
 		}
 		
 		public boolean isSupported() {
-			return valid.test(GLFramework.gfGetGLCapabilities());
+			return valid.test(GL.getCapabilities());
 		}
 	}
 	
