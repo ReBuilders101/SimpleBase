@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/lwjgl/lwjgl-natives-windows.jar"/>
 	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/OpenGl-LWJGL/glfw/lwjgl-glfw-natives-windows.jar"/>
 	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/vecmath-1.5.2.jar" sourcepath="C:/Users/Lars/AppData/Local/Temp/.org.sf.feeling.decompiler1580395214969/source/vecmath-1.5.2-sources.jar"/>
+	<classpathentry kind="lib" path="D:/Lars/Prgm/WorkspaceEclipse/APIS/pngdecoder-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
