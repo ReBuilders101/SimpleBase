@@ -1,7 +1,6 @@
 package lb.simplebase.gl.render;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
@@ -67,12 +66,10 @@ public class RenderContext implements GLHandle {
 		return new RenderContext(true, vaoHandle, renderCount, renderMode, indexType, buffers);
 	}
 	
-	public final void draw() {
-		GL30.glBindVertexArray(vertexArray);
-		doDrawCall(indexed);
-	}
-	
-	protected void doDrawCall(boolean useIndexed) {
+	/**
+	 * Will NOT bind the array
+	 */
+	public void draw() {
 		if(indexed) {
 			GL11.glDrawElements(renderCount, renderCount, indexType, 0);
 		} else {
@@ -80,9 +77,8 @@ public class RenderContext implements GLHandle {
 		}
 	}
 	
-	public static void unbindAll() {
-		GL30.glBindVertexArray(0);
-		GL20.glUseProgram(0);
+	public final void bind() {
+		GL30.glBindVertexArray(vertexArray);
 	}
 	
 	public boolean isIndexedRendering() {

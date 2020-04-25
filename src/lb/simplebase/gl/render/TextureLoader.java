@@ -19,6 +19,9 @@ import org.lwjgl.system.MemoryUtil;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import lb.simplebase.util.TextFileLoader;
 
+/**
+ * <b>Only loads PNG files</b>
+ */
 public class TextureLoader {
 
 	public static Texture safeImportFromResource(String name, TextureFormat format) {
@@ -60,7 +63,11 @@ public class TextureLoader {
 		try{
 			//Manually allocate because faster, but don't put it on the stack because stack size is limited and images can be large
 			imageData = MemoryUtil.memAlloc(imageByteSize);
-			decoder.decode(imageData, imageRowStride, PNGDecoder.Format.RGBA);
+			if(format.getFlip()) {
+				decoder.decodeFlipped(imageData, imageRowStride, PNGDecoder.Format.RGBA);
+			} else {
+				decoder.decode(imageData, imageRowStride, PNGDecoder.Format.RGBA);
+			}
 			imageData.flip(); //ready for reading
 			
 			textureHandle = GL11.glGenTextures();

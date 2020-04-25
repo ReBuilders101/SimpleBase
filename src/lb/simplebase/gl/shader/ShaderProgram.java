@@ -67,6 +67,14 @@ public final class ShaderProgram implements GLHandle {
 		GL20.glUniform1f(location, value);
 	}
 	
+	public void setUniformValue_vec2f(String name, float value1, float value2) {
+		setUniformValue_vec4f(findUniformLocation(name), value1, value2);
+	}
+	
+	public void setUniformValue_vec2f(int location, float value1, float value2) {
+		GL20.glUniform2f(location, value1, value2);
+	}
+
 	public void setUniformValue_vec4f(String name, float...values) {
 		setUniformValue_vec4f(findUniformLocation(name), values);
 	}
@@ -82,7 +90,7 @@ public final class ShaderProgram implements GLHandle {
 	
 	public void setUniformValue_mat4f(int location, float...values) {
 		assert values.length == 16;
-		GL20.glUniformMatrix4fv(location, false, values);
+		GL20.glUniformMatrix4fv(location, true, values);
 	}
 	
 	public void setUniformValue_mat4f(String name, Matrix4f value) {
@@ -102,7 +110,7 @@ public final class ShaderProgram implements GLHandle {
 			return uniforms.get(name);
 		} else {
 			int loc = GL20.glGetUniformLocation(handle, name);
-			if(loc == -1) throw new IllegalArgumentException("Invalid uniform name: " + name);
+			if(loc == -1) System.err.println("Uniform '" + name + "' was not found");
 			uniforms.put(name, loc);
 			return loc;
 		}
@@ -208,6 +216,8 @@ public final class ShaderProgram implements GLHandle {
 			GL20.glCompileShader(shaderHandle); //Compile the shader code
 			
 			if(GL20.glGetShaderi(shaderHandle, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) { //Compile error
+				//Delete this shader
+				GL20.glDeleteShader(shaderHandle);
 				throw new ShaderCompilationException("Error creating shader\n" + 
 						GL20.glGetShaderInfoLog(shaderHandle, GL20.glGetShaderi(shaderHandle, GL20.GL_INFO_LOG_LENGTH)),
 						shaderSource);
@@ -231,7 +241,13 @@ public final class ShaderProgram implements GLHandle {
 			
 			GL20.glLinkProgram(programHandle);
 			return new ShaderProgram(programHandle, shaders.array(), uniformNames.stream().collect(Collectors.toMap(Function.identity(),
-					name -> Integer.valueOf(GL20.glGetUniformLocation(programHandle, name)))), activeLoc);
+					name -> checkUniform(programHandle, name))), activeLoc);
+		}
+		
+		private static Integer checkUniform(int program, String name) {
+			int loc = GL20.glGetUniformLocation(program, name);
+			if(loc == -1) System.err.println("Uniform '" + name + "' was not found");
+			return Integer.valueOf(loc);
 		}
 		
 		public long buildGL(Consumer<Runnable> disposeTask) {

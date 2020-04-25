@@ -6,15 +6,16 @@ import org.lwjgl.opengl.GL13;
 public class TextureFormat {
 	
 	public static TextureFormat create() {
-		return new TextureFormat(GL11.GL_NEAREST, GL11.GL_NEAREST, GL11.GL_REPEAT, GL11.GL_REPEAT, true);
+		return new TextureFormat(GL11.GL_NEAREST, GL11.GL_NEAREST, GL11.GL_REPEAT, GL11.GL_REPEAT, true, false);
 	}
 	
-	private TextureFormat(int magFilter, int minFilter, int sWrap, int tWrap, boolean mipmap) {
+	private TextureFormat(int magFilter, int minFilter, int sWrap, int tWrap, boolean mipmap, boolean flip) {
 		this.magFilter = magFilter;
 		this.minFilter = minFilter;
 		this.sWrap = sWrap;
 		this.tWrap = tWrap;
 		this.mipmap = mipmap;
+		this.flip = flip;
 		this.borderColor = null;
 	}
 
@@ -23,10 +24,16 @@ public class TextureFormat {
 	private int sWrap;
 	private int tWrap;
 	private boolean mipmap;
+	private boolean flip;
 	private float[] borderColor;
 	
 	public TextureFormat setMipmaps(boolean value) {
 		mipmap = value;
+		return this;
+	}
+	
+	public TextureFormat setFlipped(boolean value) {
+		flip = value;
 		return this;
 	}
 	
@@ -69,6 +76,10 @@ public class TextureFormat {
 	
 	protected int getTWrap() {
 		return tWrap;
+	}
+	
+	protected boolean getFlip() {
+		return flip;
 	}
 	
 	protected float[] getBorderColor() {

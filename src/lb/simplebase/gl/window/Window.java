@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -567,6 +568,29 @@ public class Window implements GLHandleLong {
 		GL11.glViewport(0, 0, w, h);
 	}
 	
+	public float[] updateGlViewportAndScaleMatrix() {
+		final int w, h;
+		final float[] mat;
+		try(MemoryStack stack = MemoryStack.stackPush()) {
+			final IntBuffer width = stack.mallocInt(1);
+			final IntBuffer height = stack.mallocInt(1);
+			GLFW.glfwGetFramebufferSize(handle, width, height);
+			w = width.get(0);
+			h = height.get(0);
+		}
+		if(w > h) {
+			mat = GlUtils.scaleMatrix((float) h / (float) w, 1.0f);
+		} else if(w < h) {
+			mat = GlUtils.scaleMatrix(1.0f, (float) w / (float) h);
+		} else {
+			mat = GlUtils.identityMatrix();
+		}
+		GL11.glViewport(0, 0, w, h);
+		System.out.println(Arrays.toString(mat));
+		return mat;
+	}
+	
+	@Deprecated
 	public void updateGlViewportSquared() {
 		int w, h;
 		try(MemoryStack stack = MemoryStack.stackPush()) {

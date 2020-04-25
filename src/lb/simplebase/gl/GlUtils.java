@@ -3,6 +3,10 @@ package lb.simplebase.gl;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -20,6 +24,9 @@ public class GlUtils {
 	}
 	
 	public static void terminateGLFW() {
+		synchronized (tasks) {
+			tasks.forEach(Runnable::run);
+		}
 		GLFW.glfwTerminate();
 		GLFW.glfwSetErrorCallback(null).free();
 	}
@@ -52,6 +59,47 @@ public class GlUtils {
 	
 	public static boolean glfwBool(int value) {
 		return value == GLFW.GLFW_TRUE;
+	}
+	
+	private static final List<Runnable> tasks = Collections.synchronizedList(new LinkedList<>()); //why not, we always append/iterate
+	public static void onTerminate(Runnable task) {
+		tasks.add(task);
+	}
+	
+	public static float[] identityMatrix() {
+		return new float[] {
+				1.0f, 0.0f, 0.0f, 0.0f, 
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f}; 
+	}
+	
+	public static float[] translationMatrix(float xOffset, float yOffset, float zOffset) {
+		return new float[] {	//Row-Major, can be flipped when passing the uniform
+				1.0f, 0.0f, 0.0f, xOffset, 
+				0.0f, 1.0f, 0.0f, yOffset,
+				0.0f, 0.0f, 1.0f, zOffset,
+				0.0f, 0.0f, 0.0f, 1.0f}; 
+	}
+	
+	public static float[] scaleMatrix(float xScale, float yScale, float zScale) {
+		return new float[] {	//Row-Major, can be flipped when passing the uniform
+				xScale, 0.0f, 0.0f, 0.0f, 
+				0.0f, yScale, 0.0f, 0.0f,
+				0.0f, 0.0f, zScale, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f }; 
+	}
+	
+	public static float[] scaleMatrix(float xScale, float yScale) {
+		return scaleMatrix(xScale, yScale, 1.0f);
+	}
+	
+	public static float[] scaleMatrix(float allScale) {
+		return scaleMatrix(allScale, allScale, allScale);
+	}
+	
+	public static float[] translationMatrix(float xOffset, float yOffset) {
+		return translationMatrix(xOffset, yOffset, 0.0f);
 	}
 
 	public static GLFWImage createImage(BufferedImage image) {
